@@ -169,8 +169,7 @@ const mutations = {
       if (index == 0) return;
       state.fabled.splice(index, 1);
     } else if (fabled) {
-      // add storyteller fabled to allow direct messages
-      if (fabled == "storyteller") fabled = {
+      const fabledStoryteller = {
         "id": "storyteller",
         "firstNightReminder": "",
         "otherNightReminder": "",
@@ -180,9 +179,15 @@ const mutations = {
         "team": "fabled",
         "ability": "Click story teller to send ST messages."
       };
+      // add storyteller fabled to allow direct messages
+      if (fabled == "storyteller") fabled = fabledStoryteller;
       if (!Array.isArray(fabled)) {
         state.fabled.push(fabled);
       } else {
+        // add in Story Teller if there isn't already one
+        if (fabled[0].id != "storyteller"){
+          fabled.unshift(fabledStoryteller)
+        }
         state.fabled = fabled;
       }
     }
