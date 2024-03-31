@@ -141,6 +141,7 @@ class LiveSession {
         break;
       case "claim":
         this._updateSeat(params);
+        this._createChatHistory(params);
         break;
       case "ping":
         this._handlePing(params);
@@ -204,6 +205,9 @@ class LiveSession {
         break;
       case "pronouns":
         this._updatePlayerPronouns(params);
+        break;
+      case "chat":
+        this._handleChat(params);
         break;
     }
   }
@@ -655,6 +659,22 @@ class LiveSession {
     this._handlePing([true, value, 0]);
   }
 
+
+  /**
+   * Create a chat history for a playerID.
+   * @param index seat index (only created when seat claimed but not removed)
+   * @param value playerId to add
+   * @private
+   */
+  _createChatHistory([index]) {
+    if (index < 0) return;
+    const playerId = (this._store.state.players.players[index]).id;
+    if (playerId === "") return;
+    if (this._store.state.session.chatHistory[playerId] != undefined) return;
+    if (this._store.state.session.isSpectator && this._store.state.session.playerId != playerId) return;
+    this._store.commit("session/createChatHistory", playerId );
+  }
+
   /**
    * Distribute player roles to all seated players in a direct message.
    * This will be split server side so that each player only receives their own (sub)message.
@@ -841,6 +861,30 @@ class LiveSession {
     if (this._isSpectator) return;
     this._send("remove", payload);
   }
+  
+  /**
+   * Send message to a player or ST.
+   * @param payload
+   */
+  updateChatSent(payload) {
+    this._send("chat", payload);
+  }
+
+  /**
+   * Update chat history when received.
+   * @param payload
+   */
+  _handleChat({message, playerId}){
+    if (this._isSpectator && playerId != this._store.state.session.playerId) return;
+    this._store.commit("session/updateChatReceived", {message, playerId});
+    const num = 1;
+    if (!this._isSpectator){
+      this._store.commit("players/setPlayerMessage", {playerId, num});
+    } else{
+      this._store.commit("session/setStMessage", num);
+    }
+    
+  }
 }
 
 export default store => {
@@ -920,6 +964,9 @@ export default store => {
         } else {
           session.sendPlayer(payload);
         }
+        break;
+      case "session/updateChatSent":
+        session.updateChatSent(payload);
         break;
     }
   });

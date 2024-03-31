@@ -58,6 +58,9 @@
           :key="index"
           @click="removeFabled(index)"
         >
+        <div v-if="index === 0">
+          <div class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="item > 0">{{ item }}</div>
+        </div>
           <div
             class="night-order first"
             v-if="nightOrder.get(role).first && grimoire.isNightOrder"
@@ -83,6 +86,28 @@
 
     <ReminderModal :player-index="selectedPlayer"></ReminderModal>
     <RoleModal :player-index="selectedPlayer"></RoleModal>
+
+    <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}">
+      <div class="title" @click="maximiseChat()">
+        <span ref="chatWith" style="cursor: text; user-select: text; pointer-events: auto;"></span> 
+        <span :class="{close: !isChatMin, open: isChatMin}" @click="toggleChat()">
+          <font-awesome-icon icon="times" :class="{ turnedIcon45: isChatMin}"/>
+        </span>
+      </div>
+      <div ref="chatContent" class="content" @scroll="checkToBottom">
+        <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.playerId) || (!session.isSpectator && player.id === chattingPlayer)">
+          <ul v-for="(content, chatIndex) in player.chat" :key="chatIndex">{{ content }}</ul>
+        </div>
+      </div>
+      <form class="chatbox" @submit.prevent="sendChat">
+        <input type="text" id="message" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
+        <button type="submit" class="send">Send</button>
+      <div class="toBottom" v-if="false">
+          Go to Bottom
+          <font-awesome-icon icon="arrow"/>
+      </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -113,7 +138,12 @@ export default {
       move: -1,
       nominate: -1,
       isBluffsOpen: true,
-      isFabledOpen: true
+      isFabledOpen: true,
+      isChatMin: false,
+      isChatOpen: false,
+      minimising: false,
+      chattingPlayer: "",
+      message: "",
     };
   },
   methods: {
@@ -124,8 +154,11 @@ export default {
       this.isFabledOpen = !this.isFabledOpen;
     },
     removeFabled(index) {
-      if (this.session.isSpectator) return;
-      this.$store.commit("players/setFabled", { index });
+      if (this.session.isSpectator) {
+        if (this.session.claimedSeat >= 0) this.openChat(0); //open chat box if user is a player
+      }else{
+        this.$store.commit("players/setFabled", { index });
+      }
     },
     handleTrigger(playerIndex, [method, params]) {
       if (typeof this[method] === "function") {
@@ -138,6 +171,7 @@ export default {
         this.$store.commit("session/claimSeat", -1);
       } else {
         this.$store.commit("session/claimSeat", playerIndex);
+        this.$store.commit("session/createChatHistory", this.session.playerId);
       }
     },
     openReminderModal(playerIndex) {
@@ -251,6 +285,73 @@ export default {
       this.move = -1;
       this.swap = -1;
       this.nominate = -1;
+    },
+    openChat(playerIndex){
+      this.maximiseChat();
+      
+      // display player name or ST in the chat title
+      if(this.session.isSpectator){
+        this.$refs.chatWith.innerText = "ST";
+        this.$store.commit("session/setStMessage", 0);
+      }else{
+        var name = this.players[playerIndex].name;
+        name = name.split(". ")[1];
+        this.$refs.chatWith.innerText = name;
+        this.chattingPlayer = this.players[playerIndex].id;
+        this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0})
+      }
+
+      this.scrollToBottom();
+    },
+    toggleChat(){
+      if(this.isChatMin){
+        this.maximiseChat();
+      }else{
+        this.minimiseChat();
+      }
+    },
+    maximiseChat(){
+      if(this.minimising){
+        this.minimising = false;
+        return;
+      }
+      this.isChatOpen = true;
+      this.isChatMin = false;
+    },
+    minimiseChat(){
+      this.isChatMin = true;
+      this.minimising = true;
+    },
+    sendChat(){
+      if (this.message === "") return;
+      const sender = this.session.isSpectator ? this.session.playerName : "ST";
+      const playerId = this.session.isSpectator ? this.session.playerId : this.chattingPlayer;
+      const message = sender.concat(": ", this.message);
+      this.$store.commit("session/updateChatSent", {message, playerId});
+      this.message = "";
+
+      this.scrollToBottom();
+    },
+    scrollToBottom(){
+      this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
+    },
+    checkToBottom() {
+      if (this.$refs.chatContent.scrollTop === 0){
+        // scrolled to bottom
+        if (!this.session.isSpectator) {
+          this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
+        } else{
+          this.$store.commit("session/setStMessage", 0);
+        }
+      }
+    },
+    typing(){
+      this.session.chatting = true;
+      if (!this.session.isSpectator) {
+        this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
+      } else{
+        this.$store.commit("session/setStMessage", 0);
+      }
     }
   }
 };
@@ -499,6 +600,20 @@ export default {
   z-index: 2;
 }
 
+// New message bubble
+.fabled ul li .newMessage {
+  position: absolute;
+  right: 2%;
+  top: 1%;
+  background: lightpink;
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 80%;
+}
+
+
 /**** Night reminders ****/
 .night-order {
   position: absolute;
@@ -640,6 +755,144 @@ export default {
       }
     }
   }
+}
+
+
+/* chat with ST */
+.chatMin {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    transform-origin: bottom right;
+    width: 15%;
+    height: 5%;
+    border-radius: 10px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+.chatMin .title {
+    padding: 10px;
+    background-color: #000;
+    user-select: none;
+}
+
+.chatMin .title .open {
+    position: absolute;
+    right: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.chatMin .content {
+    display: none;
+}
+
+.chatMin .chatbox {
+    display: none;
+}
+
+.chat {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    transform-origin: bottom right;
+    background-color: #0000007f;
+    width: 30%;
+    height: 40%;
+    border-radius: 10px;
+    border: 3px solid #8a7864;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
+
+// .chat.focus, .chat:hover {
+//     z-index: 100;
+// }
+
+.chat .title {
+    padding: 10px;
+    background-color: #000;
+    user-select: none;
+}
+
+.chat .title .close {
+    position: absolute;
+    right: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.chat.alert .title {
+    background-color: #A00;
+}
+
+.chat.alert .title::after {
+    content: '看私信！！！';
+    font-size: 70%;
+    font-weight: bold;
+    position: absolute;
+    right: 40px;
+    bottom: 10px;
+}
+
+.chat .content {
+    padding: 5px;
+    font-size: 80%;
+    background-color: #131313;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.chat .chatbox {
+    padding: 5px;
+    display: flex;
+    height: fit-content;
+}
+
+.chat .chatbox .edit {
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 60px;
+    font-size: 70%;
+    border: solid;
+    background-color: #000;
+    color: #fff;
+}
+
+.chat .chatbox .edit:focus {
+    outline: none;
+}
+
+.chat .chatbox .send {
+    background-color: #4a7ec6;
+    color: white;
+    border: solid;
+    border-color: white;
+    border-radius: 0 10px 10px 0;
+    cursor: pointer;
+}
+
+.turnedIcon45 {
+  transform: rotate(45deg);
+}
+
+.toBottom {
+  margin: auto;
+  width: 40px;
+  height: 20px;
+  bottom: 30px;
+  z-index: 100;
+  font-size: 70%;
+  display: flex;
+  flex-direction: column;
 }
 
 #townsquare:not(.spectator) .fabled ul li:hover .token:before {

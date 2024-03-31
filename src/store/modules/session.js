@@ -5,6 +5,9 @@
  * @param index seat of the player in the circle
  * @param vote true or false
  */
+
+import Vue from "vue";
+
 const handleVote = (state, [index, vote]) => {
   if (!state.nomination) return;
   state.votes = [...state.votes];
@@ -23,12 +26,14 @@ const state = () => ({
   nomination: false,
   votes: [],
   lockedVote: 0,
-  votingSpeed: 3000,
+  votingSpeed: 500,
   isVoteInProgress: false,
   voteHistory: [],
   markedPlayer: -1,
   isVoteHistoryAllowed: true,
-  isRolesDistributed: false
+  isRolesDistributed: false,
+  chatHistory: [],
+  newStMessage: [0]
 });
 
 const getters = {};
@@ -108,8 +113,43 @@ const mutations = {
   voteSync: handleVote,
   lockVote(state, lock) {
     state.lockedVote = lock !== undefined ? lock : state.lockedVote + 1;
+  },
+  createChatHistory(state, playerId){
+    if (playerId === "") return;
+    if (chatIndex(state, playerId) >= 0) return; // do nothing if it already exists
+    Vue.set(state.chatHistory, state.chatHistory.length, {id: playerId, chat: []});
+  },
+  updateChatSent(state, {message, playerId}){
+    if (state.isSpectator && playerId != state.playerId) return;
+    state.chatHistory[chatIndex(state, playerId)]["chat"].push(message);
+  },
+  updateChatReceived(state, {message, playerId}){
+    if (state.isSpectator && playerId != state.playerId) return;
+    const playerIndex = chatIndex(state, playerId);
+    const oldMessages = state.chatHistory[playerIndex]["chat"];
+    Vue.set(state.chatHistory, playerIndex, {id: playerId, chat: [...oldMessages, message]})
+  },
+  setStMessage(state, num) {
+    if (num > 0){
+      const newNum = state.newStMessage[0] += num;
+      Vue.set(state.newStMessage, 0, newNum);
+    } else{
+      const newNum = state.newStMessage[0] = num;
+      Vue.set(state.newStMessage, 0, newNum);
+    }
   }
 };
+
+
+function chatIndex(state, playerId) {
+  for (let i = 0; i < state.chatHistory.length; i++) {
+    if (state.chatHistory[i]["id"] === playerId) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 
 export default {
   namespaced: true,

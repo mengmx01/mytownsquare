@@ -154,7 +154,7 @@
         <template v-if="tab === 'players' && !session.isSpectator">
           <!-- Users -->
           <li class="headline">Players</li>
-          <li @click="addPlayer" v-if="players.length < 20">Add<em>[A]</em></li>
+          <li @click="addPlayer" v-if="players.length < 20">Add<!--<em>[A]</em>--></li>
           <li @click="randomizeSeatings" v-if="players.length > 2">
             Randomize
             <em><font-awesome-icon icon="dice"/></em>
@@ -344,7 +344,6 @@ export default {
       const splitSign = ". ";
       const namePlaceholder = "Empty Seat";
       this.$store.commit("players/add", ((this.players.length + 1).toString() + splitSign + namePlaceholder));
-
     },
     randomizeSeatings() {
       if (this.session.isSpectator) return;

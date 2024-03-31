@@ -85,6 +85,7 @@ export default {
   methods: {
     keyup({ key, ctrlKey, metaKey }) {
       if (ctrlKey || metaKey) return;
+      if (this.session.chatting) return;
       switch (key.toLocaleLowerCase()) {
         case "m":
           this.$store.commit("toggleMenu");
@@ -92,9 +93,9 @@ export default {
         case "g":
           this.$store.commit("toggleGrimoire");
           break;
-        case "a":
-          this.$refs.menu.addPlayer();
-          break;
+        // case "a":
+        //   this.$refs.menu.addPlayer();
+        //   break;
         case "h":
           this.$refs.menu.hostSession();
           break;

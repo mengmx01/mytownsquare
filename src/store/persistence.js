@@ -66,10 +66,22 @@ module.exports = store => {
   if (localStorage.getItem("playerName")) {
     store.commit("session/setPlayerName", localStorage.getItem("playerName"));
   }
+  if (localStorage.getItem("claimedSeat")) {
+    store.commit("session/claimSeat", Number(localStorage.getItem("claimedSeat")));
+  }
   if (localStorage.getItem("session") && !window.location.hash.substr(1)) {
     const [spectator, sessionId] = JSON.parse(localStorage.getItem("session"));
     store.commit("session/setSpectator", spectator);
     store.commit("session/setSessionId", sessionId);
+  }
+  if (localStorage.getItem("chatHistory")) {
+    const chatHistory = JSON.parse(localStorage.getItem("chatHistory"));
+    chatHistory.forEach(player => {
+      store.commit("session/createChatHistory", player.id);
+      player.chat.forEach(message => {
+        store.commit("session/updateChatReceived", {message, playerId: player.id});
+      })
+    })
   }
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
@@ -192,6 +204,23 @@ module.exports = store => {
           localStorage.removeItem("playerName");
         }
         break;
+      case "session/claimSeat":
+        if (payload) {
+          localStorage.setItem("claimedSeat", payload);
+        } else {
+          localStorage.removeItem("claimedSeat");
+        }
+        break;
+      case "session/createChatHistory":
+      case "session/updateChatSent":
+      case "session/updateChatReceived":
+        if (state.session.chatHistory) {
+          localStorage.setItem("chatHistory", JSON.stringify(state.session.chatHistory));
+        } else {
+          localStorage.removeItem("chatHistory");
+        }
+        break;
     }
   });
+  // localStorage.clear();
 };

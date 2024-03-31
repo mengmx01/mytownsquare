@@ -5,10 +5,10 @@ const NEWPLAYER = {
   reminders: [],
   isVoteless: false,
   isDead: false,
-  pronouns: ""
+  pronouns: "",
+  newMessages: 0
 };
 
-// const storyteller = {"id":local.user.id,"name":"说书人","ability":"……受到惊吓的镇民们赶往城镇广场查看，他们发现当地的一位说书人被谋杀了，他的尸体被钉在钟楼的时针上，鲜血不断地滴落在下方的鹅卵石上。","firstNight":0,"firstNightReminder":"","otherNight":0,"otherNightReminder":"","reminders":[],"remindersGlobal":[],"setup":0,"team":"fabled","isCustom":true,"flavor":"","imageAlt":"fabled"};
 // const deus_ex_fiasco = {"id":"deus_ex_fiasco","name":"失败的上帝","ability":"整局游戏限一次，说书人会犯一个错误，说书人可以纠正错误并公开承认它。","firstNight":0,"firstNightReminder":"","otherNight":0,"otherNightReminder":"","reminders":[],"remindersGlobal":[],"setup":0,"team":"fabled","isOfficial":true,"flavor":"","imageAlt":"fabled"};
 
 const state = () => ({
@@ -186,6 +186,19 @@ const mutations = {
         state.fabled = fabled;
       }
     }
+  },
+  setPlayerMessage(state, {playerId, num}) {
+    const playersId = [];
+    state.players.forEach(player => {
+      playersId.push(player["id"]);
+    });
+    const playerIndex = playersId.indexOf(playerId);
+    if (num > 0){
+      state.players[playerIndex].newMessages += num;
+    } else{
+      state.players[playerIndex].newMessages = num;
+    }
+    
   }
 };
 

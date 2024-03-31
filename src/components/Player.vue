@@ -15,6 +15,8 @@
         player.role.team
       ]"
     >
+      <div class="newMessage" v-show="player.newMessages > 0">{{ player.newMessages }}</div>
+
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
 
@@ -143,7 +145,7 @@
               Remove
             </li>
             <li
-              @click="updatePlayer('id', '', true)"
+              @click="emptyPlayer()"
               v-if="player.id && session.sessionId"
             >
               <font-awesome-icon icon="chair" />
@@ -155,6 +157,10 @@
                 Nomination
               </li>
             </template>
+            <li @click="openChat(player)">
+                <font-awesome-icon icon="comments" prefix="fa"/>
+              Chat
+            </li>
           </template>
           <li
             @click="claimSeat"
@@ -249,7 +255,8 @@ export default {
   data() {
     return {
       isMenuOpen: false,
-      isSwap: false
+      isSwap: false,
+      newMessages: 0
     };
   },
   methods: {
@@ -326,6 +333,12 @@ export default {
         this.isMenuOpen = false;
       }
     },
+    emptyPlayer(){
+      this.updatePlayer('id', '', true);
+      const seatNum = this.player.name.split(". ")[0];
+      const name = seatNum.concat(". ", "Empty Seat");
+      this.updatePlayer('name', name, true);
+    },
     removePlayer() {
       this.isMenuOpen = false;
       this.$emit("trigger", ["removePlayer"]);
@@ -348,6 +361,12 @@ export default {
     claimSeat() {
       this.isMenuOpen = false;
       this.$emit("trigger", ["claimSeat"]);
+    },
+    openChat(player){
+      // direct message in grimoire
+      this.isMenuOpen = false;
+      if (player.id == '') return;
+      this.$emit("trigger", ["openChat"]);
     },
     /**
      * Allow the ST to override a locked vote.
@@ -702,6 +721,19 @@ li.move:not(.from) .player .overlay svg.move {
     animation-iteration-count: 1;
     animation: redToWhite 1s normal forwards;
   }
+}
+
+// New message bubble
+.player .newMessage {
+  position: absolute;
+  right: 2%;
+  top: 1%;
+  background: lightpink;
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 80%;
 }
 
 // highlight animation
