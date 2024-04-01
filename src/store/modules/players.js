@@ -128,6 +128,18 @@ const mutations = {
       ...NEWPLAYER,
       name
     });
+    if (state.fabled.length === 0) {
+      state.fabled.push({
+        "id": "storyteller",
+        "firstNightReminder": "",
+        "otherNightReminder": "",
+        "reminders": [],
+        "setup": false,
+        "name": "说书人",
+        "team": "fabled",
+        "ability": "点击和说书人私聊。"
+      });
+    }
   },
   remove(state, index) {
     state.players.splice(index, 1);
@@ -185,7 +197,7 @@ const mutations = {
         state.fabled.push(fabled);
       } else {
         // add in Story Teller if there isn't already one
-        if (fabled[0].id != "storyteller"){
+        if (fabled.length === 0 || fabled[0].id != "storyteller"){
           fabled.unshift(fabledStoryteller)
         }
         state.fabled = fabled;

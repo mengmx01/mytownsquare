@@ -100,7 +100,7 @@
         </div>
       </div>
       <form class="chatbox" @submit.prevent="sendChat">
-        <input type="text" id="message" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
+        <input type="text" id="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
         <button type="submit" class="send">Send</button>
       <div class="toBottom" v-if="false">
           移至底部

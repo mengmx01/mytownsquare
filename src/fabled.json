@@ -40,7 +40,7 @@
     "ability": "每个白天的前两分钟老玩家不能发言。"
   },
   {
-    "id": "hells_librarian",
+    "id": "hellslibrarian",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": ["不好的事"],
@@ -112,7 +112,7 @@
     "ability": "在初始设置时，可能会额外增加或减少一个外来者。"
   },
   {
-    "id": "spirit_of_ivory",
+    "id": "spiritofivory",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": ["No extra evil"],
@@ -133,7 +133,7 @@
     "ability": "使用灯神的相克规则。所有玩家都会知道其内容。"
   },
   {
-    "id": "storm_catcher",
+    "id": "stormcatcher",
     "firstNight": 1,
     "firstNightReminder": "在首个夜晚，分别依次唤醒每个邪恶玩家。如果有善良角色标记了暴风捕手的“不会死亡”提示标记，对邪恶玩家展示“这名玩家是”信息标记，对应的善良角色标记，并指向对应的善良玩家，然后让邪恶玩家重新入睡。如果没有玩家被暴风捕手标记，对邪恶玩家展示“这些角色不在场”信息标记和对应的善良角色标记，然后让邪恶玩家重新入睡。",
     "otherNightReminder": "",
