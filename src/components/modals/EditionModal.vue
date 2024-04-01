@@ -126,10 +126,7 @@ export default {
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           try {
-            console.log(reader);
-            console.log(reader.result);
             const roles = JSON.parse(reader.result);
-            console.log(roles);
             this.parseRoles(roles);
           } catch (e) {
             alert("Error reading custom script: " + e.message);
