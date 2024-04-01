@@ -30,8 +30,8 @@
       :class="{ closed: !isBluffsOpen }"
     >
       <h3>
-        <span v-if="session.isSpectator">Other characters</span>
-        <span v-else>Demon bluffs</span>
+        <span v-if="session.isSpectator">不在场身份</span>
+        <span v-else>恶魔的伪装身份</span>
         <font-awesome-icon icon="times-circle" @click.stop="toggleBluffs" />
         <font-awesome-icon icon="plus-circle" @click.stop="toggleBluffs" />
       </h3>
@@ -48,7 +48,7 @@
 
     <div class="fabled" :class="{ closed: !isFabledOpen }" v-if="fabled.length">
       <h3>
-        <span>Fabled</span>
+        <span>传奇角色</span>
         <font-awesome-icon icon="times-circle" @click.stop="toggleFabled" />
         <font-awesome-icon icon="plus-circle" @click.stop="toggleFabled" />
       </h3>
@@ -103,7 +103,7 @@
         <input type="text" id="message" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
         <button type="submit" class="send">Send</button>
       <div class="toBottom" v-if="false">
-          Go to Bottom
+          移至底部
           <font-awesome-icon icon="arrow"/>
       </div>
       </form>
@@ -291,7 +291,7 @@ export default {
       
       // display player name or ST in the chat title
       if(this.session.isSpectator){
-        this.$refs.chatWith.innerText = "ST";
+        this.$refs.chatWith.innerText = "说书人";
         this.$store.commit("session/setStMessage", 0);
       }else{
         var name = this.players[playerIndex].name;
@@ -324,7 +324,7 @@ export default {
     },
     sendChat(){
       if (this.message === "") return;
-      const sender = this.session.isSpectator ? this.session.playerName : "ST";
+      const sender = this.session.isSpectator ? this.session.playerName : "说书人";
       const playerId = this.session.isSpectator ? this.session.playerId : this.chattingPlayer;
       const message = sender.concat(": ", this.message);
       this.$store.commit("session/updateChatSent", {message, playerId});

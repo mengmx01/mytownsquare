@@ -175,9 +175,9 @@ const mutations = {
         "otherNightReminder": "",
         "reminders": [],
         "setup": false,
-        "name": "Story Teller",
+        "name": "说书人",
         "team": "fabled",
-        "ability": "Click story teller to send ST messages."
+        "ability": "点击和说书人私聊。"
       };
       // add storyteller fabled to allow direct messages
       if (fabled == "storyteller") fabled = fabledStoryteller;

@@ -47,19 +47,19 @@
 
         <template v-if="tab === 'grimoire'">
           <!-- Grimoire -->
-          <li class="headline">Grimoire</li>
+          <li class="headline">魔典</li>
           <li @click="toggleGrimoire" v-if="players.length">
-            <template v-if="!grimoire.isPublic">Hide</template>
-            <template v-if="grimoire.isPublic">Show</template>
+            <template v-if="!grimoire.isPublic">隐藏</template>
+            <template v-if="grimoire.isPublic">显示</template>
             <em>[G]</em>
           </li>
           <li @click="toggleNight" v-if="!session.isSpectator">
-            <template v-if="!grimoire.isNight">Switch to Night</template>
-            <template v-if="grimoire.isNight">Switch to Day</template>
+            <template v-if="!grimoire.isNight">切换至夜晚</template>
+            <template v-if="grimoire.isNight">切换至白天</template>
             <em>[S]</em>
           </li>
           <li @click="toggleNightOrder" v-if="players.length">
-            Night order
+            夜间顺序
             <em>
               <font-awesome-icon
                 :icon="[
@@ -70,7 +70,7 @@
             </em>
           </li>
           <li v-if="players.length">
-            Zoom
+            缩放
             <em>
               <font-awesome-icon
                 @click="setZoom(grimoire.zoom - 1)"
@@ -84,11 +84,11 @@
             </em>
           </li>
           <li @click="setBackground">
-            Background image
+            背景图
             <em><font-awesome-icon icon="image"/></em>
           </li>
           <li v-if="!edition.isOfficial" @click="imageOptIn">
-            <small>Show Custom Images</small>
+            <small>允许自定义图标</small>
             <em
               ><font-awesome-icon
                 :icon="[
@@ -98,14 +98,14 @@
             /></em>
           </li>
           <li @click="toggleStatic">
-            Disable Animations
+            关闭动画
             <em
               ><font-awesome-icon
                 :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
             /></em>
           </li>
           <li @click="toggleMuted">
-            Mute Sounds
+            静音
             <em
               ><font-awesome-icon
                 :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
@@ -116,36 +116,37 @@
         <template v-if="tab === 'session'">
           <!-- Session -->
           <li class="headline" v-if="session.sessionId">
-            {{ session.isSpectator ? "Playing" : "Hosting" }}
+            {{ session.isSpectator ? "玩家" : "说书人" }}
           </li>
           <li class="headline" v-else>
-            Live Session
+            联机
           </li>
           <template v-if="!session.sessionId">
-            <li @click="hostSession">Host (Storyteller)<em>[H]</em></li>
-            <li @click="joinSession">Join (Player)<em>[J]</em></li>
+            <li @click="hostSession">创建房间<em>[H]</em></li>
+            <li @click="joinSession">加入房间<em>[J]</em></li>
           </template>
           <template v-else>
             <li v-if="session.ping">
-              Delay to {{ session.isSpectator ? "host" : "players" }}
+              与{{ session.isSpectator ? "说书人" : "玩家" }}延迟
               <em>{{ session.ping }}ms</em>
             </li>
             <li @click="copySessionUrl">
-              Copy player link
+              复制链接
               <em><font-awesome-icon icon="copy"/></em>
             </li>
             <li v-if="!session.isSpectator" @click="distributeRoles">
-              Send Characters
+              发送角色
               <em><font-awesome-icon icon="theater-masks"/></em>
             </li>
             <li
               v-if="session.voteHistory.length || !session.isSpectator"
               @click="toggleModal('voteHistory')"
             >
-              Vote history<em>[V]</em>
+              投票记录<em>[V]</em>
             </li>
             <li @click="leaveSession">
-              Leave Session
+              <span v-if="session.isSpectator">退出房间</span>
+              <span v-if="!session.isSpectator">解散房间</span>
               <em>{{ session.sessionId }}</em>
             </li>
           </template>
@@ -153,58 +154,58 @@
 
         <template v-if="tab === 'players' && !session.isSpectator">
           <!-- Users -->
-          <li class="headline">Players</li>
-          <li @click="addPlayer" v-if="players.length < 20">Add<!--<em>[A]</em>--></li>
+          <li class="headline">玩家</li>
+          <li @click="addPlayer" v-if="players.length < 20">添加座位<!--<em>[A]</em>--></li>
           <li @click="randomizeSeatings" v-if="players.length > 2">
-            Randomize
+            随机座位
             <em><font-awesome-icon icon="dice"/></em>
           </li>
           <li @click="clearPlayers" v-if="players.length">
-            Remove all
+            移除全部
             <em><font-awesome-icon icon="trash-alt"/></em>
           </li>
         </template>
 
         <template v-if="tab === 'characters'">
           <!-- Characters -->
-          <li class="headline">Characters</li>
+          <li class="headline">角色</li>
           <li v-if="!session.isSpectator" @click="toggleModal('edition')">
-            Select Edition
+            选择剧本
             <em>[E]</em>
           </li>
           <li
             @click="toggleModal('roles')"
             v-if="!session.isSpectator && players.length > 4"
           >
-            Choose & Assign
+            配置角色
             <em>[C]</em>
           </li>
           <li v-if="!session.isSpectator" @click="toggleModal('fabled')">
-            Add Fabled
+            添加传奇角色
             <em>[F]</em>
           </li>
           <li @click="clearRoles" v-if="players.length">
-            Remove all
+            移除全部
             <em><font-awesome-icon icon="trash-alt"/></em>
           </li>
         </template>
 
         <template v-if="tab === 'help'">
           <!-- Help -->
-          <li class="headline">Help</li>
+          <li class="headline">帮助</li>
           <li @click="toggleModal('reference')">
-            Reference Sheet
+            角色技能表
             <em>[R]</em>
           </li>
           <li @click="toggleModal('nightOrder')">
-            Night Order Sheet
+            夜间顺序表
             <em>[N]</em>
           </li>
           <li @click="toggleModal('gameState')">
-            Game State JSON
+            游戏状态JSON
             <em><font-awesome-icon icon="file-code"/></em>
           </li>
-          <li>
+          <!-- <li>
             <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
               Join Discord
             </a>
@@ -213,10 +214,10 @@
                 <font-awesome-icon :icon="['fab', 'discord']" />
               </a>
             </em>
-          </li>
+          </li> -->
           <li>
             <a href="https://github.com/bra1n/townsquare" target="_blank">
-              Source code
+              源代码
             </a>
             <em>
               <a href="https://github.com/bra1n/townsquare" target="_blank">
@@ -245,7 +246,7 @@ export default {
   },
   methods: {
     setBackground() {
-      const background = prompt("Enter custom background URL");
+      const background = prompt("输入自定义背景图URL");
       if (background || background === "") {
         this.$store.commit("setBackground", background);
       }
@@ -254,7 +255,7 @@ export default {
       if (this.session.sessionId) return;
       const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
-        ("Hosting session " + sessionId + ", please enter number of players"), 12
+        ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
       );
       if (sessionId) {
         this.$store.commit("session/clearVoteHistory");
@@ -278,7 +279,7 @@ export default {
     distributeRoles() {
       if (this.session.isSpectator) return;
       const popup =
-        "Do you want to distribute assigned characters to all SEATED players?";
+        "确定将角色发送给所有已入座的玩家吗？";
       if (confirm(popup)) {
         this.$store.commit("session/distributeRoles", true);
         setTimeout(
@@ -291,7 +292,7 @@ export default {
     },
     imageOptIn() {
       const popup =
-        "Are you sure you want to allow custom images? A malicious script file author might track your IP address this way.";
+        "确定要启用自定义游戏图标吗？木马剧本拥有者可能以此来追踪你的IP地址。";
       if (this.grimoire.isImageOptIn || confirm(popup)) {
         this.toggleImageOptIn();
       }
@@ -299,13 +300,13 @@ export default {
     joinSession() {
       if (this.session.sessionId) return this.leaveSession();
       let sessionId = prompt(
-        "Enter the channel number / name of the session you want to join"
+        "输入房间号/链接"
       );
       if (!sessionId) return;
-      var name = prompt("Enter player name");
+      var name = prompt("输入玩家昵称");
       const nameLength = name.split(". ").length;
       if (nameLength > 1){
-        alert("Player name cannot contain special character \".\"");
+        alert("昵称不能含有特殊字符\".\"");
         return;
       }
       this.$store.commit("session/setPlayerName", name);
@@ -320,7 +321,7 @@ export default {
       }
     },
     leaveSession() {
-      if (confirm("Are you sure you want to leave the active live game?")) {
+      if (confirm("确定要离开/解散该房间吗？")) {
         // vacate seat upon leaving the room
         const playerIndex = this.session.claimedSeat;
         if (playerIndex >= 0){
@@ -333,7 +334,7 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
-        this.$store.commit("session/setPlayerName", "Empty Seat");
+        this.$store.commit("session/setPlayerName", "空座位");
       }
     },
     addPlayer() {
@@ -342,18 +343,18 @@ export default {
       
       // setting name to a default value, combining with the seat number
       const splitSign = ". ";
-      const namePlaceholder = "Empty Seat";
+      const namePlaceholder = "空座位";
       this.$store.commit("players/add", ((this.players.length + 1).toString() + splitSign + namePlaceholder));
     },
     randomizeSeatings() {
       if (this.session.isSpectator) return;
-      if (confirm("Are you sure you want to randomize seatings?")) {
+      if (confirm("确定要随机分配座位吗？")) {
         this.$store.dispatch("players/randomize");
       }
     },
     clearPlayers() {
       if (this.session.isSpectator) return;
-      if (confirm("Are you sure you want to remove all players?")) {
+      if (confirm("确定要移除所有座位吗？")) {
         // abort vote if in progress
         if (this.session.nomination) {
           this.$store.commit("session/nomination");
@@ -362,7 +363,7 @@ export default {
       }
     },
     clearRoles() {
-      if (confirm("Are you sure you want to remove all player roles?")) {
+      if (confirm("确定要移除所有玩家角色吗？")) {
         this.$store.dispatch("players/clearRoles");
       }
     },

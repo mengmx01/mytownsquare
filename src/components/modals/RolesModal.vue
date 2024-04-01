@@ -4,7 +4,7 @@
     v-if="modals.roles && nonTravelers >= 5"
     @close="toggleModal('roles')"
   >
-    <h3>Select the characters for {{ nonTravelers }} players:</h3>
+    <h3>为当前{{ nonTravelers }}名玩家选择角色</h3>
     <ul class="tokens" v-for="(teamRoles, team) in roleSelection" :key="team">
       <li class="count" :class="[team]">
         {{ teamRoles.reduce((a, { selected }) => a + selected, 0) }} /
@@ -31,14 +31,13 @@
     <div class="warning" v-if="hasSelectedSetupRoles">
       <font-awesome-icon icon="exclamation-triangle" />
       <span>
-        Warning: there are characters selected that modify the game setup! The
-        randomizer does not account for these characters.
+        警告: 目前选择的角色会修改游戏的初始角色配置！随机分发器不会识别这些角色的功能。建议说书人手动调整要分发的角色。
       </span>
     </div>
     <label class="multiple" :class="{ checked: allowMultiple }">
       <font-awesome-icon :icon="allowMultiple ? 'check-square' : 'square'" />
       <input type="checkbox" name="allow-multiple" v-model="allowMultiple" />
-      Allow duplicate characters
+      允许重复角色
     </label>
     <div class="button-group">
       <div
@@ -49,11 +48,11 @@
         }"
       >
         <font-awesome-icon icon="people-arrows" />
-        Assign {{ selectedRoles }} characters randomly
+        随机分配{{ selectedRoles }}个角色
       </div>
       <div class="button" @click="selectRandomRoles">
         <font-awesome-icon icon="random" />
-        Shuffle characters
+        随机角色
       </div>
     </div>
   </Modal>

@@ -11,7 +11,7 @@
       title="Show Night Order"
     />
     <h3>
-      Character Reference
+      角色技能表
       <font-awesome-icon icon="address-card" />
       {{ edition.name || "Custom Script" }}
     </h3>
@@ -53,7 +53,7 @@
 
     <div class="team jinxed" v-if="jinxed.length">
       <aside>
-        <h4>Jinxed</h4>
+        <h4>相克</h4>
       </aside>
       <ul>
         <li v-for="(jinx, index) in jinxed" :key="index">
@@ -90,6 +90,7 @@
 <script>
 import Modal from "./Modal";
 import { mapMutations, mapState } from "vuex";
+import Vue from "vue";
 
 export default {
   components: {
@@ -126,7 +127,9 @@ export default {
         rolesGrouped[role.team].push(role);
       });
       delete rolesGrouped["traveler"];
-      return rolesGrouped;
+      const rolesCn = mapRolesCn(rolesGrouped);
+      return rolesCn;
+      // return rolesGrouped;
     },
     playersByRole: function() {
       const players = {};
@@ -147,6 +150,31 @@ export default {
     ...mapMutations(["toggleModal"])
   }
 };
+
+
+const mapRolesCn = function(roles) { // 汉化角色类型
+  const rolesCn = {};
+  const keys = Object.keys(roles);
+  keys.forEach(key => {
+    const value = roles[key];
+    if (key == "demon"){
+      Vue.set(rolesCn, "恶魔", value);
+    }else if (key == "minion"){
+      Vue.set(rolesCn, "爪牙", value);
+    }else if (key == "outsider"){
+      Vue.set(rolesCn, "外来者", value);
+    }else if (key == "townsfolk"){
+      Vue.set(rolesCn, "镇民", value);
+    }else if (key == "traveler"){
+      Vue.set(rolesCn, "旅行者", value);
+    }else if (key == "jinxed"){
+      Vue.set(rolesCn, "相克", value);
+    }else {
+      Vue.set(rolesCn, key, value);
+    }
+  });
+  return rolesCn;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -169,7 +197,7 @@ h3 {
   }
 }
 
-.townsfolk {
+.镇民 {
   .name {
     color: $townsfolk;
   }
@@ -177,7 +205,7 @@ h3 {
     background: linear-gradient(-90deg, $townsfolk, transparent);
   }
 }
-.outsider {
+.外来者 {
   .name {
     color: $outsider;
   }
@@ -185,7 +213,7 @@ h3 {
     background: linear-gradient(-90deg, $outsider, transparent);
   }
 }
-.minion {
+.爪牙 {
   .name {
     color: $minion;
   }
@@ -193,7 +221,7 @@ h3 {
     background: linear-gradient(-90deg, $minion, transparent);
   }
 }
-.demon {
+.恶魔 {
   .name {
     color: $demon;
   }
@@ -240,7 +268,7 @@ h3 {
   h4 {
     text-transform: uppercase;
     text-align: center;
-    transform: rotate(90deg);
+    // transform: rotate(90deg);
     transform-origin: center;
     font-size: 80%;
   }

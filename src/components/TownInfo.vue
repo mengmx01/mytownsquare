@@ -70,7 +70,7 @@
     </li>
     <li>
       <span>
-        Room：
+        房间号：
       </span>
       <span>
         {{ this.$store.state.session.sessionId }}

@@ -640,7 +640,7 @@ class LiveSession {
       this._store.commit("players/update", {
         player: players[oldIndex],
         property: "name",
-        value: ((oldIndex+1).toString().concat(". ", "Empty Seat"))
+        value: ((oldIndex+1).toString().concat(". ", "空座位"))
       });
       this._store.commit("players/update", {
         player: players[oldIndex],

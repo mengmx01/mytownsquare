@@ -1,12 +1,13 @@
 <template>
   <Modal v-if="modals.role && availableRoles.length" @close="close">
     <h3>
-      Choose a new character for
+      为
       {{
         playerIndex >= 0 && players.length
           ? players[playerIndex].name
           : "bluffing"
       }}
+      选择角色
     </h3>
     <ul class="tokens" v-if="tab === 'editionRoles' || !otherTravelers.size">
       <li
@@ -36,13 +37,13 @@
         class="button"
         :class="{ townsfolk: tab === 'editionRoles' }"
         @click="tab = 'editionRoles'"
-        >Edition Roles</span
+        >剧本角色</span
       >
       <span
         class="button"
         :class="{ townsfolk: tab === 'otherTravelers' }"
         @click="tab = 'otherTravelers'"
-        >Other Travelers</span
+        >其他旅行者</span
       >
     </div>
   </Modal>

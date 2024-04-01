@@ -1,7 +1,7 @@
 <template>
   <Modal class="editions" v-if="modals.edition" @close="toggleModal('edition')">
     <div v-if="!isCustom">
-      <h3>Select an edition:</h3>
+      <h3>选择剧本</h3>
       <ul class="editions">
         <li
           v-for="edition in editions"
@@ -24,29 +24,23 @@
             backgroundImage: `url(${require('../../assets/editions/custom.png')})`
           }"
         >
-          Custom Script / Characters
+          自定义剧本/角色
         </li>
       </ul>
     </div>
     <div class="custom" v-else>
-      <h3>Load custom script / characters</h3>
-      To play with a custom script, you need to select the characters you want
-      to play with in the official
-      <a href="https://script.bloodontheclocktower.com/" target="_blank"
-        >Script Tool</a
+      <h3>加载自定义剧本/角色</h3>
+      若想玩自定义剧本，请在
+      <a href="https://clocktower.gstonegames.com/script_tool/" target="_blank"
+        >官方（中文）剧本工具</a
       >
-      and then upload the generated "custom-list.json" either directly here or
-      provide a URL to such a hosted JSON file.<br />
+      中选择想玩的角色然后上传生成的"custom-list.json"文件或提供包含JSON文件的URL链接。
+      
       <br />
-      To play with custom characters, please read
-      <a
-        href="https://github.com/bra1n/townsquare#custom-characters"
-        target="_blank"
-        >the documentation</a
-      >
-      on how to write a custom character definition file.
-      <b>Only load custom JSON files from sources that you trust!</b>
-      <h3>Some popular custom scripts:</h3>
+      若想玩自定义角色，请查阅关于如何编写自定义角色定义文件的文档。
+      <br />
+      <b>请勿上传未知来源的自定义JSON文件！</b>
+      <h3>剧本：</h3>
       <ul class="scripts">
         <li
           v-for="(script, index) in scripts"
@@ -64,16 +58,16 @@
       />
       <div class="button-group">
         <div class="button" @click="openUpload">
-          <font-awesome-icon icon="file-upload" /> Upload JSON
+          <font-awesome-icon icon="file-upload" /> 上传JSON
         </div>
         <div class="button" @click="promptURL">
-          <font-awesome-icon icon="link" /> Enter URL
+          <font-awesome-icon icon="link" /> 输入URL
         </div>
         <div class="button" @click="readFromClipboard">
-          <font-awesome-icon icon="clipboard" /> Use JSON from Clipboard
+          <font-awesome-icon icon="clipboard" /> 使用剪贴板中的JSON
         </div>
         <div class="button" @click="isCustom = false">
-          <font-awesome-icon icon="undo" /> Back
+          <font-awesome-icon icon="undo" /> 返回
         </div>
       </div>
     </div>
@@ -95,27 +89,27 @@ export default {
       isCustom: false,
       scripts: [
         [
-          "Deadly Penance Day",
+          "死罪忏悔日",
           "https://gist.githubusercontent.com/bra1n/0337cc44c6fd2c44f7589256ed5486d2/raw/16be38fa3c01aaf49827303ac80577bdb52c0b25/penanceday.json"
         ],
         [
-          "Catfishing 11.1",
+          "人人都该诋毁的鲶鱼11.1",
           "https://gist.githubusercontent.com/bra1n/8a5ec41a7bbf945f6b7dfc1cef72b569/raw/a312ab93c2f302e0ef83c8b65a4e8e82760fda3a/catfishing.json"
         ],
         [
-          "On Thin Ice (Teensyville)",
+          "如履薄冰（小剧本）",
           "https://gist.githubusercontent.com/bra1n/8dacd9f2abc6f428331ea1213ab153f5/raw/0cacbcaf8ed9bddae0cca25a9ada97e9958d868b/on-thin-ice.json"
         ],
         [
-          "Race To The Bottom (Teensyville)",
+          "逐底竞技（小剧本）",
           "https://gist.githubusercontent.com/bra1n/63e1354cb3dc9d4032bcd0623dc48888/raw/5acb0eedcc0a67a64a99c7e0e6271de0b7b2e1b2/race-to-the-bottom.json"
         ],
         [
-          "Frankenstein's Mayor by Ted (Teensyville)",
+          "失控造物（小剧本）",
           "https://gist.githubusercontent.com/bra1n/32c52b422cc01b934a4291eeb81dbcee/raw/5bf770693bbf7aff5e86601c82ca4af3222f4ba6/Frankensteins_Mayor_by_Ted.json"
         ],
         [
-          "Vigormortis High School (Teensyville)",
+          "永生之境（小剧本）",
           "https://gist.githubusercontent.com/bra1n/1f65bd4a999524719d5dabe98c3c2d27/raw/22bbec6bf56a51a7459e5ae41ed47e41971c5445/VigormortisHighSchool.json"
         ]
       ]
@@ -132,7 +126,10 @@ export default {
         const reader = new FileReader();
         reader.addEventListener("load", () => {
           try {
+            console.log(reader);
+            console.log(reader.result);
             const roles = JSON.parse(reader.result);
+            console.log(roles);
             this.parseRoles(roles);
           } catch (e) {
             alert("Error reading custom script: " + e.message);
@@ -165,7 +162,7 @@ export default {
         const roles = JSON.parse(text);
         this.parseRoles(roles);
       } catch (e) {
-        alert("Error reading custom script: " + e.message);
+        alert("读取剧本错误：剪贴板内容不是有效的JSON文件！");
       }
     },
     parseRoles(roles) {

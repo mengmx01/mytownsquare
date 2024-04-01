@@ -126,40 +126,40 @@
                 (session.isSpectator && player.id === session.playerId)
             "
           >
-            <font-awesome-icon icon="venus-mars" />Change Pronouns
+            <font-awesome-icon icon="venus-mars" />改人称代词
           </li>
           <template v-if="!session.isSpectator">
             <li @click="changeName">
-              <font-awesome-icon icon="user-edit" />Rename
+              <font-awesome-icon icon="user-edit" />改名
             </li>
             <li @click="movePlayer()" :class="{ disabled: session.lockedVote }">
               <font-awesome-icon icon="redo-alt" />
-              Move player
+              移动玩家
             </li>
             <li @click="swapPlayer()" :class="{ disabled: session.lockedVote }">
               <font-awesome-icon icon="exchange-alt" />
-              Swap seats
+              交换座位
             </li>
             <li @click="removePlayer" :class="{ disabled: session.lockedVote }">
               <font-awesome-icon icon="times-circle" />
-              Remove
+              移除座位
             </li>
             <li
               @click="emptyPlayer()"
               v-if="player.id && session.sessionId"
             >
               <font-awesome-icon icon="chair" />
-              Empty seat
+              踢出游戏
             </li>
             <template v-if="!session.nomination">
               <li @click="nominatePlayer()">
                 <font-awesome-icon icon="hand-point-right" />
-                Nomination
+                提名
               </li>
             </template>
             <li @click="openChat(player)">
                 <font-awesome-icon icon="comments" prefix="fa"/>
-              Chat
+              私聊
             </li>
           </template>
           <li
@@ -169,10 +169,10 @@
           >
             <font-awesome-icon icon="chair" />
             <template v-if="!player.id">
-              Claim seat
+              坐下
             </template>
             <template v-else-if="player.id === session.playerId">
-              Vacate seat
+              起立
             </template>
             <template v-else> Seat occupied</template>
           </li>
@@ -263,7 +263,7 @@ export default {
     changePronouns() {
       if (this.session.isSpectator && this.player.id !== this.session.playerId)
         return;
-      const pronouns = prompt("Player pronouns", this.player.pronouns);
+      const pronouns = prompt("人称代词", this.player.pronouns);
       //Only update pronouns if not null (prompt was not cancelled)
       if (pronouns !== null) {
         this.updatePlayer("pronouns", pronouns, true);
@@ -295,16 +295,16 @@ export default {
     changeName() {
       if (this.session.isSpectator) return;
       const seatNum = this.player.name.split(". ")[0];
-      var name = prompt("Player name", this.player.name) || this.player.name;
+      var name = prompt("玩家昵称", this.player.name) || this.player.name;
       const nameLength = name.split(". ").length;
       if (nameLength > 2){
-        alert("Player name cannot contain special character \".\"");
+        alert("昵称不能含有特殊字符\".\"");
         return;
       }
       if (nameLength == 2){
         const nameFirst = name.split(". ")[0];
         if (isNaN((Number(nameFirst)))){
-          alert("Player name cannot contain special character \".\"");
+          alert("昵称不能含有特殊字符\".\"");
           return;
         }
         name = name.split(". ")[1];
@@ -336,7 +336,7 @@ export default {
     emptyPlayer(){
       this.updatePlayer('id', '', true);
       const seatNum = this.player.name.split(". ")[0];
-      const name = seatNum.concat(". ", "Empty Seat");
+      const name = seatNum.concat(". ", "空座位");
       this.updatePlayer('name', name, true);
     },
     removePlayer() {
