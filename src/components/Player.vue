@@ -213,6 +213,7 @@
 <script>
 import Token from "./Token";
 import { mapGetters, mapState } from "vuex";
+// import Vue from "vue";
 
 export default {
   components: {
@@ -240,26 +241,44 @@ export default {
       return indexAdjusted < session.lockedVote - 1;
     },
     zoom: function() {
-      const unit = window.innerWidth > window.innerHeight ? "vh" : "vw";
+      const unit = this.windowWidth > this.windowHeight ? "vh" : "vw";
+      // var ratio = {};
       if (this.players.length < 7) {
+        // Vue.set(ratio, "width", 18 + this.grimoire.zoom + unit);
         return { width: 18 + this.grimoire.zoom + unit };
       } else if (this.players.length <= 10) {
+        // Vue.set(ratio, "width", 16 + this.grimoire.zoom + unit);
         return { width: 16 + this.grimoire.zoom + unit };
       } else if (this.players.length <= 15) {
+        // Vue.set(ratio, "width", 14 + this.grimoire.zoom + unit);
         return { width: 14 + this.grimoire.zoom + unit };
       } else {
+        // Vue.set(ratio, "width", 12 + this.grimoire.zoom + unit);
         return { width: 12 + this.grimoire.zoom + unit };
       }
+      // return ratio;
     }
   },
   data() {
     return {
       isMenuOpen: false,
       isSwap: false,
-      newMessages: 0
+      newMessages: 0,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
     };
   },
+  mounted(){
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy(){
+    window.removeEventListener("resize", this.handleResize);
+  },
   methods: {
+    handleResize(){
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight;
+    },
     changePronouns() {
       if (this.session.isSpectator && this.player.id !== this.session.playerId)
         return;
@@ -379,6 +398,23 @@ export default {
         !this.session.votes[this.index]
       ]);
     }
+    // ,
+    // zoom() {
+    //   const unit = window.innerWidth > window.innerHeight ? "vh" : "vw";
+    //   if (this.players.length < 7) {
+    //     zoom.push("width: 18" + this.grimoire.zoom + unit);
+    //     // return { width: 18 + this.grimoire.zoom + unit };
+    //   } else if (this.players.length <= 10) {
+    //     zoom.push("width: 16" + this.grimoire.zoom + unit);
+    //     // return { width: 16 + this.grimoire.zoom + unit };
+    //   } else if (this.players.length <= 15) {
+    //     zoom.push("width: 14" + this.grimoire.zoom + unit);
+    //     // return { width: 14 + this.grimoire.zoom + unit };
+    //   } else {
+    //     zoom.push("width: 12" + this.grimoire.zoom + unit);
+    //     // return { width: 12 + this.grimoire.zoom + unit };
+    //   }
+    // }
   }
 };
 </script>
@@ -755,8 +791,8 @@ li.move:not(.from) .player .overlay svg.move {
   right: 10%;
   display: flex;
   justify-content: center;
-  font-size: 120%;
-  line-height: 120%;
+  font-size: 80%;
+  line-height: 170%;
   cursor: pointer;
   white-space: nowrap;
   width: 120%;

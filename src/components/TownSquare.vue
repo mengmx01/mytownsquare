@@ -8,7 +8,7 @@
       vote: session.nomination
     }"
   >
-    <ul class="circle" :class="['size-' + players.length]">
+    <ul class="circle" :class="['size-' + players.length]" :style="orientation">
       <Player
         v-for="(player, index) in players"
         :key="index"
@@ -30,8 +30,8 @@
       :class="{ closed: !isBluffsOpen }"
     >
       <h3>
-        <span v-if="session.isSpectator">不在场身份</span>
-        <span v-else>恶魔的伪装身份</span>
+        <span v-if="session.isSpectator" style="font-size: 100%;">不在场身份</span>
+        <span v-else style="font-size: 100%;">恶魔的伪装身份</span>
         <font-awesome-icon icon="times-circle" @click.stop="toggleBluffs" />
         <font-awesome-icon icon="plus-circle" @click.stop="toggleBluffs" />
       </h3>
@@ -40,6 +40,7 @@
           v-for="index in bluffSize"
           :key="index"
           @click="openRoleModal(index * -1)"
+          :style="floatingZoom"
         >
           <Token :role="bluffs[index - 1]"></Token>
         </li>
@@ -57,6 +58,7 @@
           v-for="(role, index) in fabled"
           :key="index"
           @click="removeFabled(index)"
+          :style="floatingZoom"
         >
         <div v-if="index === 0">
           <div class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="item > 0">{{ item }}</div>
@@ -128,7 +130,17 @@ export default {
   computed: {
     ...mapGetters({ nightOrder: "players/nightOrder" }),
     ...mapState(["grimoire", "roles", "session"]),
-    ...mapState("players", ["players", "bluffs", "fabled"])
+    ...mapState("players", ["players", "bluffs", "fabled"]),
+    orientation: function(){
+      const ratio = this.windowWidth / this.windowHeight;
+      const unit = this.windowWidth > this.windowHeight ? "height: 100%;" : "height: " + ratio * 100 + "%;";
+      return unit;
+    },
+    floatingZoom: function(){
+      const ratio = this.windowWidth / this.windowHeight;
+      const size = ratio > 1 ? 14 : 8;
+      return "height: " + size + "vh; width: " + size + "vh;";
+    }
   },
   data() {
     return {
@@ -144,7 +156,15 @@ export default {
       minimising: false,
       chattingPlayer: "",
       message: "",
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
     };
+  },
+  mounted(){
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy(){
+    window.removeEventListener("resize", this.handleResize);
   },
   methods: {
     toggleBluffs() {
@@ -164,6 +184,10 @@ export default {
       if (typeof this[method] === "function") {
         this[method](playerIndex, params);
       }
+    },
+    handleResize(){
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight;
     },
     claimSeat(playerIndex) {
       if (!this.session.isSpectator) return;
@@ -373,8 +397,8 @@ export default {
 
 .circle {
   padding: 0;
-  width: 100%;
-  height: 100%;
+  // width: 100%;
+  // height: 100%;
   list-style: none;
   margin: 0;
 
@@ -542,10 +566,10 @@ export default {
       cursor: pointer;
       flex-grow: 0;
       &.fa-times-circle {
-        margin-left: 1vh;
+        margin-left: 0vh;
       }
       &.fa-plus-circle {
-        margin-left: 1vh;
+        margin-left: 0vh;
         display: none;
       }
       &:hover path {
@@ -560,8 +584,8 @@ export default {
     align-items: center;
     justify-content: center;
     li {
-      width: 14vh;
-      height: 14vh;
+      // width: 14vh;
+      // height: 14vh;
       margin: 0 0.5%;
       display: inline-block;
       transition: all 250ms;
