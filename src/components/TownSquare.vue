@@ -40,7 +40,7 @@
           v-for="index in bluffSize"
           :key="index"
           @click="openRoleModal(index * -1)"
-          :style="floatingZoom"
+          :style="isBluffsOpen ? floatingZoom : ''"
         >
           <Token :role="bluffs[index - 1]"></Token>
         </li>
@@ -58,7 +58,7 @@
           v-for="(role, index) in fabled"
           :key="index"
           @click="removeFabled(index)"
-          :style="floatingZoom"
+          :style="isFabledOpen ? floatingZoom : ''"
         >
         <div v-if="index === 0">
           <div class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="item > 0">{{ item }}</div>
@@ -397,8 +397,8 @@ export default {
 
 .circle {
   padding: 0;
-  // width: 100%;
-  // height: 100%;
+  width: 100%;
+  height: 100%;
   list-style: none;
   margin: 0;
 
