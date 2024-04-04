@@ -175,6 +175,8 @@ export default {
     },
     removeFabled(index) {
       if (this.session.isSpectator) {
+        console.log(this.session);
+        console.log(this.players);
         if (this.session.claimedSeat >= 0) this.openChat(0); //open chat box if user is a player
       }else{
         this.$store.commit("players/setFabled", { index });
@@ -195,6 +197,7 @@ export default {
         this.$store.commit("session/claimSeat", -1);
       } else {
         this.$store.commit("session/claimSeat", playerIndex);
+        console.log(playerIndex);
         this.$store.commit("session/createChatHistory", this.session.playerId);
       }
     },
@@ -311,6 +314,8 @@ export default {
       this.nominate = -1;
     },
     openChat(playerIndex){
+      console.log(this);
+
       this.maximiseChat();
       
       // display player name or ST in the chat title
@@ -318,8 +323,8 @@ export default {
         this.$refs.chatWith.innerText = "说书人";
         this.$store.commit("session/setStMessage", 0);
       }else{
-        var name = this.players[playerIndex].name;
-        name = name.split(". ")[1];
+        const name = this.players[playerIndex].name;
+        // name = name.split(". ")[1];
         this.$refs.chatWith.innerText = name;
         this.chattingPlayer = this.players[playerIndex].id;
         this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0})
@@ -335,6 +340,7 @@ export default {
       }
     },
     maximiseChat(){
+      console.log('maximise');
       if(this.minimising){
         this.minimising = false;
         return;

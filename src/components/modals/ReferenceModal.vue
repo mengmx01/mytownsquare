@@ -15,6 +15,19 @@
       <font-awesome-icon icon="address-card" />
       {{ edition.name || "Custom Script" }}
     </h3>
+    <div v-if="states.length" :class="['team', 'state']">
+      <aside>
+        <h4>状态</h4>
+      </aside>
+      <ul>
+        <li v-for="(state, index) in states" :key="index">
+          <div class="explain">
+            <span class="name">{{ Object.keys(state)[0] }}</span>
+            <span class="ability">{{ Object.values(state)[0] }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
     <div
       v-for="(teamRoles, team) in rolesGrouped"
       :key="team"
@@ -27,7 +40,7 @@
         <li v-for="role in teamRoles" :class="[team]" :key="role.id">
           <span
             class="icon"
-            v-if="role.id"
+            v-if="role.id && team != '状态'"
             :style="{
               backgroundImage: `url(${
                 role.image && grimoire.isImageOptIn
@@ -58,6 +71,7 @@
       <ul>
         <li v-for="(jinx, index) in jinxed" :key="index">
           <span
+            v-if="jinx.first"
             class="icon"
             :style="{
               backgroundImage: `url(${require('../../assets/icons/' +
@@ -66,6 +80,13 @@
             }"
           ></span>
           <span
+            v-else
+            class="icon"
+            :style="{
+              backgroundImage: `url(${require('../../assets/icons/custom.png')})`
+            }"
+          ></span>
+          <span v-if="jinx.first"
             class="icon"
             :style="{
               backgroundImage: `url(${require('../../assets/icons/' +
@@ -74,10 +95,14 @@
             }"
           ></span>
           <div class="role">
-            <span class="name"
+            <span v-if="jinx.first" class="name"
               >{{ jinx.first.name }} & {{ jinx.second.name }}</span
             >
-            <span class="ability">{{ jinx.reason }}</span>
+            <span v-else class="name"
+              >{{ jinx.name }}</span
+            >
+            <span v-if="jinx.first" class="ability">{{ jinx.reason }}</span>
+            <span v-else class="ability">{{ jinx.ability }}</span>
           </div>
         </li>
         <li></li>
@@ -104,6 +129,9 @@ export default {
     jinxed: function() {
       const jinxed = [];
       this.roles.forEach(role => {
+        if (["jinxed", "jinxes", "jinx", "hatred", "hate"].includes(role.team)) {
+          jinxed.push(role);
+        }
         if (this.jinxes.get(role.id)) {
           this.jinxes.get(role.id).forEach((reason, second) => {
             if (this.roles.get(second)) {
@@ -129,8 +157,16 @@ export default {
       delete rolesGrouped["traveler"];
       const rolesCn = mapRolesCn(rolesGrouped);
       return rolesCn;
-      // return rolesGrouped;
     },
+    // states: function() {
+    //   var statePresent = false;
+    //   if (key == "state"){
+    //   statePresent = true;
+    //   Vue.set(rolesCn, "状态", value);
+    // }else if (key == "status" && !statePresent){
+    //   Vue.set(rolesCn, "状态", value);
+    // }
+    // },
     playersByRole: function() {
       const players = {};
       this.players.forEach(({ name, role }) => {
@@ -143,7 +179,7 @@ export default {
       });
       return players;
     },
-    ...mapState(["roles", "modals", "edition", "grimoire", "jinxes"]),
+    ...mapState(["roles", "modals", "edition", "grimoire", "jinxes", "states"]),
     ...mapState("players", ["players"])
   },
   methods: {
@@ -167,10 +203,9 @@ const mapRolesCn = function(roles) { // 汉化角色类型
       Vue.set(rolesCn, "镇民", value);
     }else if (key == "traveler"){
       Vue.set(rolesCn, "旅行者", value);
-    }else if (key == "jinxed"){
-      Vue.set(rolesCn, "相克", value);
-    }else {
-      Vue.set(rolesCn, key, value);
+    }else if (!["jinxed", "jinxes", "jinx", "hatred", "hate"].includes(key)){
+      // 任何冲突全部删除，将会放进后续冲突栏
+      Vue.set(rolesCn, "hide", value);
     }
   });
   return rolesCn;
@@ -236,6 +271,27 @@ h3 {
   }
   aside {
     background: linear-gradient(-90deg, $fabled, transparent);
+  }
+}
+
+.state {
+  .explain{
+    left: 18px;
+  }
+  .name {
+    color: #CC04FF;
+  }
+  aside {
+    background: linear-gradient(-90deg, #CC04FF, transparent)
+  }
+}
+
+.hide {
+  .name {
+    display: none;
+  }
+  aside {
+    display: none;
   }
 }
 
@@ -323,9 +379,12 @@ ul {
 }
 
 /** break into 1 column below 1200px **/
+// @media screen and (max-width: 1199.98px) {
 @media screen and (max-width: 1199.98px) {
   .modal {
-    max-width: 60%;
+    max-height: 95%;
+    max-width: 80%;
+    position: static;
   }
   ul {
     li {

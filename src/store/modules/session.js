@@ -89,8 +89,8 @@ const mutations = {
     const isExile = players[state.nomination[1]].role.team === "traveler";
     state.voteHistory.push({
       timestamp: new Date(),
-      nominator: players[state.nomination[0]].name,
-      nominee: players[state.nomination[1]].name,
+      nominator: (state.nomination[0] + 1).toString() + ". " + players[state.nomination[0]].name,
+      nominee: (state.nomination[1] + 1).toString() + ". " + players[state.nomination[1]].name,
       type: isExile ? "流放" : "处决",
       majority: Math.ceil(
         players.filter(player => !player.isDead || isExile).length / 2

@@ -269,7 +269,6 @@ export default {
           this.addPlayer();
         }
       };
-      this.$store.commit("players/setFabled", {fabled: "storyteller"});
     },
     copySessionUrl() {
       const url = window.location.href.split("#")[0];
@@ -303,11 +302,12 @@ export default {
         "输入房间号/链接"
       );
       if (!sessionId) return;
-      var name = prompt("输入玩家昵称");
-      const nameLength = name.split(". ").length;
-      if (nameLength > 1){
-        alert("昵称不能含有特殊字符\".\"");
-        return;
+      var name = prompt("输入玩家昵称").trim();
+      if (!name) return; //will not execute because .trim() incurs error first
+      while (name === "空座位"){
+        alert("昵称非法！");
+        name = prompt("输入玩家昵称").trim();
+        if (!name) return; //will not execute because .trim() incurs error first
       }
       this.$store.commit("session/setPlayerName", name);
       if (sessionId.match(/^https?:\/\//i)) {
@@ -334,7 +334,7 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
-        this.$store.commit("session/setPlayerName", "空座位");
+        // this.$store.commit("session/setPlayerName", "空座位");
       }
     },
     addPlayer() {
@@ -342,9 +342,7 @@ export default {
       if (this.players.length >= 20) return;
       
       // setting name to a default value, combining with the seat number
-      const splitSign = ". ";
-      const namePlaceholder = "空座位";
-      this.$store.commit("players/add", ((this.players.length + 1).toString() + splitSign + namePlaceholder));
+      this.$store.commit("players/add", "");
     },
     randomizeSeatings() {
       if (this.session.isSpectator) return;

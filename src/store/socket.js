@@ -6,7 +6,7 @@ class LiveSession {
     this._isSpectator = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 30 * 1000; // 30 seconds between pings
+    this._pingInterval = 10 * 1000; // 30 seconds between pings
     this._pingTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
@@ -92,16 +92,17 @@ class LiveSession {
     } else {
       this.sendGamestate();
     }
-    this._ping();
+    this._ping(true);
   }
 
   /**
    * Send a ping message with player ID and ST flag.
    * @private
    */
-  _ping() {
-    this._handlePing();
-    this._send("ping", [
+  _ping(open_session = false) {
+    if (this._isSpectator) open_session = true;
+    this._handlePing([open_session]);
+    this._send("ping", [open_session,
       this._isSpectator
         ? this._store.state.session.playerId
         : Object.keys(this._players).length,
@@ -549,8 +550,9 @@ class LiveSession {
    * @param latency
    * @private
    */
-  _handlePing([playerIdOrCount = 0, latency] = []) {
+  _handlePing([open_session = false, playerIdOrCount = 0, latency] = []) {
     const now = new Date().getTime();
+    // if (!this._players.length) return;
     if (!this._isSpectator) {
       // remove players that haven't sent a ping in twice the timespan
       for (let player in this._players) {
@@ -562,6 +564,8 @@ class LiveSession {
       // remove claimed seats from players that are no longer connected
       this._store.state.players.players.forEach(player => {
         if (player.id && !this._players[player.id]) {
+          // if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
+          if (open_session) return;
           this._store.commit("players/update", {
             player,
             property: "id",
@@ -639,11 +643,6 @@ class LiveSession {
     if (oldIndex >= 0 && oldIndex !== index) {
       this._store.commit("players/update", {
         player: players[oldIndex],
-        property: "name",
-        value: ((oldIndex+1).toString().concat(". ", "空座位"))
-      });
-      this._store.commit("players/update", {
-        player: players[oldIndex],
         property: "id",
         value: ""
       });
@@ -652,11 +651,11 @@ class LiveSession {
     if (index >= 0) {
       const player = players[index];
       if (!player) return;
-      this._store.commit("players/update", { player, property:"name", value: ((index+1).toString().concat(". ", name))});
+      this._store.commit("players/update", { player, property:"name", value: name});
       this._store.commit("players/update", { player, property: "id", value });
     }
     // update player session list as if this was a ping
-    this._handlePing([true, value, 0]);
+    this._handlePing([true, true, value, 0]);
   }
 
 

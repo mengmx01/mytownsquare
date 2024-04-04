@@ -100,11 +100,11 @@ export default new Vuex.Store({
     grimoire: {
       isNight: false,
       isNightOrder: true,
-      isPublic: true,
+      isPublic: false,
       isMenuOpen: false,
       isStatic: false,
       isMuted: false,
-      isImageOptIn: false,
+      isImageOptIn: true,
       zoom: 0,
       background: ""
     },
@@ -123,7 +123,8 @@ export default new Vuex.Store({
     roles: getRolesByEdition(),
     otherTravelers: getTravelersNotInEdition(),
     fabled,
-    jinxes
+    jinxes,
+    states: []
   },
   getters: {
     /**
@@ -250,6 +251,11 @@ export default new Vuex.Store({
           .filter(r => r.team === "traveler" && !roles.some(i => i.id === r.id))
           .map(role => [role.id, role])
       );
+      console.log(state);
+      console.log(roles);
+    },
+    setStates(state, states){
+      state.states = states;
     },
     setEdition(state, edition) {
       if (editionJSONbyId.has(edition.id)) {

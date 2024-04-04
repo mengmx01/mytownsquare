@@ -205,7 +205,7 @@ module.exports = store => {
         }
         break;
       case "session/claimSeat":
-        if (payload) {
+        if (payload >= 0) {
           localStorage.setItem("claimedSeat", payload);
         } else {
           localStorage.removeItem("claimedSeat");

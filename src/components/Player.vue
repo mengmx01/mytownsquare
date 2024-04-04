@@ -15,6 +15,7 @@
         player.role.team
       ]"
     >
+      <div class="seatNum">{{ players.indexOf(player) + 1 }}</div>
       <div class="newMessage" v-show="player.newMessages > 0">{{ player.newMessages }}</div>
 
       <div class="shroud" @click="toggleStatus()"></div>
@@ -110,7 +111,8 @@
         @click="isMenuOpen = !isMenuOpen"
         :class="{ active: isMenuOpen }"
       >
-        <span>{{ player.name }}</span>
+        <span v-if="player.id">{{ player.name }}</span>
+        <span v-else>空座位</span>
         <font-awesome-icon icon="venus-mars" v-if="player.pronouns" />
         <div class="pronouns" v-if="player.pronouns">
           <span>{{ player.pronouns }}</span>
@@ -174,7 +176,7 @@
             <template v-else-if="player.id === session.playerId">
               起立
             </template>
-            <template v-else> Seat occupied</template>
+            <template v-else> 有人</template>
           </li>
         </ul>
       </transition>
@@ -244,19 +246,14 @@ export default {
       const unit = this.windowWidth > this.windowHeight ? "vh" : "vw";
       // var ratio = {};
       if (this.players.length < 7) {
-        // Vue.set(ratio, "width", 18 + this.grimoire.zoom + unit);
         return { width: 18 + this.grimoire.zoom + unit };
       } else if (this.players.length <= 10) {
-        // Vue.set(ratio, "width", 16 + this.grimoire.zoom + unit);
         return { width: 16 + this.grimoire.zoom + unit };
       } else if (this.players.length <= 15) {
-        // Vue.set(ratio, "width", 14 + this.grimoire.zoom + unit);
         return { width: 14 + this.grimoire.zoom + unit };
       } else {
-        // Vue.set(ratio, "width", 12 + this.grimoire.zoom + unit);
         return { width: 12 + this.grimoire.zoom + unit };
       }
-      // return ratio;
     }
   },
   data() {
@@ -313,22 +310,7 @@ export default {
     },
     changeName() {
       if (this.session.isSpectator) return;
-      const seatNum = this.player.name.split(". ")[0];
       var name = prompt("玩家昵称", this.player.name) || this.player.name;
-      const nameLength = name.split(". ").length;
-      if (nameLength > 2){
-        alert("昵称不能含有特殊字符\".\"");
-        return;
-      }
-      if (nameLength == 2){
-        const nameFirst = name.split(". ")[0];
-        if (isNaN((Number(nameFirst)))){
-          alert("昵称不能含有特殊字符\".\"");
-          return;
-        }
-        name = name.split(". ")[1];
-      }
-      name = seatNum.concat(". ", name);
       this.updatePlayer("name", name, true);
     },
     removeReminder(reminder) {
@@ -354,9 +336,7 @@ export default {
     },
     emptyPlayer(){
       this.updatePlayer('id', '', true);
-      const seatNum = this.player.name.split(". ")[0];
-      const name = seatNum.concat(". ", "空座位");
-      this.updatePlayer('name', name, true);
+      // this.updatePlayer('name', "空座位", true);
     },
     removePlayer() {
       this.isMenuOpen = false;
@@ -398,23 +378,6 @@ export default {
         !this.session.votes[this.index]
       ]);
     }
-    // ,
-    // zoom() {
-    //   const unit = window.innerWidth > window.innerHeight ? "vh" : "vw";
-    //   if (this.players.length < 7) {
-    //     zoom.push("width: 18" + this.grimoire.zoom + unit);
-    //     // return { width: 18 + this.grimoire.zoom + unit };
-    //   } else if (this.players.length <= 10) {
-    //     zoom.push("width: 16" + this.grimoire.zoom + unit);
-    //     // return { width: 16 + this.grimoire.zoom + unit };
-    //   } else if (this.players.length <= 15) {
-    //     zoom.push("width: 14" + this.grimoire.zoom + unit);
-    //     // return { width: 14 + this.grimoire.zoom + unit };
-    //   } else {
-    //     zoom.push("width: 12" + this.grimoire.zoom + unit);
-    //     // return { width: 12 + this.grimoire.zoom + unit };
-    //   }
-    // }
   }
 };
 </script>
@@ -757,6 +720,22 @@ li.move:not(.from) .player .overlay svg.move {
     animation-iteration-count: 1;
     animation: redToWhite 1s normal forwards;
   }
+}
+
+// Player Seat Number
+.player .seatNum {
+  position: absolute;
+  top: -5%;
+  left: 8%;
+  font-size: 120%;
+  z-index: 3;
+  font-weight: bold;
+  // -webkit-text-stroke-color: #000;
+  // -webkit-text-stroke-width: 1px;
+  text-shadow: -1px 1px #000,
+  1px 1px #000,
+  -1px 1px #000,
+  -1px -1px #000;
 }
 
 // New message bubble

@@ -128,8 +128,9 @@ export default {
           try {
             const roles = JSON.parse(reader.result);
             this.parseRoles(roles);
+            this.parseStates(roles);
           } catch (e) {
-            alert("Error reading custom script: " + e.message);
+            alert("读取剧本错误：自定义剧本内容不是有效的JSON文件！");
           }
           this.$refs.upload.value = "";
         });
@@ -137,7 +138,7 @@ export default {
       }
     },
     promptURL() {
-      const url = prompt("Enter URL to a custom-script.json file");
+      const url = prompt("输入custom-script.json文件的URL");
       if (url) {
         this.handleURL(url);
       }
@@ -148,8 +149,9 @@ export default {
         try {
           const script = await res.json();
           this.parseRoles(script);
+          this.parseStates(script);
         } catch (e) {
-          alert("Error loading custom script: " + e.message);
+          alert("读取剧本错误：URL内容不是有效的JSON文件！");
         }
       }
     },
@@ -158,6 +160,7 @@ export default {
       try {
         const roles = JSON.parse(text);
         this.parseRoles(roles);
+        this.parseStates(roles);
       } catch (e) {
         alert("读取剧本错误：剪贴板内容不是有效的JSON文件！");
       }
@@ -186,6 +189,27 @@ export default {
         this.$store.commit("players/setFabled", { fabled });
       }
       this.isCustom = false;
+    },
+    parseStates(roles) {
+      if (!roles || !roles.length) return;
+      console.log(roles);
+      roles = roles.map(role => typeof role === "string" ? { id: role } : role);
+      const metaIndex = roles.findIndex(({ id }) => id === "_meta");
+      let meta = {};
+      if (metaIndex > -1) {
+        meta = roles.splice(metaIndex, 1).pop();
+      }
+      const states = [];
+      if (meta.state){
+        meta.state.forEach(state => {
+          states.push({[state.stateName] : state.stateDescription});
+        })
+      } else if (meta.status){
+        meta.state.forEach(state => {
+          states.push({[state.name] : state.skill});
+        })
+      }
+      if (states.length) this.$store.commit("setStates", states);
     },
     ...mapMutations(["toggleModal", "setEdition"])
   }
