@@ -89,7 +89,7 @@
     <ReminderModal :player-index="selectedPlayer"></ReminderModal>
     <RoleModal :player-index="selectedPlayer"></RoleModal>
 
-    <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}">
+    <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
       <div class="title" @click="maximiseChat()">
         <span ref="chatWith" style="cursor: text; user-select: text; pointer-events: auto;"></span> 
         <span :class="{close: !isChatMin, open: isChatMin}" @click="toggleChat()">
@@ -140,6 +140,11 @@ export default {
       const ratio = this.windowWidth / this.windowHeight;
       const size = ratio > 1 ? 14 : 8;
       return "height: " + size + "vh; width: " + size + "vh;";
+    },
+    chatStyle: function(){
+      const ratio = this.windowWidth / this.windowHeight;
+      if (ratio < 1) return 'width: 300px; height: 400px;';
+      return 'width: 30%; height: 40%;';
     }
   },
   data() {
@@ -823,8 +828,8 @@ export default {
     bottom: 10px;
     transform-origin: bottom right;
     background-color: #0000007f;
-    width: 30%;
-    height: 40%;
+    // width: 30%;
+    // height: 40%;
     border-radius: 10px;
     border: 3px solid #8a7864;
     z-index: 100;

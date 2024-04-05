@@ -168,7 +168,7 @@ ul.tokens {
   padding-left: 5%;
   li {
     border-radius: 50%;
-    width: 5vw;
+    width: 100px;
     margin: 5px;
     opacity: 0.5;
     transition: all 250ms;

@@ -6,7 +6,7 @@ class LiveSession {
     this._isSpectator = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 10 * 1000; // 30 seconds between pings
+    this._pingInterval = 3600 * 1000; // 30 seconds between pings
     this._pingTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
