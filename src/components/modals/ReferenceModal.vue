@@ -205,7 +205,7 @@ const mapRolesCn = function(roles) { // 汉化角色类型
       Vue.set(rolesCn, "旅行者", value);
     }else if (!["jinxed", "jinxes", "jinx", "hatred", "hate"].includes(key)){
       // 任何冲突全部删除，将会放进后续冲突栏
-      Vue.set(rolesCn, "hide", value);
+      Vue.set(rolesCn, "other", value);
     }
   });
   return rolesCn;
@@ -286,12 +286,12 @@ h3 {
   }
 }
 
-.hide {
+.other {
   .name {
-    display: none;
+    display: block;
   }
   aside {
-    display: none;
+    visibility: hidden;
   }
 }
 

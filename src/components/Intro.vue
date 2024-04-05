@@ -15,14 +15,14 @@
         >上找到。 本项目是非官方项目，「血染钟楼」是由Steven Medway设计，The Pandemonium Institute公司出品的桌游。
       </div>
     </div>
-    <a
+    <!-- <a
       class="redirect"
       v-if="language === 'zh-CN'"
       href="https://clocktower.gstonegames.com"
     >
       <img src="../assets/gstone.png" class="gstone" alt="" />
       官方中文魔典请由此进入
-    </a>
+    </a> -->
   </div>
 </template>
 

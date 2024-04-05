@@ -186,5 +186,16 @@
     "name": "失败的上帝",
     "team": "fabled",
     "ability": "每局游戏限一次，说书人可能会犯一个“错误”，但会将其纠正，并公开承认自己曾处理有误。"
+  },
+  {
+    "id": "duck",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": [],
+    "setup": false,
+    "name": "嘴硬的上帝",
+    "team": "fabled",
+    "ability": "\"我可能有问题，但我就是不承认也不说\""
   }
 ]

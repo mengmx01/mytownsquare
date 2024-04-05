@@ -140,6 +140,9 @@ class LiveSession {
       case "player":
         this._updatePlayer(params);
         break;
+      case "bluff":
+        this._updateBluff(params);
+        break;
       case "claim":
         this._updateSeat(params);
         this._createChatHistory(params);
@@ -209,6 +212,15 @@ class LiveSession {
         break;
       case "chat":
         this._handleChat(params);
+        break;
+      case "setTimer":
+        this._handleSetTimer(params);
+        break;
+      case "startTimer":
+        this._handleStartTimer(params);
+        break;
+      case "stopTimer":
+        this._handleStopTimer(params);
         break;
     }
   }
@@ -510,6 +522,18 @@ class LiveSession {
   }
 
   /**
+   * Update demon bluffs based on incoming data. Demon/Luantic only.
+   * @param index
+   * @param property
+   * @param value
+   * @private
+   */
+  _updateBluff(bluffs) {
+    if (!this._isSpectator) return;
+    this._store.commit("players/updateBluff", bluffs);
+  }
+
+  /**
    * Publish a player pronouns update
    * @param player
    * @param value
@@ -670,7 +694,7 @@ class LiveSession {
     const playerId = (this._store.state.players.players[index]).id;
     if (playerId === "") return;
     if (this._store.state.session.chatHistory[playerId] != undefined) return;
-    if (this._store.state.session.isSpectator && this._store.state.session.playerId != playerId) return;
+    if (this._isSpectator && this._store.state.session.playerId != playerId) return;
     this._store.commit("session/createChatHistory", playerId );
   }
 
@@ -686,6 +710,26 @@ class LiveSession {
         message[player.id] = [
           "player",
           { index, property: "role", value: player.role.id }
+        ];
+      }
+    });
+    if (Object.keys(message).length) {
+      this._send("direct", message);
+    }
+  }
+
+  /**
+   * Distribute demon bluffs to demon players.
+   * This will be split server side so that each player only receives their own (sub)message.
+   */
+  distributeBluffs() {
+    if (this._isSpectator) return;
+    const message = {};
+    this._store.state.players.players.forEach(player => {
+      if (player.id && player.role && player.role.team == "demon") {
+        message[player.id] = [
+          "bluff",
+          this._store.state.players.bluffs
         ];
       }
     });
@@ -882,7 +926,55 @@ class LiveSession {
     } else{
       this._store.commit("session/setStMessage", num);
     }
-    
+  }
+
+  /**
+   * Send out timer.
+   * @param payload
+   */
+  setTimer(payload) {
+    if (this._isSpectator) return;
+    this._send("setTimer", payload);
+  }
+
+  /**
+   * Update timer when received.
+   * @param payload
+   */
+  _handleSetTimer(time){
+    this._store.commit("session/setTimer", time);
+  }
+
+  /**
+   * Send out starting timer.
+   * @param payload
+   */
+  startTimer(payload) {
+    if (this._isSpectator) return;
+    this._send("startTimer", payload);
+  }
+
+  /**
+   * Starting timer.
+   */
+  _handleStartTimer(){
+    this._store.commit("session/startTimer");
+  }
+
+  /**
+   * Send out starting timer.
+   * @param payload
+   */
+  stopTimer(payload) {
+    if (this._isSpectator) return;
+    this._send("stopTimer", payload);
+  }
+
+  /**
+   * Starting timer.
+   */
+  _handleStopTimer(){
+    this._store.commit("session/stopTimer");
   }
 }
 
@@ -907,6 +999,11 @@ export default store => {
       case "session/distributeRoles":
         if (payload) {
           session.distributeRoles();
+        }
+        break;
+      case "session/distributeBluffs":
+        if (payload) {
+          session.distributeBluffs();
         }
         break;
       case "session/nomination":
@@ -966,6 +1063,15 @@ export default store => {
         break;
       case "session/updateChatSent":
         session.updateChatSent(payload);
+        break;
+      case "session/setTimer":
+        session.setTimer(payload);
+        break;
+      case "session/startTimer":
+        session.startTimer(payload);
+        break;
+      case "session/stopTimer":
+        session.stopTimer(payload);
         break;
     }
   });

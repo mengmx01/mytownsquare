@@ -32,8 +32,11 @@ const state = () => ({
   markedPlayer: -1,
   isVoteHistoryAllowed: true,
   isRolesDistributed: false,
+  isBluffsDistributed: false,
   chatHistory: [],
-  newStMessage: [0]
+  newStMessage: [0],
+  timer: 480,
+  interval: null
 });
 
 const getters = {};
@@ -58,6 +61,7 @@ const mutations = {
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
+  distributeBluffs: set("isBluffsDistributed"),
   setSessionId(state, sessionId) {
     state.sessionId = sessionId
       .toLocaleLowerCase()
@@ -137,6 +141,19 @@ const mutations = {
       const newNum = state.newStMessage[0] = num;
       Vue.set(state.newStMessage, 0, newNum);
     }
+  },
+  setTimer(state, time) {
+    state.timer = time;
+  },
+  startTimer(state){
+    state.interval = setInterval(() => {
+      if (state.timer > 0) {
+        state.timer--;
+      }
+    }, 1000);
+  },
+  stopTimer(state){
+    clearInterval(state.interval);
   }
 };
 

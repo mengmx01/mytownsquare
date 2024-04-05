@@ -251,8 +251,6 @@ export default new Vuex.Store({
           .filter(r => r.team === "traveler" && !roles.some(i => i.id === r.id))
           .map(role => [role.id, role])
       );
-      console.log(state);
-      console.log(roles);
     },
     setStates(state, states){
       state.states = states;

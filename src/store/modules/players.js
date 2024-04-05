@@ -122,7 +122,6 @@ const mutations = {
     if (index >= 0) {
       state.players[index][property] = value;
     }
-    console.log(state.players);
   },
   add(state, name) {
     state.players.push({
@@ -175,6 +174,9 @@ const mutations = {
     } else {
       state.bluffs = [];
     }
+  },
+  updateBluff(state, bluffs) {
+    state.bluffs = bluffs;
   },
   setFabled(state, { index, fabled } = {}) {
     if (index !== undefined) {

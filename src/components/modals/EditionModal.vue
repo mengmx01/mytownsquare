@@ -13,7 +13,7 @@
               '.png')})`
           }"
           :key="edition.id"
-          @click="setEdition(edition)"
+          @click="setHomeEdition(edition)"
         >
           {{ edition.name }}
         </li>
@@ -192,7 +192,6 @@ export default {
     },
     parseStates(roles) {
       if (!roles || !roles.length) return;
-      console.log(roles);
       roles = roles.map(role => typeof role === "string" ? { id: role } : role);
       const metaIndex = roles.findIndex(({ id }) => id === "_meta");
       let meta = {};
@@ -209,7 +208,11 @@ export default {
           states.push({[state.name] : state.skill});
         })
       }
-      if (states.length) this.$store.commit("setStates", states);
+      this.$store.commit("setStates", states);
+    },
+    setHomeEdition(edition) {
+      if (["tb", "bmr", "snv", "luf"].includes(edition.id)) this.$store.commit("setStates", []);
+      this.setEdition(edition);
     },
     ...mapMutations(["toggleModal", "setEdition"])
   }

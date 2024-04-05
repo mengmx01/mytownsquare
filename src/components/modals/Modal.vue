@@ -45,6 +45,22 @@ export default {
 </script>
 
 <style lang="scss">
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgb(54, 54, 54); 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(97, 97, 97); 
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -65,8 +81,8 @@ export default {
   box-shadow: 2px 2px 20px 1px #000;
   display: flex;
   flex-direction: column;
-  max-height: 80%;
-  max-width: 80%;
+  max-height: 95%;
+  max-width: 95%;
 
   .vote-history &,
   .night-reference &,
@@ -77,7 +93,7 @@ export default {
   .roles &,
   .characters & {
     max-height: 100%;
-    max-width: 60%;
+    // max-width: 60%;
   }
 
   ul {
@@ -111,6 +127,8 @@ export default {
     position: initial;
   }
 }
+
+
 
 .maximized {
   background: rgba(0, 0, 0, 0.95);

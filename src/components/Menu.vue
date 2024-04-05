@@ -1,5 +1,15 @@
 <template>
   <div id="controls">
+
+    <span>
+      <button v-if="!timing && !session.isSpectator" @click="startTimer" class="timerButton">开始</button>
+      <button v-if="timing && !session.isSpectator" @click="stopTimer" class="timerButton">停止</button>
+      <span style="font-size: 20px;" @click="setTimer">
+        <span>计时 </span>
+        <span :style="lessThanOneMinute">{{ formattedTime }}</span>
+      </span>
+    </span>
+
     <span
       class="nomlog-summary"
       v-show="session.voteHistory.length && session.sessionId"
@@ -134,7 +144,7 @@
               复制链接
               <em><font-awesome-icon icon="copy"/></em>
             </li>
-            <li v-if="!session.isSpectator" @click="distributeRoles">
+            <li v-if="!session.isSpectator" @click="distributeAsk">
               发送角色
               <em><font-awesome-icon icon="theater-masks"/></em>
             </li>
@@ -228,6 +238,17 @@
         </template>
       </ul>
     </div>
+
+    <div v-if="distributing" class="dialog">
+      <span>
+        <label>是否同时给恶魔（疯子）发送伪装身份？</label>
+        <input type="checkbox" v-model="isSendingBluff" class="bluffCheckbox"/>
+      </span>
+      <div>
+        <button @click="distributeRoles">确定</button>
+        <button @click="closeDistributeDialog">取消</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -237,11 +258,24 @@ import { mapMutations, mapState } from "vuex";
 export default {
   computed: {
     ...mapState(["grimoire", "session", "edition"]),
-    ...mapState("players", ["players"])
+    ...mapState("players", ["players"]),
+    formattedTime() {
+      const minutes = Math.floor(this.session.timer / 60);
+      const seconds = this.session.timer % 60;
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    },
+    lessThanOneMinute() {
+      return {
+        color: this.session.timer < 60 ? 'red' : 'white'
+      }
+    }
   },
   data() {
     return {
-      tab: "grimoire"
+      tab: "grimoire",
+      timing: false,
+      distributing: false,
+      isSendingBluff: true
     };
   },
   methods: {
@@ -275,19 +309,30 @@ export default {
       const link = url + "#" + this.session.sessionId;
       navigator.clipboard.writeText(link);
     },
+    distributeAsk() {
+      this.distributing = true;
+    },
+    closeDistributeDialog() {
+      this.distributing = false;
+    },
     distributeRoles() {
       if (this.session.isSpectator) return;
-      const popup =
-        "确定将角色发送给所有已入座的玩家吗？";
-      if (confirm(popup)) {
-        this.$store.commit("session/distributeRoles", true);
-        setTimeout(
-          (() => {
-            this.$store.commit("session/distributeRoles", false);
-          }).bind(this),
-          2000
-        );
-      }
+      this.distributing = false;
+      this.$store.commit("session/distributeRoles", true);
+      setTimeout(
+        (() => {
+          this.$store.commit("session/distributeRoles", false);
+        }).bind(this),
+        2000
+      );
+      if (!this.isSendingBluff) return;
+      this.$store.commit("session/distributeBluffs", true);
+      setTimeout(
+        (() => {
+          this.$store.commit("session/distributeBluffs", false);
+        }).bind(this),
+        2000
+      );
     },
     imageOptIn() {
       const popup =
@@ -370,6 +415,28 @@ export default {
       if (this.grimoire.isNight) {
         this.$store.commit("session/setMarkedPlayer", -1);
       }
+    },
+    setTimer() {
+      if (this.session.isSpectator) return;
+      const time = prompt("输入时间（分）");
+      const timeNum = Number(time);
+      if (!timeNum) return;
+      if (timeNum <= 0) return;
+      // Vue.set(this.timer, 0, timeNum * 60 * 1000);
+      this.$store.commit("session/setTimer", timeNum * 60);
+      // this.timer = timeNum * 60;
+      this.stopTimer();
+      this.startTimer();
+    },
+    startTimer() {
+      if (this.session.isSpectator) return;
+      this.$store.commit("session/startTimer");
+      this.timing = true;
+    },
+    stopTimer() {
+      if (this.session.isSpectator) return;
+      this.$store.commit("session/stopTimer");
+      this.timing = false;
     },
     ...mapMutations([
       "toggleGrimoire",
@@ -559,5 +626,27 @@ export default {
       );
     }
   }
+}
+
+.timerButton {
+  // opacity: 0.5;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 5px 5px 5px 5px;
+  right: 8px;
+  border: white;
+  color: white;
+  cursor: pointer;
+}
+
+.dialog {
+  background-color: #000;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.dialog .bluffCheckbox {
+  width: 25px;
+  height: 25px;
 }
 </style>

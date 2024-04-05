@@ -5,7 +5,7 @@
       {{
         playerIndex >= 0 && players.length
           ? players[playerIndex].name
-          : "bluffing"
+          : "伪装身份"
       }}
       选择角色
     </h3>
