@@ -583,9 +583,10 @@ export default {
     // margin-left: 15px;
     cursor: pointer;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    width: 55%;
+    width: 60%;
     height: 60%;
     transform: scale(1.3);
+    font-size: 90%;
   }
 .player .overlay svg {
   position: absolute;

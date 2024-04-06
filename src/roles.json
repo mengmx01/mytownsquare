@@ -609,6 +609,7 @@
     "reminders": [],
     "name":"钟表匠",
     "edition": "snv",
+    "team":"townsfolk",
     "ability":"在你的首个夜晚，你会得知恶魔与爪牙之间最近的距离。（邻座的玩家距离为1）",
     "firstNight":48
 },
@@ -1434,6 +1435,18 @@
     "otherNight":90
 },
 {
+  "id":"yaggababble",
+  "name":"牙噶巴卜",
+  "ability":"在你的首个夜晚，你会得知一段秘密短语。每次你在白天公开说出这段短语，当天便可能会有一名玩家在这之后死亡。",
+  "team":"demon",
+  "firstNight":13,
+  "otherNight":44,
+  "firstNightReminder":"唤醒牙噶巴卜，对他展示这段短语，然后让他重新入睡。",
+  "otherNightReminder":"",
+  "reminders":["死亡"],
+  "setup":false
+},
+{
   "id": "Gangster",
   "name": "黑帮",
   "edition": "",
@@ -1445,18 +1458,6 @@
   "reminders": [],
   "setup": false,
   "ability": "每个白天限一次，你可以杀死与你邻近的两名存活的玩家中的一名，但需要另一边那个存活的玩家同意。"
-},
-{
-  "id":"yaggababble",
-  "name":"牙噶巴卜",
-  "ability":"在你的首个夜晚，你会得知一段秘密短语。每次你在白天公开说出这段短语，当天便可能会有一名玩家在这之后死亡。",
-  "team":"demon",
-  "firstNight":13,
-  "otherNight":44,
-  "firstNightReminder":"唤醒牙噶巴卜，对他展示这段短语，然后让他重新入睡。",
-  "otherNightReminder":"",
-  "reminders":["死亡"],
-  "setup":false
 }
 
 ]
