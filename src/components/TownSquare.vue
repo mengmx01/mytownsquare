@@ -142,6 +142,7 @@ export default {
       return "height: " + size + "vh; width: " + size + "vh;";
     },
     chatStyle: function(){
+      if (this.isChatMin) return;
       const ratio = this.windowWidth / this.windowHeight;
       if (ratio < 1) return 'width: 300px; height: 400px;';
       return 'width: 30%; height: 40%;';

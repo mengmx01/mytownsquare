@@ -95,7 +95,7 @@ export default {
       const player = this.$store.state.players.players[this.playerIndex];
       let value;
       if (reminder.role === "custom") {
-        const name = prompt("Add a custom reminder note");
+        const name = prompt("输入自定义提醒：");
         if (!name) return;
         value = [...player.reminders, { role: "custom", name }];
       } else {

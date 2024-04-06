@@ -42,7 +42,7 @@
 
       <Token
         :role="player.role"
-        @set-role="$emit('trigger', ['openRoleModal'])"
+        @set-role="clickSetRole"
       />
 
       <!-- Overlay icons -->
@@ -83,6 +83,10 @@
           @click="nominatePlayer(player)"
           title="Nominate this player"
         />
+        <div v-if="!player.id && session.isSpectator" class="sitDown">
+            <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 坐下
+        </div>
+          
       </div>
 
       <!-- Claimed seat icon -->
@@ -275,6 +279,13 @@ export default {
     handleResize(){
       this.windowWidth = window.innerWidth;
       this.windowHeight = window.innerHeight;
+    },
+    clickSetRole(){
+      if (this.session.isSpectator && !this.player.id){
+        this.claimSeat();
+        return;
+      }
+      this.$emit('trigger', ['openRoleModal']);
     },
     changePronouns() {
       if (this.session.isSpectator && this.player.id !== this.session.playerId)
@@ -561,6 +572,21 @@ export default {
     padding-top: 100%;
   }
 }
+.player .overlay .sitDown{
+    position: relative;
+    text-align: left;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 5px;
+    border-radius: 10px;
+    border: 3px solid #000;
+    // margin-left: 15px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    width: 55%;
+    height: 60%;
+    transform: scale(1.3);
+  }
 .player .overlay svg {
   position: absolute;
   filter: drop-shadow(0 0 3px black);
