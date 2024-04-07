@@ -114,6 +114,13 @@
                 :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
             /></em>
           </li>
+          <li v-if="!session.isSpectator" @click="toggleShowVacant">
+            显示空座位
+            <em
+              ><font-awesome-icon
+                :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
+            /></em>
+          </li>
           <li @click="toggleMuted">
             静音
             <em
@@ -443,6 +450,7 @@ export default {
       "toggleMenu",
       "toggleImageOptIn",
       "toggleMuted",
+      "toggleShowVacant",
       "toggleNightOrder",
       "toggleStatic",
       "setZoom",

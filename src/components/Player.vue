@@ -84,7 +84,10 @@
           title="Nominate this player"
         />
         <div v-if="!player.id && session.isSpectator" class="sitDown">
-            <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 坐下
+          <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 坐下
+        </div>
+        <div v-if="!player.id && !session.isSpectator && grimoire.isShowVacant" class="sitDown">
+          <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 空位
         </div>
           
       </div>

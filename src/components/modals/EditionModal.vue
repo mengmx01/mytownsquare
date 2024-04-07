@@ -111,6 +111,14 @@ export default {
         [
           "永生之境（小剧本）",
           "https://gist.githubusercontent.com/bra1n/1f65bd4a999524719d5dabe98c3c2d27/raw/22bbec6bf56a51a7459e5ae41ed47e41971c5445/VigormortisHighSchool.json"
+        ],
+        [
+          "无上愉悦（小剧本）",
+          "https://raw.githubusercontent.com/mengmx01/mytownsquare/main/src/scripts/no_greater_joy.json"
+        ],
+        [
+          "噬脑疑局（小剧本）",
+          "https://raw.githubusercontent.com/mengmx01/mytownsquare/main/src/scripts/a_lleach_of_distrust.json"
         ]
       ]
     };
@@ -228,7 +236,8 @@ ul.editions .edition {
   background-position: center center;
   background-size: 100% auto;
   background-repeat: no-repeat;
-  width: 30%;
+  height: 200px;
+  width: 250px;
   margin: 5px;
   font-size: 120%;
   text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,

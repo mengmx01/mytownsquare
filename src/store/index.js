@@ -105,6 +105,7 @@ export default new Vuex.Store({
       isStatic: false,
       isMuted: false,
       isImageOptIn: true,
+      isShowVacant: false,
       zoom: 0,
       background: ""
     },
@@ -166,6 +167,7 @@ export default new Vuex.Store({
     setZoom: set("zoom"),
     setBackground: set("background"),
     toggleMuted: toggle("isMuted"),
+    toggleShowVacant: toggle("isShowVacant"),
     toggleMenu: toggle("isMenuOpen"),
     toggleNightOrder: toggle("isNightOrder"),
     toggleStatic: toggle("isStatic"),

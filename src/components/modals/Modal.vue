@@ -48,7 +48,7 @@ export default {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
@@ -84,6 +84,7 @@ export default {
   max-height: 95%;
   max-width: 95%;
   overflow-y: auto;
+  overflow-x: hidden;
 
   .vote-history &,
   .night-reference &,
@@ -107,6 +108,7 @@ export default {
     align-items: center;
     justify-content: center;
     line-height: 100%;
+    max-width: 95%;
   }
 
   > .top-right-buttons {
