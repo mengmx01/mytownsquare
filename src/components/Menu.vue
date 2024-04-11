@@ -424,14 +424,7 @@ export default {
       }
     },
     setTimer() {
-      if (this.session.isSpectator) return;
-      const time = prompt("输入时间（分）");
-      const timeNum = Number(time);
-      if (!timeNum) return;
-      if (timeNum <= 0) return;
-      // Vue.set(this.timer, 0, timeNum * 60 * 1000);
-      this.$store.commit("session/setTimer", timeNum * 60);
-      // this.timer = timeNum * 60;
+      this.$store.commit("session/setTimer");
       this.stopTimer();
       this.startTimer();
     },

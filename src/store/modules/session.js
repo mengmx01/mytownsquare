@@ -142,8 +142,13 @@ const mutations = {
       Vue.set(state.newStMessage, 0, newNum);
     }
   },
-  setTimer(state, time) {
-    state.timer = time;
+  setTimer(state) {
+    if (state.isSpectator) return;
+    const time = prompt("输入时间（分）");
+    const timeNum = Number(time);
+    if (!timeNum) return;
+    if (timeNum <= 0) return;
+    state.timer = timeNum * 60;
   },
   startTimer(state){
     state.interval = setInterval(() => {

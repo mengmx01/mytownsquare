@@ -76,7 +76,6 @@
         {{ this.$store.state.session.sessionId }}
       </span>
     </li>
-    <li ref="username"></li>
   </ul>
 </template>
 

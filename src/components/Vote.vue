@@ -94,6 +94,14 @@
       <div v-else-if="!player">
         请落座后投票！
       </div>
+      <template v-if="!session.isSpectator && grimoire.isOrganGrinder">
+        <div class="organGrinder" @click="toggleOrganGrinder()">
+          <img class="icon" src="../assets/icons/organgrinder.png">
+          <span>街头风琴手在场
+          <em><font-awesome-icon :icon="['fas', grimoire.isOrganGrinderInPlay ? 'check-square' : 'square']"/></em>
+          </span>
+        </div>
+      </template>
     </div>
     <transition name="blur">
       <div
@@ -249,6 +257,9 @@ export default {
     },
     removeMarked() {
       this.$store.commit("session/setMarkedPlayer", -1);
+    },
+    toggleOrganGrinder() {
+      this.$store.commit("toggleOrganGrinderInPlay");
     }
   }
 };
@@ -429,5 +440,31 @@ export default {
   span:nth-child(4) {
     animation: countdown-go 1100ms normal forwards 3000ms;
   }
+}
+
+.organGrinder {
+  // position: inherit;
+  cursor: pointer;
+  z-index: 1;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  white-space: nowrap;
+  color: white;
+  &:hover {
+    color: red;
+  }
+}
+.organGrinder em:not(#demon) svg:not(#demon) {
+  color: white;
+}
+
+img.icon {
+  width: 20%;
+  height: 100%;
+  display: flex;
+  flex-shrink: 0;
+  flex-grow: 0;
+  white-space: nowrap;
 }
 </style>

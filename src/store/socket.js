@@ -222,6 +222,9 @@ class LiveSession {
       case "stopTimer":
         this._handleStopTimer(params);
         break;
+      case "organgrinder":
+        this._handleOrganGrinder(params);
+        break;
     }
   }
 
@@ -801,6 +804,7 @@ class LiveSession {
    */
   setMarked(playerIndex) {
     if (this._isSpectator) return;
+    if (this._store.state.grimoire.isOrganGrinderInPlay) return;
     this._send("marked", playerIndex);
   }
 
@@ -833,12 +837,28 @@ class LiveSession {
   }
 
   /**
+   * Send a status change to whether organ grinder is in play. ST to players only
+   */
+  toggleOrganGrinderInPlay(){
+    this._send("organgrinder");
+  }
+
+  _handleOrganGrinder(){
+    const inPlay = this._store.state.grimoire.isOrganGrinderInPlay;
+    this._store.state.grimoire.isOrganGrinderInPlay = !inPlay;
+  }
+
+  /**
    * Handle an incoming vote, but only if it is from ST or unlocked.
    * @param index
    * @param vote
    * @param fromST
    */
   _handleVote([index, vote, fromST]) {
+    // do not reveal vote when organ grinder is in play, unless it's ST changing that player's vote
+    const voteId = this._store.state.players.players[index].id;
+    if (this._isSpectator && this._store.state.grimoire.isOrganGrinderInPlay && voteId != this._store.state.session.playerId) return;
+    
     const { session, players } = this._store.state;
     const playerCount = players.players.length;
     const indexAdjusted =
@@ -868,6 +888,8 @@ class LiveSession {
   _handleLock([lock, vote]) {
     if (!this._isSpectator) return;
     this._store.commit("session/lockVote", lock);
+    // do not lock vote when organ grinder is in play
+    if (this._isSpectator && this._store.state.grimoire.isOrganGrinderInPlay) return;
     if (lock > 1) {
       const { lockedVote, nomination } = this._store.state.session;
       const { players } = this._store.state.players;
@@ -1072,6 +1094,9 @@ export default store => {
         break;
       case "session/stopTimer":
         session.stopTimer(payload);
+        break;
+      case "toggleOrganGrinderInPlay":
+        session.toggleOrganGrinderInPlay(payload);
         break;
     }
   });

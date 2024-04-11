@@ -129,6 +129,10 @@ export default {
           if (this.session.isSpectator) return;
           this.$refs.menu.toggleNight();
           break;
+        case "t":
+          if (this.session.isSpectator) return;
+          this.$store.commit("session/setTimer");
+          break;
         case "escape":
           this.$store.commit("toggleModal");
       }
