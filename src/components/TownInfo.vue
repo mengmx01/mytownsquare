@@ -64,7 +64,7 @@
         />
       </span>
       <span v-if="grimoire.isNight">
-        Night phase
+        夜晚阶段
         <font-awesome-icon :icon="['fas', 'cloud-moon']" />
       </span>
     </li>

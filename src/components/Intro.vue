@@ -8,7 +8,15 @@
       <span class="button" @click="toggleMenu">
         <font-awesome-icon icon="cog" /> 菜单
       </span>
-      工具或者按下 <b>[H]</b>键开始说书。 按 <b>[J]</b>可以加入已有的游戏。<br />
+      工具进行浏览。
+      <span class="button" @click="hostSession()">
+         创建房间
+      </span>
+       <b>[H]</b>开始说书，或者
+      <span class="button" @click="joinSession()">
+         加入房间
+      </span>
+       <b>[J]</b>进入已有的房间。<br />
       <div class="footer">
         这个项目是免费和开源的，可以在
         <a href="https://github.com/bra1n/townsquare" target="_blank">GitHub</a
@@ -35,7 +43,15 @@ export default {
       language: window.navigator.userLanguage || window.navigator.language
     };
   },
-  methods: mapMutations(["toggleMenu"])
+  methods: {
+    hostSession() {
+      this.$emit("trigger", ["hostSession"]);
+    },
+    joinSession () {
+      this.$emit("trigger", ["joinSession"]);
+    },
+    ...mapMutations(["toggleMenu"])
+  }
 };
 </script>
 

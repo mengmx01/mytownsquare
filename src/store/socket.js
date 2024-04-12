@@ -979,8 +979,8 @@ class LiveSession {
   /**
    * Starting timer.
    */
-  _handleStartTimer(){
-    this._store.commit("session/startTimer");
+  _handleStartTimer(payload){
+    this._store.commit("session/startTimer", payload);
   }
 
   /**

@@ -22,7 +22,7 @@
     ></video>
     <div class="backdrop"></div>
     <transition name="blur">
-      <Intro v-if="!players.length"></Intro>
+      <Intro v-if="!players.length" @trigger="handleTrigger($event)"></Intro>
       <TownInfo v-if="players.length && !session.nomination"></TownInfo>
       <Vote v-if="session.nomination"></Vote>
     </transition>
@@ -131,10 +131,15 @@ export default {
           break;
         case "t":
           if (this.session.isSpectator) return;
-          this.$store.commit("session/setTimer");
+          this.$refs.menu.setTimer();
           break;
         case "escape":
           this.$store.commit("toggleModal");
+      }
+    },
+    handleTrigger ([method]) {
+      if (typeof this.$refs.menu[method] === 'function') {
+        this.$refs.menu[method]();
       }
     }
   }

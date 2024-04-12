@@ -1,7 +1,7 @@
 <template>
   <div id="controls">
 
-    <span>
+    <span v-if="session.sessionId">
       <button v-if="!timing && !session.isSpectator" @click="startTimer" class="timerButton">开始</button>
       <button v-if="timing && !session.isSpectator" @click="stopTimer" class="timerButton">停止</button>
       <span style="font-size: 20px;" @click="setTimer">
@@ -298,18 +298,19 @@ export default {
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
       );
+      if (!Number(numPlayers)) return;
+      if (numPlayers < 0) return;
       if (sessionId) {
         this.$store.commit("session/clearVoteHistory");
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", sessionId);
         this.copySessionUrl();
       };
-      if (numPlayers > 0){
-        this.$store.commit("players/clear");
-        for(let i=0; i < numPlayers; i++){
-          this.addPlayer();
-        }
-      };
+      numPlayers = Math.min(numPlayers, 20);
+      this.$store.commit("players/clear");
+      for(let i=0; i < numPlayers; i++){
+        this.addPlayer();
+      }
     },
     copySessionUrl() {
       const url = window.location.href.split("#")[0];
@@ -386,7 +387,12 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
-        // this.$store.commit("session/setPlayerName", "空座位");
+        
+        // clear seats and return to intro
+        if (this.session.nomination) {
+          this.$store.commit("session/nomination");
+        }
+        this.$store.commit("players/clear");
       }
     },
     addPlayer() {
@@ -424,13 +430,19 @@ export default {
       }
     },
     setTimer() {
-      this.$store.commit("session/setTimer");
+      if (this.session.isSpectator || !this.session.sessionId) return;
+      const time = prompt("输入时间（分）");
+      const timeNum = Number(time);
+      if (!timeNum) return;
+      if (timeNum <= 0) return;
+      this.timing = true;
       this.stopTimer();
-      this.startTimer();
+      this.startTimer(timeNum * 60);
     },
-    startTimer() {
+    startTimer(time = null) {
       if (this.session.isSpectator) return;
-      this.$store.commit("session/startTimer");
+      if (typeof time != 'number') time = this.session.timer;
+      this.$store.commit("session/startTimer", time);
       this.timing = true;
     },
     stopTimer() {
