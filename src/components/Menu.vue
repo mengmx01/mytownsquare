@@ -97,6 +97,17 @@
             背景图
             <em><font-awesome-icon icon="image"/></em>
           </li>
+          <input
+            v-show="false"
+            type="file"
+            ref="upload"
+            accept="image/*"
+            @change="handleImageUpload"
+          />
+          <li @click="openImageUpload">
+            上传头像
+            <em><font-awesome-icon icon="user"/></em>
+          </li>
           <li v-if="!edition.isOfficial" @click="imageOptIn">
             <small>允许自定义图标</small>
             <em
@@ -291,6 +302,19 @@ export default {
       if (background || background === "") {
         this.$store.commit("setBackground", background);
       }
+    },
+    openImageUpload() {
+      this.$refs.upload.click();
+    },
+    handleImageUpload() {
+      const image = this.$refs.upload.files[0];
+      if (!image) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.$store.commit("session/setPlayerProfileImage", e.target.result);
+      }
+      reader.readAsDataURL(image);
     },
     hostSession() {
       if (this.session.sessionId) return;

@@ -1,6 +1,7 @@
 const NEWPLAYER = {
   name: "",
   id: "",
+  image: "",
   role: {},
   reminders: [],
   isVoteless: false,
@@ -8,8 +9,6 @@ const NEWPLAYER = {
   pronouns: "",
   newMessages: 0
 };
-
-// const deus_ex_fiasco = {"id":"deus_ex_fiasco","name":"失败的上帝","ability":"整局游戏限一次，说书人会犯一个错误，说书人可以纠正错误并公开承认它。","firstNight":0,"firstNightReminder":"","otherNight":0,"otherNightReminder":"","reminders":[],"remindersGlobal":[],"setup":0,"team":"fabled","isOfficial":true,"flavor":"","imageAlt":"fabled"};
 
 const state = () => ({
   players: [],
@@ -70,10 +69,6 @@ const actions = {
       .map(a => [Math.random(), a])
       .sort((a, b) => a[0] - b[0])
       .map(a => a[1]);
-    // players.forEach(player => {
-    //   player["id"] = (players.indexOf(player) + 1).toString();
-    //   player["name"] = player["id"].concat(". ", player["name"].split(". ")[1]);
-    // })
     commit("set", players);
   },
   clearRoles({ state, commit, rootState }) {
@@ -206,6 +201,9 @@ const mutations = {
       state.players[playerIndex].newMessages = num;
     }
     
+  },
+  setImage(state, image) { //image is an url
+    state.image = image;
   }
 };
 

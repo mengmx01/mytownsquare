@@ -6,7 +6,7 @@ class LiveSession {
     this._isSpectator = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 3600 * 1000; // 30 seconds between pings
+    this._pingInterval = 3600 * 1000; // 30 seconds between pings //set to 1hr now to prevent kicking players
     this._pingTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
@@ -278,6 +278,7 @@ class LiveSession {
     this._gamestate = this._store.state.players.players.map(player => ({
       name: player.name,
       id: player.id,
+      image: player.image,
       isDead: player.isDead,
       isVoteless: player.isVoteless,
       pronouns: player.pronouns,
@@ -345,7 +346,7 @@ class LiveSession {
       const player = players[x];
       const { roleId } = state;
       // update relevant properties
-      ["name", "id", "isDead", "isVoteless", "pronouns"].forEach(property => {
+      ["name", "id", "image", "isDead", "isVoteless", "pronouns"].forEach(property => {
         const value = state[property];
         if (player[property] !== value) {
           this._store.commit("players/update", { player, property, value });
@@ -598,6 +599,16 @@ class LiveSession {
             property: "id",
             value: ""
           });
+          this._store.commit("players/update", {
+            player,
+            property: "name",
+            value: ""
+          });
+          this._store.commit("players/update", {
+            player,
+            property: "image",
+            value: ""
+          });
         }
       });
       // store new player data
@@ -650,7 +661,7 @@ class LiveSession {
     if (!this._isSpectator) return;
     const players = this._store.state.players.players;
     if (players.length > seat && (seat < 0 || !players[seat].id)) {
-      this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName]);
+      this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
     }
   }
 
@@ -660,7 +671,7 @@ class LiveSession {
    * @param value playerId to add / remove
    * @private
    */
-  _updateSeat([index, value, name]) {
+  _updateSeat([index, value, name, image]) {
     // index is the seat number, value is the playerId, name is the playerName
     if (this._isSpectator) return;
     // const property = "id";
@@ -673,13 +684,24 @@ class LiveSession {
         property: "id",
         value: ""
       });
+      this._store.commit("players/update", {
+        player: players[oldIndex],
+        property: "name",
+        value: ""
+      });
+      this._store.commit("players/update", {
+        player: players[oldIndex],
+        property: "image",
+        value: ""
+      });
     }
     // add playerId to new seat
     if (index >= 0) {
       const player = players[index];
       if (!player) return;
-      this._store.commit("players/update", { player, property:"name", value: name});
       this._store.commit("players/update", { player, property: "id", value });
+      this._store.commit("players/update", { player, property:"name", value: name});
+      this._store.commit("players/update", { player, property: "image", value: image });
     }
     // update player session list as if this was a ping
     this._handlePing([true, true, value, 0]);

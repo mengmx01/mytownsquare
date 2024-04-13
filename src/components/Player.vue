@@ -42,6 +42,7 @@
 
       <Token
         :role="player.role"
+        :image="player.image"
         @set-role="clickSetRole"
       />
 
@@ -350,7 +351,8 @@ export default {
     },
     emptyPlayer(){
       this.updatePlayer('id', '', true);
-      // this.updatePlayer('name', "空座位", true);
+      this.updatePlayer('name', '', true);
+      this.updatePlayer('image', '', true)
     },
     removePlayer() {
       this.isMenuOpen = false;

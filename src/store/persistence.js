@@ -83,6 +83,9 @@ module.exports = store => {
       })
     })
   }
+  if (localStorage.getItem("playerProfileImage")) {
+    store.commit("session/setPlayerProfileImage", localStorage.getItem("playerProfileImage"));
+  }
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
@@ -220,6 +223,8 @@ module.exports = store => {
           localStorage.removeItem("chatHistory");
         }
         break;
+      case "session/setPlayerProfileImage":
+        localStorage.setItem("playerProfileImage", JSON.stringify(payload))
     }
   });
   // localStorage.clear();

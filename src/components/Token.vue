@@ -1,6 +1,11 @@
 <template>
   <div class="token" @click="setRole" :class="[role.id]">
     <span
+      v-if="image"
+      class="profileImage"
+      :style="{backgroundImage: `url(${image})`, filter: role.id ? 'blur(5px)' : 'blur(0px)'}"
+    ></span>
+    <span
       class="icon"
       v-if="role.id"
       :style="{
@@ -55,6 +60,10 @@ export default {
     role: {
       type: Object,
       default: () => ({})
+    },
+    image: {
+      type: String,
+      default: ""
     }
   },
   computed: {
@@ -81,6 +90,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.profileImage {
+  border-radius: 50%;
+  width: 100%;
+  background-size: 100%;
+  text-align: center;
+  border: 3px solid black;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 250ms;
+}
+
 .token {
   border-radius: 50%;
   width: 100%;
