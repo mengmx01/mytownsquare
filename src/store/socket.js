@@ -846,15 +846,16 @@ class LiveSession {
     // set reminders
     payload.reminders.forEach(grimReminder => {
       if (!grimReminder[0].value.length) return
-      const value = this._store.state.players.players[grimReminder[0].index].reminders;
+      const player = this._store.state.players.players[grimReminder[0].index];
+      const value = player.reminders;
       grimReminder[0].value.forEach(reminder => {
-      // reactively updates reminders, if issues exist revert to: 
-        // this.$store.commit("players/update", {
-        //   player,
-        //   property: "reminders",
-        //   value
-        // });
         value.push(reminder);
+      // reactively updates reminders, if issues exist revert to: 
+        this._store.commit("players/update", {
+          player,
+          property: "reminders",
+          value
+        });
       })
     })
   }

@@ -146,6 +146,7 @@ module.exports = store => {
         }
         break;
       case "players/setBluff":
+      case "players/updateBluff":
         localStorage.setItem(
           "bluffs",
           JSON.stringify(state.players.bluffs.map(({ id }) => id))
