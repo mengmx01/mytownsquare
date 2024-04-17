@@ -143,6 +143,9 @@ class LiveSession {
       case "bluff":
         this._updateBluff(params);
         break;
+      case "grimoire":
+        this._updateGrimoire(params);
+        break;
       case "claim":
         this._updateSeat(params);
         this._createChatHistory(params);
@@ -526,18 +529,6 @@ class LiveSession {
   }
 
   /**
-   * Update demon bluffs based on incoming data. Demon/Luantic only.
-   * @param index
-   * @param property
-   * @param value
-   * @private
-   */
-  _updateBluff(bluffs) {
-    if (!this._isSpectator) return;
-    this._store.commit("players/updateBluff", bluffs);
-  }
-
-  /**
    * Publish a player pronouns update
    * @param player
    * @param value
@@ -744,14 +735,40 @@ class LiveSession {
   }
 
   /**
-   * Distribute demon bluffs to demon players.
+   * Distribute bluffs to demon, lunatic, minion players.
    * This will be split server side so that each player only receives their own (sub)message.
+   * @param param is the role/team to be sent to
    */
-  distributeBluffs() {
+  distributeBluffs({param}) {
     if (this._isSpectator) return;
+    if (!param) return;
+
+    var team = "";
+    switch (param) {
+      case "demon":
+      case "lunatic":
+      case "demonAll":
+        team = "demon";
+        break;
+      case "snitch":
+      case "widow":
+      case "spy":
+        team = "minion";
+    }
+
     const message = {};
     this._store.state.players.players.forEach(player => {
-      if (player.id && player.role && player.role.team == "demon") {
+      if (player.id && player.role && player.role.team == team) {
+        if (team === "demon"){
+          var lunatic = false;
+          player.reminders.forEach(reminder => {
+            if (reminder.role === "lunatic") {
+              lunatic = true;
+              return;
+            }
+          })
+          if ((param === "lunatic" && !lunatic) || (param === "demon" && lunatic)) return;
+        }else if ((param === "widow" || param === "spy") && player.role.id != param) return; 
         message[player.id] = [
           "bluff",
           this._store.state.players.bluffs
@@ -761,6 +778,85 @@ class LiveSession {
     if (Object.keys(message).length) {
       this._send("direct", message);
     }
+  }
+
+  /**
+   * Update demon bluffs based on incoming data. Demon/Luantic only.
+   * @param bluffs
+   */
+  _updateBluff(bluffs) {
+    if (!this._isSpectator) return;
+    this._store.commit("players/updateBluff", bluffs);
+  }
+
+  /**
+   * Distribute to widow and spy in a direct message.
+   * This will be split server side so that each player only receives their own (sub)message.
+   * @param param is the role/team to be sent to
+   */
+  distributeGrimoire({param}) {
+    if (this._isSpectator) return;
+    if (!param) return;
+    if (param != "widow" && param != "spy") return;
+
+    // send all roles and reminders
+    const message = {};
+    this._store.state.players.players.forEach((player) => {
+      if (player.id && player.role && player.role.id == param) {
+        message[player.id] = ["grimoire", {roles: [], reminders: []}];
+        this._store.state.players.players.forEach((player2, index) => {
+          message[player.id][1].roles.push([
+            { index, property: "role", value: player2.role.id }
+          ]);
+          message[player.id][1].reminders.push([
+            { index, property: "reminder", value: player2.reminders }
+          ]);
+        })
+      }
+    });
+    if (Object.keys(message).length) {
+      this._send("direct", message);
+    }
+
+    // send bluffs
+    this.distributeBluffs({param});
+  }
+
+  /**
+   * Update grimoire once received
+   * @param payload is the grimoire details.
+   */
+  _updateGrimoire(payload){
+    // set roles
+    payload.roles.forEach(grimRole => {
+      // load role, first from session, the global, then fail gracefully
+      const role =
+        this._store.state.roles.get(grimRole[0].value) ||
+        this._store.getters.rolesJSONbyId.get(grimRole[0].value) ||
+        {};
+      if (role.team === "traveler") return;
+      const player = this._store.state.players.players[grimRole[0].index];
+      this._store.commit("players/update", {
+        player,
+        property: "role",
+        value: role
+      });
+    })
+
+    // set reminders
+    payload.reminders.forEach(grimReminder => {
+      if (!grimReminder[0].value.length) return
+      const value = this._store.state.players.players[grimReminder[0].index].reminders;
+      grimReminder[0].value.forEach(reminder => {
+      // reactively updates reminders, if issues exist revert to: 
+        // this.$store.commit("players/update", {
+        //   player,
+        //   property: "reminders",
+        //   value
+        // });
+        value.push(reminder);
+      })
+    })
   }
 
   /**
@@ -1047,7 +1143,12 @@ export default store => {
         break;
       case "session/distributeBluffs":
         if (payload) {
-          session.distributeBluffs();
+          session.distributeBluffs(payload);
+        }
+        break;
+      case "session/distributeGrimoire":
+        if (payload) {
+          session.distributeGrimoire(payload);
         }
         break;
       case "session/nomination":

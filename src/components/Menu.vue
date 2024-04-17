@@ -166,6 +166,14 @@
               发送角色
               <em><font-awesome-icon icon="theater-masks"/></em>
             </li>
+            <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
+              发送伪装身份
+              <em><font-awesome-icon icon="demon"/></em>
+            </li>
+            <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
+              发送魔典
+              <em><font-awesome-icon icon="demon"/></em>
+            </li>
             <li
               v-if="session.voteHistory.length || !session.isSpectator"
               @click="toggleModal('voteHistory')"
@@ -263,8 +271,29 @@
         <input type="checkbox" v-model="isSendingBluff" class="bluffCheckbox"/>
       </span>
       <div>
-        <button @click="distributeRoles">确定</button>
-        <button @click="closeDistributeDialog">取消</button>
+        <button @click="distributeRoles(true)">确定</button>
+        <button @click="distributeRoles(false)">取消</button>
+      </div>
+    </div>
+    <div v-if="distributingBluffs" class="dialog">
+      <span>
+        <label>发送伪装身份给：</label>
+      </span>
+      <div>
+        <button @click="distributeBluffs('demon')">恶魔</button>
+        <button @click="distributeBluffs('lunatic')">疯子</button>
+        <button @click="distributeBluffs('snitch')">爪牙（告密者）</button>
+        <button @click="distributeBluffs('')">取消</button>
+      </div>
+    </div>
+    <div v-if="distributingGrimoire" class="dialog">
+      <span>
+        <label>发送魔典给：</label>
+      </span>
+      <div>
+        <button @click="distributeGrimoire('widow')">寡妇</button>
+        <button @click="distributeGrimoire('spy')">间谍</button>
+        <button @click="distributeGrimoire('')">取消</button>
       </div>
     </div>
   </div>
@@ -293,6 +322,8 @@ export default {
       tab: "grimoire",
       timing: false,
       distributing: false,
+      distributingBluffs: false,
+      distributingGrimoire: false,
       isSendingBluff: true
     };
   },
@@ -342,14 +373,15 @@ export default {
       navigator.clipboard.writeText(link);
     },
     distributeAsk() {
-      this.distributing = true;
+      this.distributingBluffs = false;
+      this.distributingGrimoire = false;
+      if (this.distributing) this.distributing = false;
+      else this.distributing = true;
     },
-    closeDistributeDialog() {
+    distributeRoles(confirm) {
       this.distributing = false;
-    },
-    distributeRoles() {
+      if (!confirm) return;
       if (this.session.isSpectator) return;
-      this.distributing = false;
       this.$store.commit("session/distributeRoles", true);
       setTimeout(
         (() => {
@@ -358,13 +390,85 @@ export default {
         2000
       );
       if (!this.isSendingBluff) return;
-      this.$store.commit("session/distributeBluffs", true);
+      this.$store.commit("session/distributeBluffs", {val: true, param: "demonAll"});
       setTimeout(
         (() => {
-          this.$store.commit("session/distributeBluffs", false);
+          this.$store.commit("session/distributeBluffs", {val:false});
         }).bind(this),
         2000
       );
+    },
+    distributeBluffsAsk() {
+      this.distributing = false;
+      this.distributingGrimoire = false;
+      if (this.distributingBluffs) this.distributingBluffs = false;
+      else this.distributingBluffs = true;
+    },
+    distributeBluffs(role = "") {
+      if (!role) {
+        this.distributingBluffs = false;
+        return;
+      }
+      
+      var roleText = "";
+      switch (role) {
+        case "demon":
+          roleText = "恶魔";
+          break;
+        case "lunatic":
+          roleText = "疯子";
+          break;
+        case "snitch":
+          roleText = "爪牙";
+          break;
+      }
+
+      if (confirm("确定要发送伪装身份给" + roleText + "？")) {
+        if (this.session.isSpectator) return;
+        this.$store.commit("session/distributeBluffs", {val: true, param: role});
+        setTimeout(
+          (() => {
+            this.$store.commit("session/distributeBluffs", {val:false});
+          }).bind(this),
+          2000
+        );
+        this.distributingBluffs = false;
+      }
+    },
+    distributeGrimoireAsk(){
+      this.distributing = false;
+      this.distributingBluffs = false;
+      if (this.distributingGrimoire) this.distributingGrimoire = false;
+      else this.distributingGrimoire = true;
+    },
+    distributeGrimoire(role = ""){
+
+      if (!role) {
+        this.distributingGrimoire = false;
+        return;
+      }
+      
+      var roleText = "";
+      switch (role) {
+        case "widow":
+          roleText = "寡妇";
+          break;
+        case "spy":
+          roleText = "间谍";
+          break;
+      }
+
+      if (confirm("确定要发送魔典给" + roleText + "？")) {
+        if (this.session.isSpectator) return;
+        this.$store.commit("session/distributeGrimoire", {val: true, param: role});
+        setTimeout(
+          (() => {
+            this.$store.commit("session/distributeGrimoire", {val:false});
+          }).bind(this),
+          2000
+        );
+        this.distributingGrimoire = false;
+      }
     },
     imageOptIn() {
       const popup =

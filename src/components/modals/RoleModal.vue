@@ -12,6 +12,7 @@
     <ul class="tokens" v-if="tab === 'editionRoles' || !otherTravelers.size">
       <li
         v-for="role in availableRoles"
+        v-show="(!role.id && !role.name) || ['townsfolk', 'outsider', 'minion', 'demon', 'traveler'].includes(role.team)"
         :class="[role.team]"
         :key="role.id"
         @click="setRole(role)"
@@ -118,7 +119,7 @@ export default {
 
 ul.tokens li {
   border-radius: 50%;
-  width: 100px;
+  width: 120px;
   margin: 1%;
   transition: transform 500ms ease;
 

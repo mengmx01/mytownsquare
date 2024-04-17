@@ -34,6 +34,7 @@ const state = () => ({
   isVoteHistoryAllowed: true,
   isRolesDistributed: false,
   isBluffsDistributed: false,
+  isGrimoireDistributed: false,
   chatHistory: [],
   newStMessage: [0],
   timer: 480,
@@ -62,7 +63,12 @@ const mutations = {
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
-  distributeBluffs: set("isBluffsDistributed"),
+  distributeBluffs(state, {val}){
+    state.isBluffsDistributed = val;
+  },
+  distributeGrimoire(state, {val}){
+    state.isGrimoireDistributed = val;
+  },
   setSessionId(state, sessionId) {
     state.sessionId = sessionId
       .toLocaleLowerCase()

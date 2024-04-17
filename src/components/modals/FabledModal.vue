@@ -25,7 +25,7 @@ export default {
       this.$store.state.fabled.forEach(role => {
         // don't show fabled that are already in play
         if (
-          !this.$store.state.players.fabled.some(fable => fable.id === role.id)
+          !this.$store.state.players.fabled.some(fable => fable.id === role.id) || role.id === "deusexfiasco" // 失败的上帝可以循环使用
         ) {
           fabled.push(role);
         }
@@ -50,7 +50,7 @@ export default {
 
 ul.tokens li {
   border-radius: 50%;
-  width: 100px;
+  width: 120px;
   margin: 0.5%;
   transition: transform 500ms ease;
 
