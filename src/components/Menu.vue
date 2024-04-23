@@ -108,6 +108,10 @@
             上传头像
             <em><font-awesome-icon icon="user"/></em>
           </li>
+          <li @click="changeName">
+            设置昵称
+            <em><font-awesome-icon icon="user-edit"/></em>
+          </li>
           <li v-if="!edition.isOfficial" @click="imageOptIn">
             <small>允许自定义图标</small>
             <em
@@ -347,6 +351,16 @@ export default {
       }
       reader.readAsDataURL(image);
     },
+    changeName() {
+      var name = prompt("输入玩家昵称").trim();
+      if (!name) return; //will not execute because .trim() incurs error first
+      while (name === "空座位"){
+        alert("昵称非法！");
+        name = prompt("输入玩家昵称").trim();
+        if (!name) return; //will not execute because .trim() incurs error first
+      }
+      this.$store.commit("session/setPlayerName", name);
+    },
     hostSession() {
       if (this.session.sessionId) return;
       const sessionId = Math.round(Math.random() * 10000).toString();
@@ -483,14 +497,8 @@ export default {
         "输入房间号/链接"
       );
       if (!sessionId) return;
-      var name = prompt("输入玩家昵称").trim();
-      if (!name) return; //will not execute because .trim() incurs error first
-      while (name === "空座位"){
-        alert("昵称非法！");
-        name = prompt("输入玩家昵称").trim();
-        if (!name) return; //will not execute because .trim() incurs error first
-      }
-      this.$store.commit("session/setPlayerName", name);
+      if (!this.session.playerName) this.changeName();
+      if (!this.session.playerName) return;
       if (sessionId.match(/^https?:\/\//i)) {
         sessionId = sessionId.split("#").pop();
       }

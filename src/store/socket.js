@@ -842,21 +842,21 @@ class LiveSession {
         value: role
       });
     })
-
+    
     // set reminders
     payload.reminders.forEach(grimReminder => {
       if (!grimReminder[0].value.length) return
       const player = this._store.state.players.players[grimReminder[0].index];
-      const value = player.reminders;
+      const value = Array.from(player.reminders);
       grimReminder[0].value.forEach(reminder => {
+        if (reminder.role === "custom") return;
         value.push(reminder);
-      // reactively updates reminders, if issues exist revert to: 
-        this._store.commit("players/update", {
-          player,
-          property: "reminders",
-          value
-        });
-      })
+      });
+      this._store.commit("players/update", {
+        player,
+        property: "reminders",
+        value
+      });
     })
   }
 
