@@ -72,13 +72,13 @@ export default {
       });
       // add fabled reminders
       this.$store.state.players.fabled.forEach(role => {
-        reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
+        if (role.reminders && role.reminders.length) reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
       });
 
       // add out of script traveler reminders
       this.$store.state.otherTravelers.forEach(role => {
         if (players.some(p => p.role.id === role.id)) {
-          reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
+          if (role.reminders && role.reminders.length) reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
         }
       });
 
