@@ -51,7 +51,7 @@
         @click="tab = 'editionRoles'"
         >
         <span v-if="playerIndex >= 0">剧本角色</span>
-        <span v-else>剩余角色</span>
+        <span v-else>不在场角色</span>
         </span
       >
       <span
