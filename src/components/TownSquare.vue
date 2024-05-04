@@ -103,7 +103,7 @@
       </div>
       <form class="chatbox" @submit.prevent="sendChat">
         <input type="text" id="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
-        <button type="submit" class="send">Send</button>
+        <button type="submit" class="send">发送</button>
       <div class="toBottom" v-if="false">
           移至底部
           <font-awesome-icon icon="arrow"/>
@@ -635,7 +635,7 @@ export default {
   position: absolute;
   right: 2%;
   top: 1%;
-  background: lightpink;
+  background: rgb(255, 51, 85);
   border-radius: 100%;
   width: 20px;
   height: 20px;

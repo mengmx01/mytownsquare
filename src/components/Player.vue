@@ -775,7 +775,7 @@ li.move:not(.from) .player .overlay svg.move {
   position: absolute;
   right: 2%;
   top: 1%;
-  background: lightpink;
+  background: rgb(255, 51, 85);
   border-radius: 100%;
   width: 20px;
   height: 20px;
