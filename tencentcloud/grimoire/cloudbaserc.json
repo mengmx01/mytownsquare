@@ -49,7 +49,7 @@
       "preDeploy": {
         "type": "execCommand",
         "commands": [
-          "sudo npm install --save @fortawesome/fontawesome-svg-core @fortawesome/free-brands-svg-icons @fortawesome/free-solid-svg-icons @fortawesome/vue-fontawesome vuex"
+          "npm install --save @fortawesome/fontawesome-svg-core @fortawesome/free-brands-svg-icons @fortawesome/free-solid-svg-icons @fortawesome/vue-fontawesome vuex"
         ]
       }
     }
