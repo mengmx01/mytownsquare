@@ -56,9 +56,10 @@
       <ul>
         <li
           v-for="(role, index) in fabled"
+          v-show="index === 0 || isFabledOpen"
           :key="index"
           @click="removeFabled(index)"
-          :style="isFabledOpen ? floatingZoom : ''"
+          :style="floatingZoom"
         >
         <div v-if="index === 0">
           <div class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="item > 0">{{ item }}</div>
