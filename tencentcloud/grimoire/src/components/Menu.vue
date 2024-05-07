@@ -374,7 +374,7 @@ export default {
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", sessionId);
         this.copySessionUrl();
-      };
+      }
       numPlayers = Math.min(numPlayers, 20);
       this.$store.commit("players/clear");
       for(let i=0; i < numPlayers; i++){
