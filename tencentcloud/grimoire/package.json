@@ -15,6 +15,7 @@
   "dependencies": {
     "@cloudbase/vue-provider": "^0.5.1",
     "core-js": "^3.6.4",
+    "i": "^0.3.7",
     "vue": "^2.6.11"
   },
   "devDependencies": {
