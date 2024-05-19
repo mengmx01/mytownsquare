@@ -1,5 +1,5 @@
 const fs = require("fs");
-const https = require("https");
+const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 
@@ -10,7 +10,7 @@ register.setDefaultLabels({
   app: "clocktower-online"
 });
 
-const PING_INTERVAL = 30000; // 30 seconds
+const PING_INTERVAL = 5000; // 5 seconds
 
 const options = {};
 
@@ -19,13 +19,13 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-const server = https.createServer(options);
+const server = http.createServer(options);
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
   verifyClient: info =>
     info.origin &&
     !!info.origin.match(
-      /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz)/i
+      /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site)/i
     )
 });
 
@@ -120,9 +120,14 @@ wss.on("connection", function connection(ws, req) {
     )
   ) {
     console.log(ws.channel, "duplicate host");
-    ws.close(1000, `The channel "${ws.channel}" already has a host`);
+    ws.send(JSON.stringify(["close"]));
+    ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
     metrics.connection_terminated_host.inc();
     return;
+  }
+  if (ws.playerId != "host" && !channels[ws.channel]) {
+    ws.send(JSON.stringify(["close"]));
+    ws.close(1000, `房间"${ws.channel}"不存在！`)
   }
   ws.isAlive = true;
   ws.pingStart = new Date().getTime();
@@ -172,13 +177,13 @@ wss.on("connection", function connection(ws, req) {
         break;
       case '"direct"':
         // handle "direct" messages differently
-        console.log(
-          new Date(),
-          wss.clients.size,
-          ws.channel,
-          ws.playerId,
-          data
-        );
+        // console.log(
+        //   new Date(),
+        //   wss.clients.size,
+        //   ws.channel,
+        //   ws.playerId,
+        //   data
+        // );
         try {
           const dataToPlayer = JSON.parse(data)[1];
           channels[ws.channel].forEach(function each(client) {
@@ -197,13 +202,13 @@ wss.on("connection", function connection(ws, req) {
         break;
       default:
         // all other messages
-        console.log(
-          new Date(),
-          wss.clients.size,
-          ws.channel,
-          ws.playerId,
-          data
-        );
+        // console.log(
+        //   new Date(),
+        //   wss.clients.size,
+        //   ws.channel,
+        //   ws.playerId,
+        //   data
+        // );
         channels[ws.channel].forEach(function each(client) {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             client.send(data);
@@ -243,7 +248,6 @@ const interval = setInterval(function ping() {
     }
   }
 }, PING_INTERVAL);
-
 // handle server shutdown
 wss.on("close", function close() {
   clearInterval(interval);
@@ -251,7 +255,6 @@ wss.on("close", function close() {
 
 // prod mode with stats API
 if (process.env.NODE_ENV !== "development") {
-  console.log("server starting");
   server.listen(8080);
   server.on("request", (req, res) => {
     res.setHeader("Content-Type", register.contentType);
