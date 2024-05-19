@@ -1,6 +1,8 @@
 class LiveSession {
   constructor(store) {
-    this._wss = "wss://live.clocktower.online:8080/";
+    this._wss = "wss://43.139.3.156:8080/";
+    // this._wss = "wss://botcgrimoire.site:8080/";
+    // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;
     this._isSpectator = true;
@@ -125,6 +127,9 @@ class LiveSession {
       console.log("unsupported socket message", data);
     }
     switch (command) {
+      case "close":
+        this._clearSession();
+        break;
       case "getGamestate":
         this.sendGamestate(params);
         break;
@@ -311,6 +316,19 @@ class LiveSession {
         ...(session.nomination ? { votes: session.votes } : {})
       });
     }
+  }
+
+  /**
+   * Update the available channels (rooms) based on incoming data.
+   * @param data
+   * @private
+   */
+  _clearSession() {
+    this._store.commit("session/setSpectator", false);
+    this._store.commit("session/setSessionId", "");
+    
+    // clear seats and return to intro
+    this._store.commit("players/clear");
   }
 
   /**
