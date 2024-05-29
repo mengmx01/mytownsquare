@@ -26,13 +26,8 @@ const wss = new WebSocket.Server({
   verifyClient: info =>
     info.origin &&
     !!info.origin.match(
-<<<<<<< HEAD
     //  /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
       /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
-=======
-      // /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site)/i
-      /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site)/i
->>>>>>> 6c5029c1bc7a52d603c800f126734604516a457a
     )
 });
 
@@ -262,17 +257,9 @@ wss.on("close", function close() {
 
 // prod mode with stats API
 if (process.env.NODE_ENV !== "development") {
-<<<<<<< HEAD
-  server.listen(8081, ()=>{
-    console.log('running on port 8081');
-  });
-  server.on("request", (req, res) => {
-    //res.setHeader("Content-Type", register.contentType);
-=======
   server.listen(8081);
   server.on("request", (req, res) => {
-    // res.setHeader("Content-Type", register.contentType);
->>>>>>> 6c5029c1bc7a52d603c800f126734604516a457a
+    res.setHeader("Content-Type", register.contentType);
     register.metrics().then(out => res.end(out));
   });
 }
