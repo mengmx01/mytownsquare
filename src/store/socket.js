@@ -670,7 +670,8 @@ class LiveSession {
     if (!this._isSpectator) return;
     const players = this._store.state.players.players;
     if (players.length > seat && (seat < 0 || !players[seat].id)) {
-      this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
+      // this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
+      this._sendDirect("host", "claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
     }
   }
 
@@ -685,6 +686,7 @@ class LiveSession {
     if (this._isSpectator) return;
     // const property = "id";
     const players = this._store.state.players.players;
+    if (index >= 0 && players[index].id) return;
     // remove previous seat
     const oldIndex = players.findIndex(({ id }) => id === value);
     if (oldIndex >= 0 && oldIndex !== index) {
