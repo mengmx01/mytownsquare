@@ -220,7 +220,8 @@ export default {
       if (this.session.isSpectator || this.session.lockedVote) return;
       if (
         confirm(
-          `Do you really want to remove ${this.players[playerIndex].name}?`
+          //`确定要移除玩家 ${this.players[playerIndex].name}？`
+          `确定要移除该座位吗？`
         )
       ) {
         const { nomination } = this.session;
