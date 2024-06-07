@@ -265,7 +265,6 @@ wss.on("connection", function connection(ws, req) {
                     console.error('Failed to save image:', err);
                   }
                 });
-                fs.writeFileSync((playerId + ".png"), profileImageData, "base64");
                 break;
             }
           } catch (e) {
