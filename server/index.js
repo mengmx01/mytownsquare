@@ -3,6 +3,7 @@ const fs = require("fs");
 const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
+const path = require("path");
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -20,7 +21,25 @@ if (process.env.NODE_ENV !== "development") {
 }
 
 // const server = https.createServer(options);
-const server = http.createServer(options);
+// const server = http.createServer(options);
+
+const server = http.createServer(options, (req, res) => {
+  if (req.method === 'GET' && req.url === '/image.jpg') {
+    fs.readFile('image.jpg', (err, data) => {
+      if (err) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Image not found');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+        res.end(data);
+      }
+    });
+  } else {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+  }
+});
+
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
   verifyClient: info =>
@@ -201,6 +220,34 @@ wss.on("connection", function connection(ws, req) {
         } catch (e) {
           console.log("error parsing direct message JSON", e);
         }
+        break;
+      case '"uploadfile"':
+          try {
+            const uploadData = JSON.parse(data)[1];
+            const uploadType = Object.keys(uploadData)[0];
+            const playerId = Object.values(uploadData)[0][0];
+            const uploadContent = Object.values(uploadData)[0][1];
+            
+            switch(uploadType) {
+              case "uploadProfileImage":
+                const profileImageData = uploadContent.split(";base64,").pop();
+                const folderPath = path.join(__dirname, "profile_image");
+                if (!fs.existsSync(folderPath)){
+                    fs.mkdirSync(folderPath);
+                }
+                const filePath = path.join(folderPath, (playerId + ".png"));
+                fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
+                  if (err) {
+                    console.error('Failed to save image:', err);
+                  }
+                });
+                fs.writeFileSync((playerId + ".png"), profileImageData, "base64");
+                break;
+            }
+          } catch (e) {
+            console.log("error receiving uploaded file!", e);
+          }
+        // })
         break;
       default:
         // all other messages
