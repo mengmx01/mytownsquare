@@ -49,7 +49,7 @@ const server = http.createServer((req, res) => {
                   if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
                   else if (ext === '.png') contentType = 'image/png';
                   else if (ext === '.gif') contentType = 'image/gif';
-
+                  console.log("no error");
                   res.writeHead(200, { 'Content-Type': contentType });
                   res.end(data);
               }
