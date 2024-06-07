@@ -23,20 +23,44 @@ if (process.env.NODE_ENV !== "development") {
 // const server = https.createServer(options);
 // const server = http.createServer(options);
 
-const server = http.createServer(options, (req, res) => {
-  if (req.method === 'GET' && req.url === '/image.jpg') {
-    fs.readFile('image.jpg', (err, data) => {
-      if (err) {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Image not found');
+const server = http.createServer((req, res) => {
+  // Parse the request URL
+  const parsedUrl = url.parse(req.url);
+  console.log(parsedUrl);
+  const pathname = decodeURIComponent(parsedUrl.pathname);
+  console.log(pathname);
+
+  // Check if the request is for the images directory
+  if (pathname.startsWith('/profile_images/')) {
+      // Construct the full path to the requested image file
+      const imagePath = path.join(__dirname, pathname);
+
+      // Check if the file exists and is within the images directory
+      if (imagePath.startsWith(imagesDirectory) && fs.existsSync(imagePath)) {
+          // Read and serve the image file
+          fs.readFile(imagePath, (err, data) => {
+              if (err) {
+                  res.writeHead(500, { 'Content-Type': 'text/plain' });
+                  res.end('Internal Server Error');
+              } else {
+                  // Set the correct content type based on the file extension
+                  const ext = path.extname(imagePath).toLowerCase();
+                  let contentType = 'application/octet-stream';
+                  if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+                  else if (ext === '.png') contentType = 'image/png';
+                  else if (ext === '.gif') contentType = 'image/gif';
+
+                  res.writeHead(200, { 'Content-Type': contentType });
+                  res.end(data);
+              }
+          });
       } else {
-        res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-        res.end(data);
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Not Found');
       }
-    });
   } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
   }
 });
 
@@ -231,7 +255,7 @@ wss.on("connection", function connection(ws, req) {
             switch(uploadType) {
               case "uploadProfileImage":
                 const profileImageData = uploadContent.split(";base64,").pop();
-                const folderPath = path.join(__dirname, "profile_image");
+                const folderPath = path.join(__dirname, "profile_images");
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
