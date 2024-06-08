@@ -263,6 +263,16 @@ wss.on("connection", function connection(ws, req) {
                 fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
                   if (err) {
                     console.error('Failed to save image:', err);
+                  } else {
+                    channels[ws.channel].forEach(function each(client) {
+                      if (
+                        client === ws &&
+                        client.readyState === WebSocket.OPEN
+                      ) {
+                        client.send(JSON.stringify(["profileImageReceived", playerId]));
+                        metrics.messages_outgoing.inc();
+                      }
+                    });
                   }
                 });
                 break;
