@@ -4,6 +4,8 @@ const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
+const url = require("url");
+const express = require("express");
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -21,48 +23,7 @@ if (process.env.NODE_ENV !== "development") {
 }
 
 // const server = https.createServer(options);
-// const server = http.createServer(options);
-
-const server = http.createServer((req, res) => {
-  // Parse the request URL
-  const parsedUrl = url.parse(req.url);
-  console.log(parsedUrl);
-  const pathname = decodeURIComponent(parsedUrl.pathname);
-  console.log(pathname);
-
-  // Check if the request is for the images directory
-  if (pathname.startsWith('/profile_images/')) {
-      // Construct the full path to the requested image file
-      const imagePath = path.join(__dirname, pathname);
-
-      // Check if the file exists and is within the images directory
-      if (imagePath.startsWith(imagesDirectory) && fs.existsSync(imagePath)) {
-          // Read and serve the image file
-          fs.readFile(imagePath, (err, data) => {
-              if (err) {
-                  res.writeHead(500, { 'Content-Type': 'text/plain' });
-                  res.end('Internal Server Error');
-              } else {
-                  // Set the correct content type based on the file extension
-                  const ext = path.extname(imagePath).toLowerCase();
-                  let contentType = 'application/octet-stream';
-                  if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
-                  else if (ext === '.png') contentType = 'image/png';
-                  else if (ext === '.gif') contentType = 'image/gif';
-                  console.log("no error");
-                  res.writeHead(200, { 'Content-Type': contentType });
-                  res.end(data);
-              }
-          });
-      } else {
-          res.writeHead(404, { 'Content-Type': 'text/plain' });
-          res.end('Not Found');
-      }
-  } else {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not Found');
-  }
-});
+const server = http.createServer(options);
 
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
@@ -254,12 +215,14 @@ wss.on("connection", function connection(ws, req) {
             
             switch(uploadType) {
               case "uploadProfileImage":
+                const extension = uploadContent.split(";base64,")[0].split("/").pop();
                 const profileImageData = uploadContent.split(";base64,").pop();
                 const folderPath = path.join(__dirname, "profile_images");
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
-                const filePath = path.join(folderPath, (playerId + ".png"));
+                const fileName = playerId + "." + extension;
+                const filePath = path.join(folderPath, fileName);
                 fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
                   if (err) {
                     console.error('Failed to save image:', err);
@@ -269,7 +232,7 @@ wss.on("connection", function connection(ws, req) {
                         client === ws &&
                         client.readyState === WebSocket.OPEN
                       ) {
-                        client.send(JSON.stringify(["profileImageReceived", playerId]));
+                        client.send(JSON.stringify(["profileImageReceived", fileName]));
                         metrics.messages_outgoing.inc();
                       }
                     });
@@ -337,11 +300,28 @@ wss.on("close", function close() {
 
 // prod mode with stats API
 if (process.env.NODE_ENV !== "development") {
-  server.listen(8081);
+  server.listen(8081, () => {
+    console.log("Socket is running on port 8081");
+  });
   server.on("request", (req, res) => {
     res.setHeader("Content-Type", register.contentType);
     register.metrics().then(out => res.end(out));
   });
 }
+
+const app = express();
+
+app.use("/profile_images", function(req, res) {
+  const filePath = path.join(__dirname, "profile_images", req.url);
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      res.status(500).send("Internal Server Error");
+    }
+  });
+});
+
+app.listen(3000, () => {
+    console.log('Express is running on port 3000');
+});
 
 console.log("server started");
