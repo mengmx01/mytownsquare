@@ -149,8 +149,11 @@ const mutations = {
       Vue.set(state.newStMessage, 0, newNum);
     }
   },
-  setPlayerProfileImage(state, image){
-    state.playerProfileImage = image;
+  setPlayerProfileImage(state){
+    state.playerProfileImage = "";
+  },
+  updatePlayerProfileImage(state, link){
+    state.playerProfileImage = link;
   },
   startTimer(state, time){
     if (time) state.timer = time;

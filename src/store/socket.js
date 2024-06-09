@@ -79,6 +79,20 @@ class LiveSession {
       this._send(command, params);
     }
   }
+  
+  /**
+   * Upload a file to the server (stored).
+   * Currently only supports images for profile pictures
+   * @param playerId player ID or "host"
+   * @param command
+   * @param params
+   * @private
+   */
+  _uploadFile(command, playerId, params) {
+    if (playerId) {
+      this._send("uploadFile", { [command]: [playerId, params] });
+    }
+  }
 
   /**
    * Open event handler for socket.
@@ -229,6 +243,9 @@ class LiveSession {
         break;
       case "stopTimer":
         this._handleStopTimer(params);
+        break;
+      case "profileImageReceived":
+        this._profileImageReceived(params);
         break;
       case "organgrinder":
         this._handleOrganGrinder(params);
@@ -579,6 +596,27 @@ class LiveSession {
       value,
       isFromSockets: true
     });
+  }
+
+  /**
+   * Upload profile image to the server and create a link.
+   * @param image
+   */
+  uploadProfileImage(image) {
+    this._uploadFile("uploadProfileImage", this._store.state.session.playerId, image);
+  }
+  
+  /**
+   * Confirmation on receiving the uploaded image.
+   * @param image
+   */
+  _profileImageReceived(link) {
+    const playerId = this._store.state.session.playerId;
+    const linkId = link.split(".")[0];
+    if (playerId != linkId) return;
+
+    this._store.commit("session/updatePlayerProfileImage", link);
+    alert("上传成功！");
   }
 
   /**
@@ -1238,6 +1276,9 @@ export default store => {
         break;
       case "session/stopTimer":
         session.stopTimer(payload);
+        break;
+      case "session/setPlayerProfileImage":
+        session.uploadProfileImage(payload);
         break;
       case "toggleOrganGrinderInPlay":
         session.toggleOrganGrinderInPlay(payload);

@@ -344,6 +344,11 @@ export default {
     handleImageUpload() {
       const image = this.$refs.upload.files[0];
       if (!image) return;
+      if (image.type.split("/")[0] != "image") {
+        this.$refs.upload.files[0] = undefined;
+        alert("不是有效的图片文件！")
+        return;
+      }
 
       const reader = new FileReader();
       reader.onload = (e) => {

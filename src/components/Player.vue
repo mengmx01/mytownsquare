@@ -20,11 +20,16 @@
 
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
-      <div
-        v-if="player.image"
+      <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
+        v-show="player.id && player.image"
         class="profileImage"
-        :style="{backgroundImage: `url(${player.image})`, filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
-      ></div>
+        :style="{filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
+      > -->
+      <img :src="`http://43.139.3.156/profile_images/${player.image}`" 
+        v-show="player.id && player.image"
+        class="profileImage"
+        :style="{filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
+      >
 
       <div
         class="night-order first"
