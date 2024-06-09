@@ -217,7 +217,8 @@ wss.on("connection", function connection(ws, req) {
               case "uploadProfileImage":
                 const extension = uploadContent.split(";base64,")[0].split("/").pop();
                 const profileImageData = uploadContent.split(";base64,").pop();
-                const folderPath = path.join(__dirname, "profile_images");
+                // const folderPath = path.join(__dirname, "profile_images");
+                const folderPath = "/usr/share/nginx/html/dist/profile_images";
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
