@@ -1,5 +1,5 @@
 <template>
-  <Modal class="editions" v-if="modals.edition" @close="toggleModal('edition')">
+  <Modal class="editions" v-if="modals.edition" @close="closeEdition()">
     <div v-if="!isCustom">
       <h3>选择剧本</h3>
       <ul class="editions">
@@ -125,6 +125,10 @@ export default {
   },
   computed: mapState(["modals"]),
   methods: {
+    closeEdition(){
+      this.toggleModal('edition');
+      this.isCustom = false;
+    },
     openUpload() {
       this.$refs.upload.click();
     },
