@@ -177,6 +177,17 @@
     "ability": "由说书人来为一名或更多玩家派发角色。"
   },
   {
+    "id": "qilin",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": [],
+    "setup": false,
+    "name": "麒麟",
+    "team": "fabled",
+    "ability": "在游戏的最后一天，最幸运的玩家身上会发生一些好的事情。"
+  },
+  {
     "id": "deusexfiasco",
     "firstNight": 0,
     "firstNightReminder": "",
