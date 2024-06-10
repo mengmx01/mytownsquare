@@ -4,8 +4,6 @@ const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
-const url = require("url");
-const express = require("express");
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -305,24 +303,10 @@ if (process.env.NODE_ENV !== "development") {
     console.log("Socket is running on port 8081");
   });
   server.on("request", (req, res) => {
-    res.setHeader("Content-Type", register.contentType);
+    // res.setHeader("Content-Type", register.contentType);
+    res.setHeader("Nothing.");
     register.metrics().then(out => res.end(out));
   });
 }
-
-const app = express();
-
-app.use("/profile_images", function(req, res) {
-  const filePath = path.join(__dirname, "profile_images", req.url);
-  res.sendFile(filePath, (err) => {
-    if (err) {
-      res.status(500).send("Internal Server Error");
-    }
-  });
-});
-
-app.listen(3000, () => {
-    console.log('Express is running on port 3000');
-});
 
 console.log("server started");
