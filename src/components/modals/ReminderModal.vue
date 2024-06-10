@@ -60,7 +60,7 @@ export default {
         }
         // add reminders from bluff/other roles
         else if (bluffs.some(bluff => bluff.id === role.id)) {
-          reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
+          if (role.reminders && role.reminders.length) reminders = [...reminders, ...role.reminders.map(mapReminder(role))];
         }
         // add global reminders
         if (role.remindersGlobal && role.remindersGlobal.length) {
