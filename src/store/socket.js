@@ -141,9 +141,6 @@ class LiveSession {
       console.log("unsupported socket message", data);
     }
     switch (command) {
-      case "close":
-        this._clearSession();
-        break;
       case "getGamestate":
         this.sendGamestate(params);
         break;
@@ -333,19 +330,6 @@ class LiveSession {
         ...(session.nomination ? { votes: session.votes } : {})
       });
     }
-  }
-
-  /**
-   * Update the available channels (rooms) based on incoming data.
-   * @param data
-   * @private
-   */
-  _clearSession() {
-    this._store.commit("session/setSpectator", false);
-    this._store.commit("session/setSessionId", "");
-    
-    // clear seats and return to intro
-    this._store.commit("players/clear");
   }
 
   /**

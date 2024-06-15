@@ -124,13 +124,11 @@ wss.on("connection", function connection(ws, req) {
     )
   ) {
     console.log(ws.channel, "duplicate host");
-    ws.send(JSON.stringify(["close"]));
     ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
     metrics.connection_terminated_host.inc();
     return;
   }
   if (ws.playerId != "host" && !channels[ws.channel]) {
-    ws.send(JSON.stringify(["close"]));
     ws.close(1000, `房间"${ws.channel}"不存在！`)
   }
   ws.isAlive = true;
@@ -303,8 +301,7 @@ if (process.env.NODE_ENV !== "development") {
     console.log("Socket is running on port 8081");
   });
   server.on("request", (req, res) => {
-    // res.setHeader("Content-Type", register.contentType);
-    res.setHeader("Content-Type", "Nothing.");
+    res.setHeader("Content-Type", register.contentType);
     register.metrics().then(out => res.end(out));
   });
 }
