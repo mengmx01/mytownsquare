@@ -256,16 +256,16 @@ export default new Vuex.Store({
           .filter(r => r.team === "traveler" && !roles.some(i => i.id === r.id))
           .map(role => [role.id, role])
       );
-      // check if orphan grinder is in play
+      // check if organ grinder is in the script
       var isOrganGrinder = false;
       state.roles.forEach(role => {
-        if (role.id == "organgrinder") {
+        console.log(role.name);
+        if (role.id === "organgrinder" || role.name === "街头风琴手") {
           isOrganGrinder = true;
           return;
         }
       });
-      state.grimoire.isOrganGrinder = isOrganGrinder;
-      if (!isOrganGrinder) this.commit("setOrganGrinderInPlay", false);
+      if (!isOrganGrinder) this.commit("setOrganGrinderInPlay", false)
     },
     setStates(state, states){
       state.states = states;
@@ -282,7 +282,7 @@ export default new Vuex.Store({
       // check if orphan grinder is in play
       var isOrganGrinder = false;
       state.roles.forEach(role => {
-        if (role.id == "organgrinder") {
+        if (role.id == "organgrinder" || role.name === "街头风琴手") {
           isOrganGrinder = true;
           return;
         }
