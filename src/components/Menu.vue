@@ -383,7 +383,7 @@ export default {
         for(let i=0; i < numPlayers; i++){
           this.addPlayer();
         }
-        this.copySessionUrl();
+        // this.copySessionUrl();
       };
     },
     copySessionUrl() {

@@ -72,8 +72,11 @@
       <span>
         房间号：
       </span>
-      <span>
+      <span v-if="$store.state.session.sessionId">
         {{ this.$store.state.session.sessionId }}
+      </span>
+      <span v-else>
+        未加入房间
       </span>
     </li>
   </ul>

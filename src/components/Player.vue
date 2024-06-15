@@ -28,6 +28,7 @@
       <img :src="`http://43.139.3.156/profile_images/${player.image}`" 
         v-show="player.id && player.image"
         class="profileImage"
+        loading="lazy"
         :style="{filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
       >
 
