@@ -1127,6 +1127,8 @@
   },
   {
     "id": "amnesiac",
+    "firstNightReminder": "在失忆者该行动时唤醒失忆者，在行动完之后让他重新入睡。",
+    "otherNightReminder": "在失忆者该行动时唤醒失忆者，在行动完之后让他重新入睡。",
     "reminders": ["？"],
     "remindersGlobal": null,
     "setup": false,
