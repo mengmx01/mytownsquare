@@ -6,8 +6,8 @@
     </div>
     <div class="overlay">
       <audio src="../assets/sounds/countdown.mp3" preload="auto"></audio>
-      <em class="blue">{{ nominator.name }}</em> 提名了
-      <em>{{ nominee.name }}</em
+      <em class="blue">{{ session.nomination[0] + ". " + nominator.name }}</em> 提名了
+      <em>{{ session.nomination[1] + ". " + nominee.name }}</em
       >！
       <br />
       <em class="blue">
