@@ -93,6 +93,7 @@
     <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
       <div class="title" @click="maximiseChat()">
         <span ref="chatWith" style="cursor: text; user-select: text; pointer-events: auto;"></span> 
+        <span class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="session.isSpectator && item > 0">{{ item }}</span>
         <span :class="{close: !isChatMin, open: isChatMin}" @click="toggleChat()">
           <font-awesome-icon icon="times" :class="{ turnedIcon45: isChatMin}"/>
         </span>
@@ -343,6 +344,7 @@ export default {
       }
     },
     maximiseChat(){
+      console.log(this);
       if(this.minimising){
         this.minimising = false;
         return;
@@ -718,7 +720,7 @@ export default {
       rgba(0, 0, 0, 0.5) 20%
     );
     &:before {
-      content: "First Night";
+      content: "首夜";
     }
     &:after {
       border-left-color: $townsfolk;
@@ -731,7 +733,7 @@ export default {
     left: 120%;
     background: linear-gradient(to right, $demon 0%, rgba(0, 0, 0, 0.5) 20%);
     &:before {
-      content: "Other Nights";
+      content: "其他夜";
     }
     &:after {
       right: 100%;
@@ -824,6 +826,18 @@ export default {
 .chatMin .chatbox {
     display: none;
 }
+// New message bubble
+.chatMin .newMessage {
+  position: absolute;
+  left: 40%;
+  top: 30%;
+  background: rgb(255, 51, 85);
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 80%;
+}
 
 .chat {
     position: absolute;
@@ -838,6 +852,18 @@ export default {
     z-index: 100;
     display: flex;
     flex-direction: column;
+}
+// New message bubble
+.chat .newMessage {
+  position: absolute;
+  left: 25%;
+  top: 30%;
+  background: rgb(255, 51, 85);
+  border-radius: 100%;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 80%;
 }
 
 // .chat.focus, .chat:hover {
