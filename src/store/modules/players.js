@@ -82,11 +82,12 @@ const actions = {
         return player;
       });
     } else {
-      players = state.players.map(({ name, id, pronouns }) => ({
+      players = state.players.map(({ name, id, pronouns, image }) => ({
         ...NEWPLAYER,
         name,
         id,
-        pronouns
+        pronouns,
+        image
       }));
       commit("setFabled", { fabled: [] });
     }
