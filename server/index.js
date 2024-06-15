@@ -304,7 +304,7 @@ if (process.env.NODE_ENV !== "development") {
   });
   server.on("request", (req, res) => {
     // res.setHeader("Content-Type", register.contentType);
-    res.setHeader("Nothing.");
+    res.setHeader("Content-Type", "Nothing.");
     register.metrics().then(out => res.end(out));
   });
 }
