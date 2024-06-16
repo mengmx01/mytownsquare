@@ -259,7 +259,6 @@ export default new Vuex.Store({
       // check if organ grinder is in the script
       var isOrganGrinder = false;
       state.roles.forEach(role => {
-        console.log(role.name);
         if (role.id === "organgrinder" || role.name === "街头风琴手") {
           isOrganGrinder = true;
           return;
