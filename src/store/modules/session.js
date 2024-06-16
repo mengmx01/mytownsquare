@@ -98,12 +98,10 @@ const mutations = {
     if (!state.isVoteHistoryAllowed && state.isSpectator) return;
     if (!state.nomination || state.lockedVote <= players.length) return;
     const isExile = players[state.nomination[1]].role.team === "traveler";
-    if (!players[0].seat) console.log(state.votes);
     const votedPlayers = Array.from(players).filter((player, index) => state.votes[index]);
     votedPlayers.forEach(player => {
       player.seat = players.indexOf(player) + 1;
     });
-    console.log(players);
     state.voteHistory.push({
       timestamp: new Date(),
       nominator: (state.nomination[0] + 1).toString() + ". " + players[state.nomination[0]].name,

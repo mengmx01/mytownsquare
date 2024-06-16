@@ -178,6 +178,11 @@
                 提名
               </li>
             </template>
+            <li v-if="!player.id || player.id === 'host'" @click="setStoryTeller(player)">
+              <font-awesome-icon icon="book-open" prefix="fa"/>
+              <span v-if="!player.id">设为</span>
+              <span v-else>移除</span>说书人
+            </li>
             <li @click="openChat(player)">
                 <font-awesome-icon icon="comments" prefix="fa"/>
               私聊
@@ -387,6 +392,10 @@ export default {
     claimSeat() {
       this.isMenuOpen = false;
       this.$emit("trigger", ["claimSeat"]);
+    },
+    setStoryTeller(player) {
+      this.isMenuOpen = false;
+      this.$emit("trigger", ["setStoryTeller", player]);
     },
     openChat(player){
       // direct message in grimoire
