@@ -16,6 +16,7 @@
         :class="[role.team]"
         :key="role.id"
         @click="setRole(role)"
+        :style="tokenWidth"
       >
         <Token :role="role" />
       </li>
@@ -27,6 +28,7 @@
         :class="[role.team]"
         :key="role.id"
         @click="setRole(role)"
+        :style="tokenWidth"
       >
         <Token :role="role" />
       </li>
@@ -37,6 +39,7 @@
         :class="[role.team]"
         :key="role.id"
         @click="setRole(role)"
+        :style="tokenWidth"
       >
         <Token :role="role" />
       </li>
@@ -100,16 +103,33 @@ export default {
       availableRoles.push({});
       return availableRoles;
     },
+    tokenWidth() {
+      const percentage = 0.06
+      const width = percentage * this.windowWidth;
+      return width >= 80 ? "width: 6vw" : "width: 80px";
+    },
     ...mapState(["modals", "roles", "session"]),
     ...mapState("players", ["players"]),
     ...mapState(["otherTravelers"])
   },
   data() {
     return {
-      tab: "editionRoles"
+      tab: "editionRoles",
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
     };
   },
+  mounted(){
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy(){
+    window.removeEventListener("resize", this.handleResize);
+  },
   methods: {
+    handleResize(){
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight;
+    },
     setRole(role) {
       if (this.playerIndex < 0) {
         // assign to bluff slot (index < 0)
@@ -144,7 +164,7 @@ export default {
 
 ul.tokens li {
   border-radius: 50%;
-  width: 120px;
+  // width: 120px;
   margin: 1%;
   transition: transform 500ms ease;
 

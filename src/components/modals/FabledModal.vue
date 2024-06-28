@@ -4,7 +4,8 @@
       选择一个传奇角色
     </h3>
     <ul class="tokens">
-      <li v-for="role in fabled" :key="role.id" @click="setFabled(role)">
+      <li v-for="role in fabled" :key="role.id" @click="setFabled(role)"
+        :style="tokenWidth">
         <Token :role="role" />
       </li>
     </ul>
@@ -31,7 +32,24 @@ export default {
         }
       });
       return fabled;
+    },
+    tokenWidth() {
+      const percentage = 0.06
+      const width = percentage * this.windowWidth;
+      return width >= 80 ? "width: 6vw" : "width: 80px";
+    },
+  },
+  data(){
+    return {
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
     }
+  },
+  mounted(){
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy(){
+    window.removeEventListener("resize", this.handleResize);
   },
   methods: {
     setFabled(role) {
@@ -39,6 +57,10 @@ export default {
         fabled: role
       });
       this.$store.commit("toggleModal", "fabled");
+    },
+    handleResize(){
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight;
     },
     ...mapMutations(["toggleModal"])
   }
@@ -50,7 +72,7 @@ export default {
 
 ul.tokens li {
   border-radius: 50%;
-  width: 120px;
+  // width: 120px;
   margin: 0.5%;
   transition: transform 500ms ease;
 

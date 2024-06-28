@@ -15,6 +15,7 @@
         :class="[role.team, role.selected ? 'selected' : '']"
         :key="role.id"
         @click="role.selected = role.selected ? 0 : 1"
+        :style="tokenWidth"
       >
         <Token :role="role" />
         <font-awesome-icon icon="exclamation-triangle" v-if="role.setup" />
@@ -75,7 +76,9 @@ export default {
     return {
       roleSelection: {},
       game: gameJSON,
-      allowMultiple: false
+      allowMultiple: false,
+      windowWidth: window.innerWidth,
+      windowHeight: window.innerHeight
     };
   },
   computed: {
@@ -89,11 +92,20 @@ export default {
         roles.some(role => role.selected && role.setup)
       );
     },
+    tokenWidth() {
+      const percentage = 0.06
+      const width = percentage * this.windowWidth;
+      return width >= 80 ? "width: 6vw" : "width: 80px";
+    },
     ...mapState(["roles", "modals"]),
     ...mapState("players", ["players"]),
     ...mapGetters({ nonTravelers: "players/nonTravelers" })
   },
   methods: {
+    handleResize(){
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight;
+    },
     selectRandomRoles() {
       this.roleSelection = {};
       this.roles.forEach(role => {
@@ -152,6 +164,10 @@ export default {
     if (!Object.keys(this.roleSelection).length) {
       this.selectRandomRoles();
     }
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy(){
+    window.removeEventListener("resize", this.handleResize);
   },
   watch: {
     roles() {
@@ -168,7 +184,7 @@ ul.tokens {
   padding-left: 5%;
   li {
     border-radius: 50%;
-    width: 120px;
+    // width: 120px;
     margin: 5px;
     opacity: 0.5;
     transition: all 250ms;
