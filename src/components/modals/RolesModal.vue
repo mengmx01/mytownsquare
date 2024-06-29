@@ -5,7 +5,7 @@
     @close="toggleModal('roles')"
   >
     <h3>为当前{{ nonTravelers }}名玩家选择角色</h3>
-    <ul class="tokens" v-for="(teamRoles, team) in roleSelection" :key="team">
+    <ul class="tokens" v-for="(teamRoles, team) in roleSelection" :key="team" >
       <li class="count" :class="[team]">
         {{ teamRoles.reduce((a, { selected }) => a + selected, 0) }} /
         {{ game[nonTravelers - 5][team] }}
@@ -115,7 +115,14 @@ export default {
         this.roleSelection[role.team].push(role);
         this.$set(role, "selected", 0);
       });
-      delete this.roleSelection["traveler"];
+      const teamSelected = ["townsfolk", "outsider", "minion", "demon"];
+      const teamDeselected = [];
+      Object.keys(this.roleSelection).forEach(team => {
+        if (!teamSelected.includes(team)) teamDeselected.push(team);
+      });
+      teamDeselected.forEach(team => {
+        delete this.roleSelection[team];
+      })
       const playerCount = Math.max(5, this.nonTravelers);
       const composition = this.game[playerCount - 5];
       Object.keys(composition).forEach(team => {
