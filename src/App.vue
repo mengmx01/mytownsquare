@@ -2,6 +2,7 @@
   <div
     id="app"
     @keyup="keyup"
+    @keydown="keydown"
     tabindex="-1"
     :class="{
       night: grimoire.isNight,
@@ -135,6 +136,20 @@ export default {
           break;
         case "escape":
           this.$store.commit("toggleModal");
+          break;
+        case "f2":
+          this.$refs.menu.stopListening(false);
+          break;
+      }
+    },
+    keydown({ key, ctrlKey, metaKey }) {
+      if (ctrlKey || metaKey) return;
+      switch (key.toLocaleLowerCase()) {
+        case "f2":
+          if (this.session.claimedSeat < 0) return;
+          if (this.session.isListening) return;
+          this.$refs.menu.startListening(false);
+          break;
       }
     },
     handleTrigger ([method]) {

@@ -7,7 +7,8 @@ const NEWPLAYER = {
   isVoteless: false,
   isDead: false,
   pronouns: "",
-  newMessages: 0
+  newMessages: 0,
+  isTalking: false
 };
 
 const state = () => ({

@@ -1,5 +1,19 @@
 <template>
   <div id="controls">
+    <span v-if="session.sessionId">
+      <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && session.isListening"
+      @click="stopListening()"
+      />
+      <font-awesome-icon icon="microphone-slash" v-if="microphoneSetting === 'free' && !session.isListening"
+      @click="startListening()"
+      />
+      <font-awesome-icon icon="keyboard" v-if="microphoneSetting === 'keyboard'" :style="keyboardIcon"/>
+      
+      <select id="microphone" v-model="microphoneSetting">
+        <option value="free">自由发言</option>
+        <option value="keyboard">按f2发言</option>
+      </select>
+    </span>
 
     <span v-if="session.sessionId">
       <button v-if="!timing && !session.isSpectator" @click="startTimer" class="timerButton">开始</button>
@@ -319,6 +333,11 @@ export default {
       return {
         color: this.session.timer < 60 ? 'red' : 'white'
       }
+    },
+    keyboardIcon() {
+      return {
+        color: this.session.isListening ? 'red' : 'white'
+      }
     }
   },
   data() {
@@ -328,7 +347,9 @@ export default {
       distributing: false,
       distributingBluffs: false,
       distributingGrimoire: false,
-      isSendingBluff: true
+      isSendingBluff: true,
+      recognition: null,
+      microphoneSetting: "free"
     };
   },
   methods: {
@@ -591,6 +612,20 @@ export default {
       this.$store.commit("session/stopTimer");
       this.timing = false;
     },
+    startListening(free = true) {
+      if (this.session.isListening) return;
+      if (this.microphoneSetting === "free" && !free) return;
+      if (this.microphoneSetting === "keyboard" && free) return;
+      this.$store.commit("session/setListening", true);
+      this.recognition.start();
+    },
+    stopListening(free = true) {
+      if (!this.session.isListening) return;
+      if (this.microphoneSetting === "free" && !free) return;
+      if (this.microphoneSetting === "keyboard" && free) return;
+      this.$store.commit("session/setListening", false);
+      this.recognition.stop();
+    },
     ...mapMutations([
       "toggleGrimoire",
       "toggleMenu",
@@ -602,6 +637,19 @@ export default {
       "setZoom",
       "toggleModal"
     ])
+  },
+  mounted() {
+    // 语音检测
+    this.recognition = new window.webkitSpeechRecognition;
+    this.recognition.continuous = false;
+    this.recognition.onend = () => {
+      this.$store.commit("session/stopTalking", this.session.playerId);
+      if (this.session.isListening) this.recognition.start();
+    }
+    this.recognition.onspeechstart = () => {
+      if (!this.session.isListening) return;
+      this.$store.commit("session/startTalking", this.session.playerId);
+    }
   }
 };
 </script>

@@ -38,7 +38,9 @@ const state = () => ({
   chatHistory: [],
   newStMessage: [0],
   timer: 480,
-  interval: null
+  interval: null,
+  isTalking: false,
+  isListening: false
 });
 
 const getters = {};
@@ -61,6 +63,8 @@ const mutations = {
   setMarkedPlayer: set("markedPlayer"),
   setNomination: set("nomination"),
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
+  setTalking: set("isTalking"),
+  setListening: set("isListening"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
   distributeBluffs(state, {val}){
@@ -169,6 +173,12 @@ const mutations = {
   },
   stopTimer(state){
     clearInterval(state.interval);
+  },
+  startTalking(playerId){
+    if (!playerId) return;
+  },
+  stopTalking(playerId){
+    if (!playerId) return;
   }
 };
 

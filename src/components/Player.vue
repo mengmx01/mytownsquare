@@ -8,9 +8,9 @@
           dead: player.isDead,
           marked: session.markedPlayer === index,
           'no-vote': player.isVoteless,
-          you: session.sessionId && player.id && player.id === session.playerId,
           'vote-yes': session.votes[index],
-          'vote-lock': voteLocked
+          'vote-lock': voteLocked,
+          talking: player.isTalking
         },
         player.role.team
       ]"
@@ -167,7 +167,7 @@
             </li>
             <li
               @click="emptyPlayer()"
-              v-if="player.id && session.sessionId"
+              v-if="player.id && player.id != 'host' && session.sessionId"
             >
               <font-awesome-icon icon="chair" />
               踢出游戏
@@ -184,7 +184,7 @@
               <span v-else>移除</span>说书人
             </li>
             <li @click="openChat(player)">
-                <font-awesome-icon icon="comments" prefix="fa"/>
+                <font-awesome-icon icon="comment" prefix="fa"/>
               私聊
             </li>
           </template>
@@ -400,7 +400,7 @@ export default {
     openChat(player){
       // direct message in grimoire
       this.isMenuOpen = false;
-      if (player.id == '') return;
+      if (!player.id) return;
       this.$emit("trigger", ["openChat"]);
     },
     /**
@@ -676,7 +676,7 @@ export default {
 }
 
 // you voted yes | a locked vote yes | a locked vote no
-#townsquare.vote .player.you.vote-yes .overlay svg.vote.fa-hand-paper,
+#townsquare.vote .player.talking.vote-yes .overlay svg.vote.fa-hand-paper,
 #townsquare.vote .player.vote-lock.vote-yes .overlay svg.vote.fa-hand-paper,
 #townsquare.vote .player.vote-lock:not(.vote-yes) .overlay svg.vote.fa-times {
   opacity: 1;
@@ -721,24 +721,17 @@ li.move:not(.from) .player .overlay svg.move {
   right: 2px;
 }
 
-/****** Session seat glow *****/
+/****** Session seat glow when talking *****/
 @mixin glow($name, $color) {
   @keyframes #{$name}-glow {
-    0% {
+    0%, 100% {
       box-shadow: 0 0 rgba($color, 1);
-      border-color: $color;
-    }
-    50% {
-      border-color: black;
-    }
-    100% {
-      box-shadow: 0 0 20px 16px transparent;
       border-color: $color;
     }
   }
 
-  .player.you.#{$name} .token {
-    animation: #{$name}-glow 5s ease-in-out infinite;
+  .player.talking.#{$name} .token {
+    animation: #{$name}-glow 0.5s infinite;
   }
 }
 
@@ -748,8 +741,8 @@ li.move:not(.from) .player .overlay svg.move {
 @include glow("minion", $minion);
 @include glow("traveler", $traveler);
 
-.player.you .token {
-  animation: townsfolk-glow 5s ease-in-out infinite;
+.player.talking .token {
+  animation: townsfolk-glow 0.5s infinite;
 }
 
 /****** Marked icon ******/
@@ -838,7 +831,7 @@ li.move:not(.from) .player .overlay svg.move {
   }
 }
 
-.player.you .seat {
+.player.talking .seat {
   color: $townsfolk;
 }
 

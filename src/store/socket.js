@@ -247,6 +247,12 @@ class LiveSession {
       case "organgrinder":
         this._handleOrganGrinder(params);
         break;
+      case "startedTalking":
+        this._handleStartTalking(params);
+        break;
+      case "stoppedTalking":
+        this._handleStopTalking(params);
+        break;
     }
   }
 
@@ -1010,6 +1016,61 @@ class LiveSession {
   }
 
   /**
+   * Set talking status to true to enable glowing animation
+   * Send this update to all clients in the channel
+   */
+  startTalking(payload){
+    var isSeated = false;
+    (this._store.state.players.players).forEach(player => {
+      if (player.id != payload) return;
+      if (!player.isTalking) {
+        player.isTalking = true;
+        isSeated = true;
+      }
+    })
+    if (!isSeated) return;
+    this._send("startedTalking", payload);
+  }
+
+  /**
+   * Set talking status to true to enable glowing animation when received
+   */
+  _handleStartTalking(payload){
+    (this._store.state.players.players).forEach(player => {
+      if (player.id != payload) return;
+      if (!player.isTalking) player.isTalking = true;
+    })
+  }
+
+  
+  /**
+   * Set talking status to false to disable glowing animation
+   * Send this update to all clients in the channel
+   */
+  stopTalking(payload){
+    var isSeated = false;
+    (this._store.state.players.players).forEach(player => {
+      if (player.id != payload) return;
+      if (player.isTalking) {
+        player.isTalking = false;
+        isSeated = true;
+      }
+    })
+    if (!isSeated) return;
+    this._send("stoppedTalking", payload);
+  }
+
+  /**
+   * Set talking status to false to disable glowing animation when received
+   */
+  _handleStopTalking(payload){
+    (this._store.state.players.players).forEach(player => {
+      if (player.id != payload) return;
+      if (player.isTalking) player.isTalking = false;
+    })
+  }
+
+  /**
    * Handle an incoming vote, but only if it is from ST or unlocked.
    * @param index
    * @param vote
@@ -1266,6 +1327,12 @@ export default store => {
         break;
       case "toggleOrganGrinderInPlay":
         session.toggleOrganGrinderInPlay(payload);
+        break;
+      case "session/startTalking":
+        session.startTalking(payload);
+        break;
+      case "session/stopTalking":
+        session.stopTalking(payload);
         break;
     }
   });
