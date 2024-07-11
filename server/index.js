@@ -1,5 +1,5 @@
-const fs = require("fs");
-// const https = require("https");
+// const fs = require("fs");
+const https = require("https");
 const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
@@ -20,16 +20,16 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-// const server = https.createServer(options);
-const server = http.createServer(options);
+const server = https.createServer(options);
+// const server = http.createServer(options);
 
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
   verifyClient: info =>
     info.origin &&
     !!info.origin.match(
-    //  /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
-      /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
+     /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
+      // /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|43\.139\.3\.156)/i
     )
 });
 
