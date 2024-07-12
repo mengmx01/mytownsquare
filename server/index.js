@@ -1,6 +1,6 @@
-// const fs = require("fs");
+const fs = require("fs");
 const https = require("https");
-const http = require("http");
+// const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
@@ -15,6 +15,7 @@ register.setDefaultLabels({
 const PING_INTERVAL = 30000; // 30 seconds
 
 const options = {};
+console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV !== "development") {
   options.cert = fs.readFileSync("cert.pem");
   options.key = fs.readFileSync("key.pem");
