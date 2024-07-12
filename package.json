@@ -4,7 +4,7 @@
   "description": "Blood on the Clocktower Town Square",
   "author": "Steffen Baumgart",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "vue-cli-service serve --https",
     "build": "vue-cli-service build ./src/main.js",
     "lint": "vue-cli-service lint",
     "lint-ci": "vue-cli-service lint --no-fix --max-warnings=0"
