@@ -1473,6 +1473,17 @@
     "otherNight": 76
   },
   {
+    "id": "alsaahir",
+    "reminders": null,
+    "remindersGlobal": null,
+    "setup": false,
+    "name": "戏法师",
+    "team": "townsfolk",
+    "ability": "每个白天限一次，你可以公开猜测谁是爪牙，谁是恶魔。如果你猜对，善良阵营获胜。",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
     "id": "snitch",
     "firstNightReminder": "在首个夜晚，唤醒一名爪牙。对他展示“这些角色不在场”信息标记，然后对他展示三个不在场的善良角色标记。让这名爪牙重新入睡。重复此流程，直到所有爪牙都得知了三个不在场角色。",
     "reminders": null,
@@ -1585,6 +1596,17 @@
     "team": "outsider",
     "ability": "在你的首个夜晚，你要选择除你以外的一名玩家：你转变为他的阵营，即使你已醉酒或中毒，但你不知道你转变后的阵营。",
     "firstNight": 70,
+    "otherNight": 0
+  },
+  {
+    "id": "zealot",
+    "reminders": null,
+    "remindersGlobal": null,
+    "setup": false,
+    "name": "狂热者",
+    "team": "outsider",
+    "ability": "如果有大于等于五名玩家存活，你必须在所有提名中投票。",
+    "firstNight": 0,
     "otherNight": 0
   },
   {
@@ -1829,6 +1851,19 @@
     "ability": "在你的首个夜晚，你会得知一段秘密短语。每次你在白天公开说出这段短语，当天便可能会有一名玩家在这之后死亡。",
     "firstNight": 42,
     "otherNight": 52
+  },
+  {
+    "id": "lordoftyphon",
+    "firstNightReminder": "将位于堤丰之首两侧的对应数量的玩家变成邪恶的爪牙，并分别唤醒他们通知他们的角色和阵营变化。",
+    "otherNightReminder": "唤醒堤丰之首，让他攻击一名玩家。",
+    "reminders": ["死亡"],
+    "remindersGlobal": null,
+    "setup": true,
+    "name": "堤丰之首",
+    "team": "demon",
+    "ability": "每个夜晚*，你要选择一名玩家：他死亡。[邪恶玩家全部邻座，你靠近正中，+1爪牙，-或+任意数量外来者]",
+    "firstNight": 5,
+    "otherNight": 46
   },
   {
     "id": "gangster",
