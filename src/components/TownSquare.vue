@@ -182,8 +182,11 @@ export default {
       this.isFabledOpen = !this.isFabledOpen;
     },
     removeFabled(index) {
-      if (this.session.isSpectator && index === 0) {
-        if (this.session.claimedSeat >= 0) this.openChat(0); //open chat box if user is a player
+      if (this.session.isSpectator) {
+        if (index === 0) {
+          if (this.session.claimedSeat >= 0) this.openChat(0); //open chat box if user is a player
+        }
+        
       }else{
         this.$store.commit("players/setFabled", { index });
       }
