@@ -29,11 +29,12 @@ const allowConnection = true;
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
   verifyClient: info => {
+    allowConnection ||
     (info.origin &&
     !!info.origin.match(
       /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
        // /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
-    )) || allowConnection
+    ))
   }
 });
 
@@ -303,7 +304,8 @@ wss.on("close", function close() {
 
 // prod mode with stats API
 if (process.env.NODE_ENV !== "development") {
-  server.listen(8081, () => {
+  // server.listen(8081, () => { //http port
+  server.listen(8443, () => { //https port
     console.log("Socket is running on port 8081");
   });
   server.on("request", (req, res) => {
