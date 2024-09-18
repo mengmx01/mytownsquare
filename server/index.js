@@ -24,14 +24,16 @@ if (process.env.NODE_ENV !== "development") {
 const server = https.createServer(options);
 // const server = http.createServer(options);
 
+const allowConnection = true;
+
 const wss = new WebSocket.Server({
   ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
   verifyClient: info =>
-    info.origin &&
+    (info.origin &&
     !!info.origin.match(
       /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
        // /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
-    )
+    )) || allowConnection
 });
 
 function noop() {}
