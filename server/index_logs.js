@@ -24,19 +24,23 @@ if (process.env.NODE_ENV !== "development") {
 const server = https.createServer(options);
 // const server = http.createServer(options);
 
-const allowConnection = true;
+const skipVerification = false;
 
-const wss = new WebSocket.Server({
-  ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
-  verifyClient: info => {
-    allowConnection ||
-    (info.origin &&
-    !!info.origin.match(
-      /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
-       // /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156)/i
-    ))
-  }
-});
+if (skipVerification) {
+  const wss = new WebSocket.Server({ server });
+} else {
+  const wss = new WebSocket.Server({
+    ...(process.env.NODE_ENV === "development" ? { port: 8081 } : { server }),
+    verifyClient: info => {
+      allowConnection ||
+      (info.origin &&
+      !!info.origin.match(
+        /^https?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156|58\.84\.180\.119|172\.68\.210\.101)/i
+         // /^http?:\/\/([^.]+\.github\.io|localhost|clocktower\.online|eddbra1nprivatetownsquare\.xyz|botcgrimoire\.site|www\.botcgrimoire\.site|43\.139\.3\.156|58\.84\.180\.119|172\.68\.210\.101)/i
+      ))
+    }
+  });
+}
 
 function noop() {}
 
@@ -114,6 +118,8 @@ for (let metric in metrics) {
 // a new client connects
 wss.on("connection", function connection(ws, req) {
   console.log("connection established!");
+  console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+  console.log(req.headers.origin);
   // url pattern: clocktower.online/<channel>/<playerId|host>
   const url = req.url.toLocaleLowerCase().split("/");
   ws.playerId = url.pop();
