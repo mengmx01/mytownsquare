@@ -308,8 +308,8 @@ wss.on("close", function close() {
 
 // prod mode with stats API
 if (process.env.NODE_ENV !== "development") {
-  // server.listen(8081, () => { //http port
-  server.listen(8443, () => { //https port
+  server.listen(8081, () => { //http port
+  // server.listen(8443, () => { //https port
     console.log("Socket is running on port 8081");
   });
   server.on("request", (req, res) => {
