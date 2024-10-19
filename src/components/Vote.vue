@@ -40,11 +40,15 @@
           >
             倒计时
           </div>
-          <div class="button" v-if="!session.isVoteInProgress" @click="start">
-            {{ session.lockedVote ? "重新开始" : "开始" }}
+          <div class="button" v-if="!session.isVoteInProgress && !session.lockedVote" @click="start">
+            {{ "开始" }}
+          </div>
+          <div class="button" v-if="!session.isVoteInProgress && !session.lockedVote" @click="start0">
+            {{ "统计" }}
           </div>
           <template v-else>
             <div
+              v-if="session.isVoteInProgress"
               class="button townsfolk"
               :class="{ disabled: !session.lockedVote }"
               @click="pause"
@@ -68,6 +72,12 @@
           <div class="button" @click="removeMarked">
             清除标记
           </div>
+        </div>
+        
+        <div class="secretVote" @click="setSecretVote()">
+          <span>闭眼投票
+          <em><font-awesome-icon :icon="['fas', session.isSecretVote ? 'check-square' : 'square']"/></em>
+          </span>
         </div>
       </template>
       <template v-else-if="canVote">
@@ -94,14 +104,9 @@
       <div v-else-if="!player">
         请落座后投票！
       </div>
-      <template v-if="!session.isSpectator && grimoire.isOrganGrinder">
-        <div class="organGrinder" @click="toggleOrganGrinder()">
-          <img class="icon" src="../assets/icons/organgrinder.png">
-          <span>街头风琴手在场
-          <em><font-awesome-icon :icon="['fas', grimoire.isOrganGrinderInPlay ? 'check-square' : 'square']"/></em>
-          </span>
-        </div>
-      </template>
+      <div v-if="session.isSpectator" v-show="session.isSecretVote">
+        闭眼投票
+      </div>
     </div>
     <transition name="blur">
       <div
@@ -214,6 +219,12 @@ export default {
         }
       }, this.session.votingSpeed);
     },
+    start0() {
+      const speed = this.session.votingSpeed;
+      this.$store.commit("session/setVotingSpeed", 0);
+      this.start();
+      this.$store.commit("session/setVotingSpeed", speed);
+    },
     pause() {
       if (this.voteTimer) {
         clearInterval(this.voteTimer);
@@ -237,6 +248,7 @@ export default {
     finish() {
       clearInterval(this.voteTimer);
       this.$store.commit("session/addHistory", this.players);
+      this.$store.commit("session/addVoteSelected");
       this.$store.commit("session/nomination");
     },
     vote(vote) {
@@ -258,8 +270,10 @@ export default {
     removeMarked() {
       this.$store.commit("session/setMarkedPlayer", -1);
     },
-    toggleOrganGrinder() {
-      this.$store.commit("toggleOrganGrinderInPlay");
+    setSecretVote() {
+      if (this.session.isSpectator) return;
+      const isSecretVote = !this.session.isSecretVote;
+      this.$store.commit("session/setSecretVote", isSecretVote);
     }
   }
 };
@@ -442,21 +456,27 @@ export default {
   }
 }
 
-.organGrinder {
-  // position: inherit;
+.secretVote {
   cursor: pointer;
-  z-index: 1;
-  text-align: center;
-  align-items: center;
-  display: flex;
-  white-space: nowrap;
   color: white;
   &:hover {
     color: red;
   }
-}
-.organGrinder em:not(#demon) svg:not(#demon) {
-  color: white;
+  em:not(#demon):not(.button) 
+  // &.fa-check-square
+  // &.fa-square 
+  {
+    color: white !important;
+    &:hover {
+      color: inherit !important;
+    }
+  }
+  svg {
+    cursor: pointer !important;
+    &:hover{
+      fill: white !important;
+    }
+  }
 }
 
 img.icon {

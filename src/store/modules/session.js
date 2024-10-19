@@ -29,7 +29,9 @@ const state = () => ({
   lockedVote: 0,
   votingSpeed: 500,
   isVoteInProgress: false,
+  isSecretVote: false,
   voteHistory: [],
+  voteSelected: [],
   markedPlayer: -1,
   isVoteHistoryAllowed: true,
   isRolesDistributed: false,
@@ -65,6 +67,7 @@ const mutations = {
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
   setTalking: set("isTalking"),
   setListening: set("isListening"),
+  setSecretVote: set("isSecretVote"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
   distributeBluffs(state, {val}){
@@ -119,8 +122,22 @@ const mutations = {
         .map(({ seat, name }) => (seat + ". " + name))
     });
   },
-  clearVoteHistory(state) {
-    state.voteHistory = [];
+  addVoteSelected(state) {
+    state.voteSelected.push(false);
+  },
+  setVoteSelected(state, {index, value}) {
+    Vue.set(state.voteSelected, index, value);
+  },
+  clearVoteHistory(state, voteIndex) {
+    const length = voteIndex.length;
+    if (length === 0) {
+      state.voteHistory = [];
+      state.voteSelected = [];
+    }
+    else {
+      state.voteHistory = state.voteHistory.filter((_, index) => !voteIndex.includes(index));
+      state.voteSelected = state.voteSelected.filter((_, index) => !voteIndex.includes(index));
+    }
   },
   /**
    * Store a vote with and without syncing it to the live session.

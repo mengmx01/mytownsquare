@@ -106,8 +106,6 @@ export default new Vuex.Store({
       isMuted: false,
       isImageOptIn: true,
       isShowVacant: false,
-      isOrganGrinder: false,
-      isOrganGrinderInPlay: false,
       zoom: 0,
       background: ""
     },
@@ -176,7 +174,6 @@ export default new Vuex.Store({
     toggleNight: toggle("isNight"),
     toggleGrimoire: toggle("isPublic"),
     toggleImageOptIn: toggle("isImageOptIn"),
-    toggleOrganGrinderInPlay: toggle("isOrganGrinderInPlay"),
     toggleModal({ modals }, name) {
       if (name) {
         modals[name] = !modals[name];
@@ -256,15 +253,6 @@ export default new Vuex.Store({
           .filter(r => r.team === "traveler" && !roles.some(i => i.id === r.id))
           .map(role => [role.id, role])
       );
-      // check if organ grinder is in the script
-      var isOrganGrinder = false;
-      state.roles.forEach(role => {
-        if (role.id === "organgrinder" || role.name === "街头风琴手") {
-          isOrganGrinder = true;
-          return;
-        }
-      });
-      if (!isOrganGrinder) this.commit("setOrganGrinderInPlay", false)
     },
     setStates(state, states){
       state.states = states;
@@ -278,19 +266,6 @@ export default new Vuex.Store({
         state.edition = edition;
       }
       state.modals.edition = false;
-      // check if orphan grinder is in play
-      var isOrganGrinder = false;
-      state.roles.forEach(role => {
-        if (role.id == "organgrinder" || role.name === "街头风琴手") {
-          isOrganGrinder = true;
-          return;
-        }
-      });
-      state.grimoire.isOrganGrinder = isOrganGrinder;
-      if (!isOrganGrinder) this.commit("setOrganGrinderInPlay", false);
-    },
-    setOrganGrinderInPlay(state, inPlay){
-      state.grimoire.isOrganGrinderInPlay = inPlay;
     }
   },
   plugins: [persistence, socket]

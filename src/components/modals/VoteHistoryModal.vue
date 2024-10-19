@@ -27,13 +27,23 @@
         </div>
         <div class="option" @click="clearVoteHistory">
           <font-awesome-icon icon="trash-alt" />
-          清除记录
+          清除<span v-if="!session.voteSelected.every(selected => selected === false)">选中</span><span v-else>全部</span>记录
         </div>
       </div>
     </template>
     <table>
       <thead>
         <tr>
+          <td>
+            <font-awesome-icon
+              :icon="[
+                'fas',
+                session.voteSelected.every(selected => selected === true) ? 'check-square' : 'square'
+              ]"
+              @click="setVoteSelected(-1)"
+              class="checkbox"
+            />
+          </td>
           <td>时间</td>
           <td>提名者</td>
           <td>被提名者</td>
@@ -48,6 +58,16 @@
       </thead>
       <tbody>
         <tr v-for="(vote, index) in session.voteHistory" :key="index">
+          <td>
+            <font-awesome-icon
+              :icon="[
+                'fas',
+                session.voteSelected[index] ? 'check-square' : 'square'
+              ]"
+              @click="setVoteSelected(index)"
+              class="checkbox"
+            />
+          </td>
           <td>
             {{
               vote.timestamp
@@ -98,8 +118,29 @@ export default {
     ...mapState(["session", "modals"])
   },
   methods: {
+    setVoteSelected(index) {
+      if (index >= 0) {
+        this.$store.commit("session/setVoteSelected", {index, value: !this.session.voteSelected[index]});
+      } else {
+        const selectedAll = this.session.voteSelected.every(selected => selected === true);
+        for (let i=0; i<this.session.voteHistory.length; i++) {
+          this.$store.commit("session/setVoteSelected", {index: i, value: !selectedAll});
+        }
+      }
+    },
     clearVoteHistory() {
-      this.$store.commit("session/clearVoteHistory");
+      const someSelected = !this.session.voteSelected.every(selected => selected === false);
+      if (someSelected) {
+        const selected = [];
+        for (let i=0; i<this.session.voteSelected.length; i++) {
+          if (this.session.voteSelected[i]) selected.push(i);
+        }
+        this.$store.commit("session/clearVoteHistory", selected);
+      }
+      else {
+        this.$store.commit("session/clearVoteHistory", []);
+      }
+      
     },
     setRecordVoteHistory() {
       this.$store.commit(
@@ -119,6 +160,13 @@ export default {
   position: absolute;
   left: 20px;
   top: 15px;
+  cursor: pointer;
+  &:hover {
+    color: red;
+  }
+}
+
+.checkbox {
   cursor: pointer;
   &:hover {
     color: red;

@@ -1,7 +1,8 @@
 class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
-    this._wss = "wss://botcgrimoire.site:8080/";
+    // this._wss = "wss://botcgrimoire.site:8080/";
+    this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "wss://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;
@@ -244,8 +245,8 @@ class LiveSession {
       case "profileImageReceived":
         this._profileImageReceived(params);
         break;
-      case "organgrinder":
-        this._handleOrganGrinder(params);
+      case "secretVote":
+        this._handleSecretVote(params);
         break;
       case "startedTalking":
         this._handleStartTalking(params);
@@ -971,7 +972,7 @@ class LiveSession {
    */
   setMarked(playerIndex) {
     if (this._isSpectator) return;
-    if (this._store.state.grimoire.isOrganGrinderInPlay) return;
+    if (this._store.state.session.isSecretVote) return;
     this._send("marked", playerIndex);
   }
 
@@ -1004,15 +1005,14 @@ class LiveSession {
   }
 
   /**
-   * Send a status change to whether organ grinder is in play. ST to players only
+   * Send a status change to whether anonymous votes are in progress. ST to players only
    */
-  toggleOrganGrinderInPlay(){
-    this._send("organgrinder");
+  setSecretVote(isSecretVote){
+    this._send("secretVote", isSecretVote);
   }
 
-  _handleOrganGrinder(){
-    const inPlay = this._store.state.grimoire.isOrganGrinderInPlay;
-    this._store.state.grimoire.isOrganGrinderInPlay = !inPlay;
+  _handleSecretVote(isSecretVote){
+    this._store.state.session.isSecretVote = isSecretVote;
   }
 
   /**
@@ -1077,9 +1077,9 @@ class LiveSession {
    * @param fromST
    */
   _handleVote([index, vote, fromST]) {
-    // do not reveal vote when organ grinder is in play, unless it's ST changing that player's vote
+    // do not reveal vote when anonymous voting is in progress, unless it's ST changing that player's vote
     const voteId = this._store.state.players.players[index].id;
-    if (this._isSpectator && this._store.state.grimoire.isOrganGrinderInPlay && voteId != this._store.state.session.playerId) return;
+    if (this._isSpectator && this._store.state.session.isSecretVote && voteId != this._store.state.session.playerId) return;
     
     const { session, players } = this._store.state;
     const playerCount = players.players.length;
@@ -1110,8 +1110,8 @@ class LiveSession {
   _handleLock([lock, vote]) {
     if (!this._isSpectator) return;
     this._store.commit("session/lockVote", lock);
-    // do not lock vote when organ grinder is in play
-    if (this._isSpectator && this._store.state.grimoire.isOrganGrinderInPlay) return;
+    // do not lock vote when anonymous voting is in progress
+    if (this._isSpectator && this._store.state.session.isSecretVote) return;
     if (lock > 1) {
       const { lockedVote, nomination } = this._store.state.session;
       const { players } = this._store.state.players;
@@ -1271,9 +1271,9 @@ export default store => {
       case "session/setVotingSpeed":
         session.setVotingSpeed(payload);
         break;
-      case "session/clearVoteHistory":
-        session.clearVoteHistory();
-        break;
+      // case "session/clearVoteHistory":
+      //   session.clearVoteHistory();
+      //   break;
       case "session/setVoteHistoryAllowed":
         session.setVoteHistoryAllowed();
         break;
@@ -1325,8 +1325,8 @@ export default store => {
       case "session/setPlayerProfileImage":
         session.uploadProfileImage(payload);
         break;
-      case "toggleOrganGrinderInPlay":
-        session.toggleOrganGrinderInPlay(payload);
+      case "session/setSecretVote":
+        session.setSecretVote(payload);
         break;
       case "session/startTalking":
         session.startTalking(payload);
