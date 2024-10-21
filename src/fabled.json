@@ -188,6 +188,17 @@
     "ability": "在游戏的最后一天，最幸运的玩家身上会发生一些好的事情。"
   },
   {
+    "id": "shelingchengzhi",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": [],
+    "setup": false,
+    "name": "赦令承旨",
+    "team": "fabled",
+    "ability": "解除所有角色能力在进行选择时的限制条件。"
+  },
+  {
     "id": "deusexfiasco",
     "firstNight": 0,
     "firstNightReminder": "",

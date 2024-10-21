@@ -43,5 +43,14 @@
     "level": "困难",
     "roles": [],
     "isOfficial": true
+  },
+  {
+    "id": "syyl",
+    "name": "山雨欲来",
+    "author": "集石",
+    "description": "（请注意：山雨欲来并非“可以直接游玩的剧本”，而是角色合集！）",
+    "level": "困难",
+    "roles": [],
+    "isOfficial": true
   }
 ]
