@@ -45,9 +45,10 @@ module.exports = store => {
   }
   if (localStorage.fabled !== undefined) {
     store.commit("players/setFabled", {
-      fabled: JSON.parse(localStorage.fabled).map(
-        fabled => store.state.fabled.get(fabled.id) || fabled
-      )
+      // fabled: JSON.parse(localStorage.fabled).map(
+      //   fabled => store.state.fabled.get(fabled.id) || fabled
+      // )
+      fabled: JSON.parse(localStorage.fabled)
     });
   }
   if (localStorage.players) {
@@ -76,6 +77,10 @@ module.exports = store => {
     const [spectator, sessionId] = JSON.parse(localStorage.getItem("session"));
     store.commit("session/setSpectator", spectator);
     store.commit("session/setSessionId", sessionId);
+  }
+  if (localStorage.getItem("customBootlegger")) {
+    const customBootlegger = JSON.parse(localStorage.getItem("customBootlegger"));
+    store.commit("session/setBootlegger", customBootlegger);
   }
   if (localStorage.getItem("chatHistory")) {
     const chatHistory = JSON.parse(localStorage.getItem("chatHistory"));
@@ -158,11 +163,7 @@ module.exports = store => {
       case "players/setFabled":
         localStorage.setItem(
           "fabled",
-          JSON.stringify(
-            state.players.fabled.map(fabled =>
-              fabled.isCustom ? fabled : { id: fabled.id }
-            )
-          )
+          JSON.stringify(state.players.fabled)
         );
         break;
       case "players/add":
@@ -218,6 +219,9 @@ module.exports = store => {
           localStorage.removeItem("claimedSeat");
         }
         break;
+      case "session/setBootlegger":
+        localStorage.setItem("customBootlegger", JSON.stringify(payload));
+        break;
       case "session/createChatHistory":
       case "session/updateChatSent":
       case "session/updateChatReceived":
@@ -231,5 +235,6 @@ module.exports = store => {
         localStorage.setItem("playerProfileImage", JSON.stringify(payload))
     }
   });
+  // console.log(localStorage);
   // localStorage.clear();
 };

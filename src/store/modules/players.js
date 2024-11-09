@@ -101,6 +101,7 @@ const mutations = {
   clear(state) {
     state.players = [];
     state.bluffs = [];
+    this.commit("players/setFabled", { fabled: [] });
     state.fabled = [];
   },
   set(state, players = []) {
@@ -165,8 +166,14 @@ const mutations = {
   },
   setFabled(state, { index, fabled } = {}) {
     if (index !== undefined) {
-      // do not ever remove the first fabled i.e. storyteller
-      if (index == 0) return;
+      if (index == 0) return; // do not ever remove the first fabled i.e. storyteller
+
+      // 传奇角色页面的私货商人将恢复默认描述
+      const customBootlegger = this.state.session.bootlegger;
+      if (state.fabled[index].id === "bootlegger" & !!customBootlegger) {
+        state.fabled[index].ability = "这个剧本包含有自制角色或自制规则。";
+      }
+
       state.fabled.splice(index, 1);
     } else if (fabled) {
       const fabledStoryteller = {
@@ -179,6 +186,22 @@ const mutations = {
         "team": "fabled",
         "ability": "点击和说书人私聊。"
       };
+
+      // 加入自定义私货商人描述
+      const customBootlegger = this.state.session.bootlegger;
+      if (fabled.id === "bootlegger" & !!customBootlegger) {
+        fabled.ability = customBootlegger;
+      }
+      // 空数组时恢复默认描述
+      if (Array.isArray(fabled) & fabled.length === 0 & state.fabled.length > 0) {
+        for(let i=0;i<state.fabled.length;i++) {
+          if (state.fabled[i].id === "bootlegger") {
+            this.commit("players/setFabled", { index: i });
+            break;
+          }
+        }
+      }
+
       // add storyteller fabled to allow direct messages
       if (!Array.isArray(fabled)) {
         state.fabled.push(fabled);

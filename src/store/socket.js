@@ -248,6 +248,9 @@ class LiveSession {
       case "secretVote":
         this._handleSecretVote(params);
         break;
+      case "bootlegger":
+        this._handleSetBootlegger(params);
+        break;
       case "startedTalking":
         this._handleStartTalking(params);
         break;
@@ -333,7 +336,7 @@ class LiveSession {
         lockedVote: session.lockedVote,
         isVoteInProgress: session.isVoteInProgress,
         markedPlayer: session.markedPlayer,
-        fabled: fabled.map(f => (f.isCustom ? f : { id: f.id })),
+        fabled,
         ...(session.nomination ? { votes: session.votes } : {})
       });
     }
@@ -412,9 +415,7 @@ class LiveSession {
         isVoteInProgress
       });
       this._store.commit("session/setMarkedPlayer", markedPlayer);
-      this._store.commit("players/setFabled", {
-        fabled: fabled.map(f => this._store.state.fabled.get(f.id) || f)
-      });
+      this._store.commit("players/setFabled", {fabled});
     }
   }
 
@@ -472,7 +473,7 @@ class LiveSession {
     const { fabled } = this._store.state.players;
     this._send(
       "fabled",
-      fabled.map(f => (f.isCustom ? f : { id: f.id }))
+      fabled
     );
   }
 
@@ -484,7 +485,7 @@ class LiveSession {
   _updateFabled(fabled) {
     if (!this._isSpectator) return;
     this._store.commit("players/setFabled", {
-      fabled: fabled.map(f => this._store.state.fabled.get(f.id) || f)
+      fabled
     });
   }
 
@@ -1015,6 +1016,14 @@ class LiveSession {
     this._store.state.session.isSecretVote = isSecretVote;
   }
 
+  setBootlegger(content){
+    this._send("bootlegger", content);
+  }
+
+  _handleSetBootlegger(content){
+    this._store.state.session.bootlegger = content;
+  }
+
   /**
    * Set talking status to true to enable glowing animation
    * Send this update to all clients in the channel
@@ -1328,6 +1337,9 @@ export default store => {
       case "session/setSecretVote":
         session.setSecretVote(payload);
         break;
+      // case "session/setBootlegger":
+      //   session.setBootlegger(payload);
+      //   break;
       case "session/startTalking":
         session.startTalking(payload);
         break;

@@ -238,6 +238,12 @@
             添加传奇角色
             <em>[F]</em>
           </li>
+          <li v-if="!session.isSpectator" @click="customiseBootlegger">
+            <small>
+              自定义私货商人
+            </small>
+            <em>[B]</em>
+          </li>
           <li @click="clearRoles" v-if="players.length">
             移除全部
             <em><font-awesome-icon icon="trash-alt"/></em>
@@ -396,7 +402,7 @@ export default {
       if (!Number(numPlayers)) return;
       if (numPlayers < 0) return;
       if (sessionId) {
-        this.$store.commit("session/clearVoteHistory");
+        this.$store.commit("session/clearVoteHistory", []);
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", sessionId);
         numPlayers = Math.min(numPlayers, 20);
@@ -555,6 +561,11 @@ export default {
           this.$store.commit("session/nomination");
         }
         this.$store.commit("players/clear");
+
+        // clear customBootlegger
+        if (this.session.bootlegger) {
+          this.$store.commit("session/setBootlegger", "");
+        }
       }
     },
     addPlayer() {
@@ -584,6 +595,15 @@ export default {
       if (confirm("确定要移除所有玩家角色吗？")) {
         this.$store.dispatch("players/clearRoles");
       }
+    },
+    customiseBootlegger() {
+      if (this.session.isSpectator) return;
+
+      let content = prompt("输入私货商人内容", this.session.bootlegger);
+      if (content == null) return;
+
+      const trimmedContent = content.trim();
+      this.$store.commit("session/setBootlegger", trimmedContent);
     },
     toggleNight() {
       this.$store.commit("toggleNight");
