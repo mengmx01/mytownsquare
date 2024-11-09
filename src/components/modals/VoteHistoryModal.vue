@@ -48,6 +48,7 @@
           <td>提名者</td>
           <td>被提名者</td>
           <td>类型</td>
+          <td>模式</td>
           <td>票数</td>
           <td>通过票数</td>
           <td>
@@ -84,6 +85,7 @@
           <td>{{ vote.nominator }}</td>
           <td>{{ vote.nominee }}</td>
           <td>{{ vote.type }}</td>
+          <td>{{ vote.mode }}</td>
           <td>
             {{ vote.votes.length }}
             <font-awesome-icon icon="hand-paper" />

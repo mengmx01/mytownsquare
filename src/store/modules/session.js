@@ -116,6 +116,7 @@ const mutations = {
       nominator: (state.nomination[0] + 1).toString() + ". " + players[state.nomination[0]].name,
       nominee: (state.nomination[1] + 1).toString() + ". " + players[state.nomination[1]].name,
       type: isExile ? "流放" : "处决",
+      mode: state.isSecretVote ? "闭眼" : "睁眼",
       majority: Math.ceil(
         players.filter(player => !player.isDead || isExile).length / 2
       ),
