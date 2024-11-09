@@ -39,6 +39,7 @@ const state = () => ({
   isGrimoireDistributed: false,
   chatHistory: [],
   newStMessage: [0],
+  bootlegger: "",
   timer: 480,
   interval: null,
   isTalking: false,
@@ -68,6 +69,7 @@ const mutations = {
   setTalking: set("isTalking"),
   setListening: set("isListening"),
   setSecretVote: set("isSecretVote"),
+  setBootlegger: set("bootlegger"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
   distributeBluffs(state, {val}){
@@ -128,7 +130,12 @@ const mutations = {
   setVoteSelected(state, {index, value}) {
     Vue.set(state.voteSelected, index, value);
   },
-  clearVoteHistory(state, voteIndex) {
+  clearVoteHistory(state, voteIndex = null) {
+    if (voteIndex == null) {
+      state.voteHistory = [];
+      state.voteSelected = [];
+      return;
+    }
     const length = voteIndex.length;
     if (length === 0) {
       state.voteHistory = [];
