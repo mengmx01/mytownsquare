@@ -52,5 +52,13 @@
     "level": "困难",
     "roles": [],
     "isOfficial": true
+  },
+  {
+    "id": "all",
+    "name": "全角色合集",
+    "description": "",
+    "level": "困难",
+    "roles": [],
+    "isOfficial": true
   }
 ]
