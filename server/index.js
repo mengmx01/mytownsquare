@@ -1,6 +1,6 @@
 const fs = require("fs");
-// const https = require("https");
-const http = require("http");
+const https = require("https");
+// const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
@@ -22,8 +22,8 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-// const server = https.createServer(options);
-const server = http.createServer(options);
+const server = https.createServer(options);
+// const server = http.createServer(options);
 
 const skipVerification = true;
 
