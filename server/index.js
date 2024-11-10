@@ -1,9 +1,10 @@
 const fs = require("fs");
-const https = require("https");
-// const http = require("http");
+// const https = require("https");
+const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
+const sharp = require('sharp');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -21,8 +22,8 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-const server = https.createServer(options);
-// const server = http.createServer(options);
+// const server = https.createServer(options);
+const server = http.createServer(options);
 
 const skipVerification = true;
 
@@ -217,30 +218,47 @@ wss.on("connection", function connection(ws, req) {
             
             switch(uploadType) {
               case "uploadProfileImage":
-                const extension = uploadContent.split(";base64,")[0].split("/").pop();
+                // const extension = uploadContent.split(";base64,")[0].split("/").pop();
+                const extension = 'webp';
                 const profileImageData = uploadContent.split(";base64,").pop();
                 // const folderPath = path.join(__dirname, "profile_images");
-                const folderPath = "/usr/share/nginx/html/dist/profile_images";
+                // const folderPath = "/usr/share/nginx/html/dist/profile_images";
+                const folderPath = "E:/Townsquare/grimoire1";
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
                 const fileName = playerId + "." + extension;
                 const filePath = path.join(folderPath, fileName);
-                fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
-                  if (err) {
-                    console.error('Failed to save image:', err);
-                  } else {
-                    channels[ws.channel].forEach(function each(client) {
-                      if (
-                        client === ws &&
-                        client.readyState === WebSocket.OPEN
-                      ) {
-                        client.send(JSON.stringify(["profileImageReceived", fileName]));
-                        metrics.messages_outgoing.inc();
-                      }
-                    });
-                  }
-                });
+                // fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
+                //   if (err) {
+                //     console.error('Failed to save image:', err);
+                //   } else {
+                //     channels[ws.channel].forEach(function each(client) {
+                //       if (
+                //         client === ws &&
+                //         client.readyState === WebSocket.OPEN
+                //       ) {
+                //         client.send(JSON.stringify(["profileImageReceived", fileName]));
+                //         metrics.messages_outgoing.inc();
+                //       }
+                //     });
+                //   }
+                // });
+                sharp(Buffer.from(profileImageData, 'base64'))
+                  .resize(512, 512) // Resize to 512x512 pixels
+                  .toFormat('webp') // Convert to WebP format
+                  .toFile(filePath, (err, info) => {
+                    if (err) {
+                        console.error('Failed to save image:', err);
+                    } else {
+                      channels[ws.channel].forEach(function each(client) {
+                        if (client === ws && client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify(["profileImageReceived", fileName]));
+                            metrics.messages_outgoing.inc();
+                        }
+                      });
+                    }
+                  });
                 break;
             }
           } catch (e) {
