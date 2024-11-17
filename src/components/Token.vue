@@ -58,7 +58,7 @@ export default {
       type: Object,
       default: () => ({})
     },
-    image: {
+    id: {
       type: String,
       default: ""
     }
@@ -71,7 +71,7 @@ export default {
       );
     },
     tokenBackground() {
-      return this.image ? {} : {backgroundImage: `url(${require('../assets/token.png')})`}
+      return this.id ? {} : {backgroundImage: `url(${require('../assets/token.png')})`}
     },
     ...mapState(["grimoire"])
   },

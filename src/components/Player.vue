@@ -50,7 +50,7 @@
 
       <Token
         :role="player.role"
-        :image="player.image"
+        :id="player.id"
         @set-role="clickSetRole"
       />
 
