@@ -4,7 +4,7 @@ class LiveSession {
     // this._wss = "wss://botcgrimoire.site:8080/";
     this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
-    // this._wss = "wss://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
+    // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;
     this._isSpectator = true;
     this._gamestate = [];
@@ -725,24 +725,24 @@ class LiveSession {
         property: "id",
         value: ""
       });
-      this._store.commit("players/update", {
-        player: players[oldIndex],
-        property: "name",
-        value: ""
-      });
-      this._store.commit("players/update", {
-        player: players[oldIndex],
-        property: "image",
-        value: ""
-      });
+      // this._store.commit("players/update", {
+      //   player: players[oldIndex],
+      //   property: "name",
+      //   value: ""
+      // });
+      // this._store.commit("players/update", {
+      //   player: players[oldIndex],
+      //   property: "image",
+      //   value: ""
+      // });
     }
     // add playerId to new seat
     if (index >= 0) {
       const player = players[index];
       if (!player) return;
-      this._store.commit("players/update", { player, property: "id", value });
-      this._store.commit("players/update", { player, property:"name", value: name});
       this._store.commit("players/update", { player, property: "image", value: image });
+      this._store.commit("players/update", { player, property:"name", value: name});
+      this._store.commit("players/update", { player, property: "id", value });
     }
     // update player session list as if this was a ping
     this._handlePing([true, true, value, 0]);

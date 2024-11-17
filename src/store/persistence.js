@@ -92,7 +92,7 @@ module.exports = store => {
     })
   }
   if (localStorage.getItem("playerProfileImage")) {
-    store.commit("session/setPlayerProfileImage", localStorage.getItem("playerProfileImage"));
+    store.commit("session/updatePlayerProfileImage", localStorage.getItem("playerProfileImage"));
   }
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
@@ -231,8 +231,8 @@ module.exports = store => {
           localStorage.removeItem("chatHistory");
         }
         break;
-      case "session/setPlayerProfileImage":
-        localStorage.setItem("playerProfileImage", JSON.stringify(payload))
+      case "session/updatePlayerProfileImage":
+        localStorage.setItem("playerProfileImage", payload);
     }
   });
   // console.log(localStorage);

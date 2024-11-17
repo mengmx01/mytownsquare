@@ -20,17 +20,14 @@
 
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
-      <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
-        v-show="player.id && player.image"
-        class="profileImage"
-        :style="{filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
-      > -->
-      <img :src="`https://botcgrimoire.site/profile_images/${player.image}`" 
-        v-show="player.id && player.image"
-        class="profileImage"
-        loading="lazy"
-        :style="{filter: player.role.id ? 'blur(3px)' : 'blur(0px)'}"
-      >
+      <div v-if="player.id && player.image" class="profileImage">
+        <img :src="`https://botcgrimoire.site/profile_images/${player.image}?v=1`" 
+          :class="{ on: player.role.id }"
+        >
+        <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
+            :class="{ on: player.role.id }"
+        > -->
+      </div>
 
       <div
         class="night-order first"
@@ -496,31 +493,7 @@ export default {
 
 /****** Life token *******/
 .player {
-  z-index: 2;
-  .profileImage {
-    border-radius: 50%;
-    width: 100%;
-    background-size: 100%;
-    text-align: center;
-    border: 3px solid black;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 250ms;
-    position: absolute;
-    left: 0;
-    top: 0;
-    pointer-events: none;
-
-    &:before {
-      content: " ";
-      display: block;
-      padding-top: 100%;
-    }
-  }
-
+  
   .life {
     border-radius: 50%;
     width: 100%;
@@ -601,6 +574,29 @@ export default {
   transition: transform 200ms ease-in-out;
   transform: perspective(400px) rotateY(0deg);
   backface-visibility: hidden;
+}
+.player .profileImage,.player .token {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+
+.player .profileImage {
+  border-radius: 50%;
+  padding: 6%;
+  cursor: pointer;
+}
+
+.player .profileImage img {
+  border-radius: 50%;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.player .profileImage img.on {
+  filter: blur(3px)
 }
 
 #townsquare.public .circle .token {
