@@ -277,7 +277,7 @@ wss.on("connection", function connection(ws, req) {
                 //   }
                 // });
                 sharp(Buffer.from(profileImageData, 'base64'))
-                  .resize(512, 512) // Resize to 512x512 pixels
+                  .resize(512, 512, { fit: 'inside' }) // Resize to 512x512 pixels
                   .toFormat('webp') // Convert to WebP format
                   .toFile(filePath, (err, info) => {
                     if (err) {
