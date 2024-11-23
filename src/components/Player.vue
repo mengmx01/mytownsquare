@@ -21,7 +21,7 @@
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
       <div v-if="player.id && player.image" class="profileImage">
-        <img :src="`https://botcgrimoire.site/profile_images/${player.image}?v=1`" 
+        <img :src="`https://botcgrimoire.site/profile_images/${player.image}`" 
           :class="{ on: player.role.id }"
         >
         <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
