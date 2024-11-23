@@ -114,38 +114,38 @@ for (let metric in metrics) {
   register.registerMetric(metrics[metric]);
 }
 // Function to purge Nginx cache 
-const purgeNginxCache = async (url) => { 
-  try { 
-    const response = await axios({ 
-      method: 'PURGE', 
-      url: url 
-    }); 
-    console.log(`Purge request to Nginx successful: ${response.status}`); 
-  } catch (error) { 
-    console.error(`Error purging Nginx cache: ${error.message}`); 
-  } 
-}; 
+// const purgeNginxCache = async (url) => { 
+//   try { 
+//     const response = await axios({ 
+//       method: 'PURGE', 
+//       url: url 
+//     }); 
+//     console.log(`Purge request to Nginx successful: ${response.status}`); 
+//   } catch (error) { 
+//     console.error(`Error purging Nginx cache: ${error.message}`); 
+//   } 
+// }; 
 
-// Function to purge Cloudflare cache 
-const purgeCloudflareCache = async (urls) => { 
-  try { 
-    const response = await axios({ 
-      method: 'POST', 
-      url: 'https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/purge_cache', 
-      headers: { 
-        'X-Auth-Email': 'YOUR_EMAIL', 
-        'X-Auth-Key': 'YOUR_API_KEY', 
-        'Content-Type': 'application/json' 
-      }, 
-      data: { 
-        files: urls 
-      } 
-    }); 
-    console.log(`Purge request to Cloudflare successful: ${response.data}`); 
-  } catch (error) { 
-    console.error(`Error purging Cloudflare cache: ${error.message}`); 
-  } 
-};
+// // Function to purge Cloudflare cache 
+// const purgeCloudflareCache = async (urls) => { 
+//   try { 
+//     const response = await axios({ 
+//       method: 'POST', 
+//       url: 'https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/purge_cache', 
+//       headers: { 
+//         'X-Auth-Email': 'YOUR_EMAIL', 
+//         'X-Auth-Key': 'YOUR_API_KEY', 
+//         'Content-Type': 'application/json' 
+//       }, 
+//       data: { 
+//         files: urls 
+//       } 
+//     }); 
+//     console.log(`Purge request to Cloudflare successful: ${response.data}`); 
+//   } catch (error) { 
+//     console.error(`Error purging Cloudflare cache: ${error.message}`); 
+//   } 
+// };
 // a new client connects
 wss.on("connection", function connection(ws, req) {
   // url pattern: clocktower.online/<channel>/<playerId|host>
@@ -254,6 +254,7 @@ wss.on("connection", function connection(ws, req) {
                 // const extension = uploadContent.split(";base64,")[0].split("/").pop();
                 const extension = 'webp';
                 const profileImageData = uploadContent.split(";base64,").pop();
+                const version = new Date().getTime();
                 // const folderPath = path.join(__dirname, "profile_images");
                 const folderPath = "/usr/share/nginx/html/dist/profile_images";
                 if (!fs.existsSync(folderPath)){
@@ -284,13 +285,15 @@ wss.on("connection", function connection(ws, req) {
                         console.error('Failed to save image:', err);
                     } else {
                       channels[ws.channel].forEach(function each(client) {
+                        const fileLink = fileName + "?v=" + version;
+                        console.log(fileLink);
                         if (client === ws && client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(["profileImageReceived", fileName]));
+                            client.send(JSON.stringify(["profileImageReceived", fileLink]));
                             metrics.messages_outgoing.inc();
                         }
                       });
-                      purgeNginxCache(`http://botcgrimoire.site/profile_images/${fileName}`);
-                      purgeCloudflareCache([`http://botcgrimoire.site/profile_images/${fileName}`]);
+                      // purgeNginxCache(`http://botcgrimoire.site/profile_images/${fileName}`);
+                      // purgeCloudflareCache([`http://botcgrimoire.site/profile_images/${fileName}`]);
                     }
                   });
                 break;
