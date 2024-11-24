@@ -1,6 +1,6 @@
 const fs = require("fs");
-const https = require("https");
-// const http = require("http");
+// const https = require("https");
+const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
@@ -22,8 +22,8 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-const server = https.createServer(options);
-// const server = http.createServer(options);
+// const server = https.createServer(options);
+const server = http.createServer(options);
 
 const skipVerification = true;
 
@@ -223,8 +223,8 @@ wss.on("connection", function connection(ws, req) {
                 const extension = 'webp';
                 const profileImageData = uploadContent.split(";base64,").pop();
                 const version = new Date().getTime();
-                // const folderPath = path.join(__dirname, "profile_images");
-                const folderPath = "/usr/share/nginx/html/dist/profile_images";
+                const folderPath = path.join(__dirname, "profile_images");
+                // const folderPath = "/usr/share/nginx/html/dist/profile_images";
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
@@ -246,20 +246,37 @@ wss.on("connection", function connection(ws, req) {
                 //   }
                 // });
                 sharp(Buffer.from(profileImageData, 'base64'))
-                  .resize(512, 512, { fit: 'inside' }) // Resize to 512x512 pixels
+                  .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
                   .toFormat('webp') // Convert to WebP format
-                  .toFile(filePath, (err, info) => {
+                  .toBuffer((err, buffer, info) => {
                     if (err) {
+                      console.error('Failed to process image:', err);
+                      return;
+                    }
+                    // Create an empty 512x512 image to use as the base
+                    sharp({
+                      create: {
+                        width: 512,
+                        height: 512,
+                        channels: 4, // Ensure alpha channel for transparency
+                        background: { r: 0, g: 0, b: 0, alpha: 0 }
+                      }
+                    })
+                    .composite([{ input: buffer, gravity: 'center' }]) // Composite the resized image onto the center
+                    .toFormat('webp') // Convert to WebP format
+                    .toFile(filePath, (err, info) => {
+                      if (err) {
                         console.error('Failed to save image:', err);
-                    } else {
-                      channels[ws.channel].forEach(function each(client) {
-                        const fileLink = fileName + "?v=" + version;
-                        if (client === ws && client.readyState === WebSocket.OPEN) {
+                      } else {
+                        channels[ws.channel].forEach(function each(client) {
+                          const fileLink = fileName + "?v=" + version;
+                          if (client === ws && client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(["profileImageReceived", fileLink]));
                             metrics.messages_outgoing.inc();
-                        }
-                      });
-                    }
+                          }
+                        });
+                      }
+                    });
                   });
                 break;
             }
