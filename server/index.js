@@ -5,7 +5,6 @@ const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
 const sharp = require('sharp');
-const axios = require('axios');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -113,39 +112,8 @@ const metrics = {
 for (let metric in metrics) {
   register.registerMetric(metrics[metric]);
 }
-// Function to purge Nginx cache 
-// const purgeNginxCache = async (url) => { 
-//   try { 
-//     const response = await axios({ 
-//       method: 'PURGE', 
-//       url: url 
-//     }); 
-//     console.log(`Purge request to Nginx successful: ${response.status}`); 
-//   } catch (error) { 
-//     console.error(`Error purging Nginx cache: ${error.message}`); 
-//   } 
-// }; 
 
-// // Function to purge Cloudflare cache 
-// const purgeCloudflareCache = async (urls) => { 
-//   try { 
-//     const response = await axios({ 
-//       method: 'POST', 
-//       url: 'https://api.cloudflare.com/client/v4/zones/YOUR_ZONE_ID/purge_cache', 
-//       headers: { 
-//         'X-Auth-Email': 'YOUR_EMAIL', 
-//         'X-Auth-Key': 'YOUR_API_KEY', 
-//         'Content-Type': 'application/json' 
-//       }, 
-//       data: { 
-//         files: urls 
-//       } 
-//     }); 
-//     console.log(`Purge request to Cloudflare successful: ${response.data}`); 
-//   } catch (error) { 
-//     console.error(`Error purging Cloudflare cache: ${error.message}`); 
-//   } 
-// };
+
 // a new client connects
 wss.on("connection", function connection(ws, req) {
   // url pattern: clocktower.online/<channel>/<playerId|host>
@@ -286,14 +254,11 @@ wss.on("connection", function connection(ws, req) {
                     } else {
                       channels[ws.channel].forEach(function each(client) {
                         const fileLink = fileName + "?v=" + version;
-                        console.log(fileLink);
                         if (client === ws && client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(["profileImageReceived", fileLink]));
                             metrics.messages_outgoing.inc();
                         }
                       });
-                      // purgeNginxCache(`http://botcgrimoire.site/profile_images/${fileName}`);
-                      // purgeCloudflareCache([`http://botcgrimoire.site/profile_images/${fileName}`]);
                     }
                   });
                 break;
