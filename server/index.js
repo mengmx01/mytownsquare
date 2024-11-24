@@ -223,8 +223,8 @@ wss.on("connection", function connection(ws, req) {
                 const extension = 'webp';
                 const profileImageData = uploadContent.split(";base64,").pop();
                 const version = new Date().getTime();
-                const folderPath = path.join(__dirname, "profile_images");
-                // const folderPath = "/usr/share/nginx/html/dist/profile_images";
+                // const folderPath = path.join(__dirname, "profile_images");
+                const folderPath = "/usr/share/nginx/html/dist/profile_images";
                 if (!fs.existsSync(folderPath)){
                     fs.mkdirSync(folderPath);
                 }
