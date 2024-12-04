@@ -71,7 +71,7 @@ export default {
       );
     },
     tokenBackground() {
-      return this.id ? {} : {backgroundImage: `url(${require('../assets/token.png')})`}
+      return (this.id && this.image) ? {} : {backgroundImage: `url(${require('../assets/token.png')})`}
     },
     ...mapState(["grimoire"])
   },

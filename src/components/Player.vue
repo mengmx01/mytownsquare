@@ -10,7 +10,7 @@
           'no-vote': player.isVoteless,
           'vote-yes': session.votes[index],
           'vote-lock': voteLocked,
-          talking: player.isTalking
+          talking: player.isTalking && player.id
         },
         player.role.team
       ]"
@@ -51,6 +51,7 @@
       <Token
         :role="player.role"
         :id="player.id"
+        :image="player.image"
         @set-role="clickSetRole"
       />
 
