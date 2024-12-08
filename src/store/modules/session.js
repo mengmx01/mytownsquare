@@ -199,11 +199,13 @@ const mutations = {
   stopTimer(state){
     clearInterval(state.interval);
   },
-  startTalking(playerId){
-    if (!playerId) return;
+  startTalking(state, seatNum){
+    if (seatNum < 0) return;
+    this.commit("players/setIsTalking", {seatNum, isTalking: true});
   },
-  stopTalking(playerId){
-    if (!playerId) return;
+  stopTalking(state, seatNum){
+    if (seatNum < 0) return;
+    this.commit("players/setIsTalking", {seatNum, isTalking: false});
   }
 };
 

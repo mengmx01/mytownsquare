@@ -663,12 +663,12 @@ export default {
     this.recognition = new window.webkitSpeechRecognition;
     this.recognition.continuous = false;
     this.recognition.onend = () => {
-      this.$store.commit("session/stopTalking", this.session.playerId);
+      this.$store.commit("session/stopTalking", this.session.claimedSeat);
       if (this.session.isListening) this.recognition.start();
     }
     this.recognition.onspeechstart = () => {
       if (!this.session.isListening) return;
-      this.$store.commit("session/startTalking", this.session.playerId);
+      this.$store.commit("session/startTalking", this.session.claimedSeat);
     }
   }
 };

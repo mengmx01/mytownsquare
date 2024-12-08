@@ -725,6 +725,11 @@ class LiveSession {
         property: "id",
         value: ""
       });
+      this._store.commit("players/update", {
+        player: players[oldIndex],
+        property: "isTalking",
+        value: false
+      });
       // this._store.commit("players/update", {
       //   player: players[oldIndex],
       //   property: "name",
@@ -1029,15 +1034,18 @@ class LiveSession {
    * Send this update to all clients in the channel
    */
   startTalking(payload){
-    var isSeated = false;
-    (this._store.state.players.players).forEach(player => {
-      if (player.id != payload) return;
-      if (!player.isTalking) {
-        player.isTalking = true;
-        isSeated = true;
-      }
-    })
-    if (!isSeated) return;
+    if (payload < 0) return;
+    // console.log(this._store.state.session);
+    // var isSeated = false;
+    // (this._store.state.players.players).forEach(player => {
+    //   if (player.id != payload) return;
+    //   if (!player.isTalking) {
+    //     player.isTalking = true;
+    //     isSeated = true;
+    //   }
+    // })
+    // if (!isSeated) return;
+    // console.log('sent');
     this._send("startedTalking", payload);
   }
 
@@ -1045,10 +1053,14 @@ class LiveSession {
    * Set talking status to true to enable glowing animation when received
    */
   _handleStartTalking(payload){
-    (this._store.state.players.players).forEach(player => {
-      if (player.id != payload) return;
-      if (!player.isTalking) player.isTalking = true;
-    })
+    if (payload < 0) return;
+    // console.log('received');
+    // console.log(this._store.state.players.players);
+    this._store.state.players.players[payload].isTalking = true;
+    // (this._store.state.players.players).forEach(player => {
+    //   if (player.id != payload) return;
+    //   if (!player.isTalking) player.isTalking = true;
+    // })
   }
 
   
@@ -1057,15 +1069,16 @@ class LiveSession {
    * Send this update to all clients in the channel
    */
   stopTalking(payload){
-    var isSeated = false;
-    (this._store.state.players.players).forEach(player => {
-      if (player.id != payload) return;
-      if (player.isTalking) {
-        player.isTalking = false;
-        isSeated = true;
-      }
-    })
-    if (!isSeated) return;
+    // var isSeated = false;
+    // (this._store.state.players.players).forEach(player => {
+    //   if (player.id != payload) return;
+    //   if (player.isTalking) {
+    //     player.isTalking = false;
+    //     isSeated = true;
+    //   }
+    // })
+    // if (!isSeated) return;
+    if (payload < 0) return;
     this._send("stoppedTalking", payload);
   }
 
@@ -1073,10 +1086,12 @@ class LiveSession {
    * Set talking status to false to disable glowing animation when received
    */
   _handleStopTalking(payload){
-    (this._store.state.players.players).forEach(player => {
-      if (player.id != payload) return;
-      if (player.isTalking) player.isTalking = false;
-    })
+    // (this._store.state.players.players).forEach(player => {
+    //   if (player.id != payload) return;
+    //   if (player.isTalking) player.isTalking = false;
+    // })
+    if (payload < 0) return;
+    this._store.state.players.players[payload].isTalking = false;
   }
 
   /**

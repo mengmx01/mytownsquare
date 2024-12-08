@@ -229,6 +229,9 @@ const mutations = {
   },
   setImage(state, image) { //image is an url
     state.image = image;
+  },
+  setIsTalking(state, {seatNum, isTalking}) {
+    state.players[seatNum].isTalking = isTalking;
   }
 };
 
