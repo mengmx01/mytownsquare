@@ -725,11 +725,6 @@ class LiveSession {
         property: "id",
         value: ""
       });
-      this._store.commit("players/update", {
-        player: players[oldIndex],
-        property: "isTalking",
-        value: false
-      });
       // this._store.commit("players/update", {
       //   player: players[oldIndex],
       //   property: "name",
@@ -740,6 +735,13 @@ class LiveSession {
       //   property: "image",
       //   value: ""
       // });
+      if (players[oldIndex].isTalking === true) {
+        this._store.commit("players/update", {
+          player: players[oldIndex],
+          property: "isTalking",
+          value: false
+        });
+      }
     }
     // add playerId to new seat
     if (index >= 0) {
