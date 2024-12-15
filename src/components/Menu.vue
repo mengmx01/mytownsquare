@@ -111,14 +111,7 @@
             背景图
             <em><font-awesome-icon icon="image"/></em>
           </li>
-          <input
-            v-show="false"
-            type="file"
-            ref="upload"
-            accept="image/*"
-            @change="handleImageUpload"
-          />
-          <li @click="openImageUpload">
+          <li @click="$emit('trigger', ['uploadProfileImage'])">
             上传头像
             <em><font-awesome-icon icon="user"/></em>
           </li>
@@ -364,24 +357,6 @@ export default {
       if (background || background === "") {
         this.$store.commit("setBackground", background);
       }
-    },
-    openImageUpload() {
-      this.$refs.upload.click();
-    },
-    handleImageUpload() {
-      const image = this.$refs.upload.files[0];
-      if (!image) return;
-      if (image.type.split("/")[0] != "image") {
-        this.$refs.upload.files[0] = undefined;
-        alert("不是有效的图片文件！")
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.$store.commit("session/setPlayerProfileImage", e.target.result);
-      }
-      reader.readAsDataURL(image);
     },
     changeName() {
       var name = prompt("输入玩家昵称").trim();

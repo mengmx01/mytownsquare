@@ -28,7 +28,8 @@
       <Vote v-if="session.nomination"></Vote>
     </transition>
     <TownSquare></TownSquare>
-    <Menu ref="menu"></Menu>
+    <Menu ref="menu" @trigger="handleTrigger($event)"></Menu>
+    <ImageCropper ref="imageCropper"/>
     <EditionModal />
     <FabledModal />
     <RolesModal />
@@ -47,6 +48,7 @@ import { version } from "../package.json";
 import TownSquare from "./components/TownSquare";
 import TownInfo from "./components/TownInfo";
 import Menu from "./components/Menu";
+import ImageCropper from "./components/ImageCropper";
 import RolesModal from "./components/modals/RolesModal";
 import EditionModal from "./components/modals/EditionModal";
 import Intro from "./components/Intro";
@@ -70,6 +72,7 @@ export default {
     TownInfo,
     TownSquare,
     Menu,
+    ImageCropper,
     EditionModal,
     RolesModal,
     Gradients
@@ -155,6 +158,9 @@ export default {
     handleTrigger ([method]) {
       if (typeof this.$refs.menu[method] === 'function') {
         this.$refs.menu[method]();
+      }
+      if (typeof this.$refs.imageCropper[method] === 'function') {
+        this.$refs.imageCropper[method]();
       }
     }
   }
