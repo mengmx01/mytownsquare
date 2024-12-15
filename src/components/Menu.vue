@@ -541,6 +541,11 @@ export default {
         if (this.session.bootlegger) {
           this.$store.commit("session/setBootlegger", "");
         }
+
+        // reset secret vote
+        if (this.session.isSecretVote) {
+          this.$store.commit("session/setSecretVote", false)
+        }
       }
     },
     addPlayer() {

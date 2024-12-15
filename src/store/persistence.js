@@ -94,6 +94,9 @@ module.exports = store => {
   if (localStorage.getItem("playerProfileImage")) {
     store.commit("session/updatePlayerProfileImage", localStorage.getItem("playerProfileImage"));
   }
+  if (localStorage.getItem("secretVote")) {
+    store.commit("session/setSecretVote", localStorage.getItem("secretVote"));
+  }
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
@@ -233,6 +236,9 @@ module.exports = store => {
         break;
       case "session/updatePlayerProfileImage":
         localStorage.setItem("playerProfileImage", payload);
+        break;
+      case "session/setSecretVote":
+        localStorage.setItem("secretVote", payload);
     }
   });
   // console.log(localStorage);

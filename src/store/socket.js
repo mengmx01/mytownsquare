@@ -331,6 +331,7 @@ class LiveSession {
         gamestate: this._gamestate,
         isNight: grimoire.isNight,
         isVoteHistoryAllowed: session.isVoteHistoryAllowed,
+        isSecretVote: session.isSecretVote,
         nomination: session.nomination,
         votingSpeed: session.votingSpeed,
         lockedVote: session.lockedVote,
@@ -354,6 +355,7 @@ class LiveSession {
       isLightweight,
       isNight,
       isVoteHistoryAllowed,
+      isSecretVote,
       nomination,
       votingSpeed,
       votes,
@@ -407,6 +409,7 @@ class LiveSession {
     if (!isLightweight) {
       this._store.commit("toggleNight", !!isNight);
       this._store.commit("session/setVoteHistoryAllowed", isVoteHistoryAllowed);
+      this._store.commit("session/setSecretVote", isSecretVote);
       this._store.commit("session/nomination", {
         nomination,
         votes,

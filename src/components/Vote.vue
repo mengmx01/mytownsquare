@@ -272,6 +272,7 @@ export default {
     },
     setSecretVote() {
       if (this.session.isSpectator) return;
+      if (this.session.isVoteInProgress) return;
       const isSecretVote = !this.session.isSecretVote;
       this.$store.commit("session/setSecretVote", isSecretVote);
     }
