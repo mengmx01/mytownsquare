@@ -361,7 +361,7 @@ export default {
     changeName() {
       var name = prompt("输入玩家昵称").trim();
       if (!name) return; //will not execute because .trim() incurs error first
-      while (name === "空座位"){
+      while (name === "空座位" || name === "说书人"){
         alert("昵称非法！");
         name = prompt("输入玩家昵称").trim();
         if (!name) return; //will not execute because .trim() incurs error first

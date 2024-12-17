@@ -1369,11 +1369,32 @@ export default store => {
     }
   });
 
+  store.commit("session/setSpectator", true);
+  store.commit("toggleGrimoire", false);
+
   // check for session Id in hash
   const sessionId = window.location.hash.substr(1);
   if (sessionId) {
-    store.commit("session/setSpectator", true);
-    store.commit("session/setSessionId", sessionId);
-    store.commit("toggleGrimoire", false);
+    if (!session._store.state.session.playerName) {
+      var name = prompt("输入玩家昵称");
+      if (name) {
+        name = name.trim();
+        while (name === "空座位" || name === "说书人"){
+          alert("昵称非法！");
+          name = prompt("输入玩家昵称");
+          if (name) {
+            name = name.trim();
+          };
+        }
+      };
+      if (name) {
+        store.commit("session/setPlayerName", name);
+      }
+    };
+    if (session._store.state.session.playerName) {
+      store.commit("session/setSessionId", sessionId);
+    } else {
+      store.commit("session/setSessionId", "");
+    }
   }
 };
