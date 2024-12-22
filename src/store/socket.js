@@ -2,7 +2,7 @@ class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
     // this._wss = "wss://botcgrimoire.site:8080/";
-    this._wss = "wss://botcgrimoire.site:8443/";
+    this._wss = "wss://botcgrimoire.uk:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;
@@ -1040,17 +1040,6 @@ class LiveSession {
    */
   startTalking(payload){
     if (payload < 0) return;
-    // console.log(this._store.state.session);
-    // var isSeated = false;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (!player.isTalking) {
-    //     player.isTalking = true;
-    //     isSeated = true;
-    //   }
-    // })
-    // if (!isSeated) return;
-    // console.log('sent');
     this._send("startedTalking", payload);
   }
 
@@ -1059,13 +1048,7 @@ class LiveSession {
    */
   _handleStartTalking(payload){
     if (payload < 0) return;
-    // console.log('received');
-    // console.log(this._store.state.players.players);
     this._store.state.players.players[payload].isTalking = true;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (!player.isTalking) player.isTalking = true;
-    // })
   }
 
   
@@ -1369,12 +1352,12 @@ export default store => {
     }
   });
 
-  store.commit("session/setSpectator", true);
-  store.commit("toggleGrimoire", false);
-
   // check for session Id in hash
   const sessionId = window.location.hash.substr(1);
   if (sessionId) {
+    store.commit("session/setSpectator", true);
+    store.commit("toggleGrimoire", false);
+
     if (!session._store.state.session.playerName) {
       var name = prompt("输入玩家昵称");
       if (name) {
