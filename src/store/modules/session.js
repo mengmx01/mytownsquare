@@ -63,7 +63,10 @@ const mutations = {
   setPing: set("ping"),
   setVotingSpeed: set("votingSpeed"),
   setVoteInProgress: set("isVoteInProgress"),
-  setMarkedPlayer: set("markedPlayer"),
+  setMarkedPlayer(state, {val, force}) {
+    if (!force && state.isSecretVote && val >= 0) return;
+    state.markedPlayer = val;
+  },
   setNomination: set("nomination"),
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
   setTalking: set("isTalking"),
@@ -89,9 +92,14 @@ const mutations = {
   },
   nomination(
     state,
-    { nomination, votes, votingSpeed, lockedVote, isVoteInProgress } = {}
+    { nomination, votes, votingSpeed, lockedVote, isVoteInProgress, nominatedPlayer = null } = {}
   ) {
     state.nomination = nomination || false;
+    if (!!nomination && !!nominatedPlayer && state.isSecretVote && nominatedPlayer.role.team != 'traveler') {
+      for(let i=0; i<votes.length; i++) {
+        if (i != state.claimedSeat) {votes[i] = false}
+      }
+    }
     state.votes = votes || [];
     state.votingSpeed = votingSpeed || state.votingSpeed;
     state.lockedVote = lockedVote || 0;

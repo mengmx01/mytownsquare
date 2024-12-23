@@ -410,14 +410,16 @@ class LiveSession {
       this._store.commit("toggleNight", !!isNight);
       this._store.commit("session/setVoteHistoryAllowed", isVoteHistoryAllowed);
       this._store.commit("session/setSecretVote", isSecretVote);
+      const nominatedPlayer = nomination.length ? players[nomination[1]] : null;
       this._store.commit("session/nomination", {
         nomination,
         votes,
         votingSpeed,
         lockedVote,
-        isVoteInProgress
+        isVoteInProgress,
+        nominatedPlayer
       });
-      this._store.commit("session/setMarkedPlayer", markedPlayer);
+      this._store.commit("session/setMarkedPlayer", {val: markedPlayer, force: false});
       this._store.commit("players/setFabled", {fabled});
     }
   }
@@ -1006,12 +1008,23 @@ class LiveSession {
       this._store.state.session.playerId === player.id ||
       !this._isSpectator
     ) {
-      // send vote only if it is your own vote or you are the storyteller
-      this._send("vote", [
-        index,
-        this._store.state.session.votes[index],
-        !this._isSpectator
-      ]);
+      if (
+        this._store.state.players.players[this._store.state.session.nomination[1]].role.team === "traveler" ||
+        !this._store.state.session.isSecretVote
+      ) { // send to everyone if exile or secret vote is off
+        // send vote only if it is your own vote or you are the storyteller
+        this._send("vote", [
+          index,
+          this._store.state.session.votes[index],
+          !this._isSpectator
+        ]);
+      } else { // otherwise only to ST
+        this._sendDirect("host", "vote", [
+          index,
+          this._store.state.session.votes[index],
+          !this._isSpectator
+        ])
+      }
     }
   }
 
@@ -1019,18 +1032,22 @@ class LiveSession {
    * Send a status change to whether anonymous votes are in progress. ST to players only
    */
   setSecretVote(isSecretVote){
+    if (this._isSpectator) return;
     this._send("secretVote", isSecretVote);
   }
 
   _handleSecretVote(isSecretVote){
+    if (!this._isSpectator) return;
     this._store.state.session.isSecretVote = isSecretVote;
   }
 
   setBootlegger(content){
+    if (this._isSpectator) return;
     this._send("bootlegger", content);
   }
 
   _handleSetBootlegger(content){
+    if (!this._isSpectator) return;
     this._store.state.session.bootlegger = content;
   }
 
@@ -1057,15 +1074,6 @@ class LiveSession {
    * Send this update to all clients in the channel
    */
   stopTalking(payload){
-    // var isSeated = false;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (player.isTalking) {
-    //     player.isTalking = false;
-    //     isSeated = true;
-    //   }
-    // })
-    // if (!isSeated) return;
     if (payload < 0) return;
     this._send("stoppedTalking", payload);
   }
@@ -1074,10 +1082,6 @@ class LiveSession {
    * Set talking status to false to disable glowing animation when received
    */
   _handleStopTalking(payload){
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (player.isTalking) player.isTalking = false;
-    // })
     if (payload < 0) return;
     this._store.state.players.players[payload].isTalking = false;
   }
@@ -1091,7 +1095,10 @@ class LiveSession {
   _handleVote([index, vote, fromST]) {
     // do not reveal vote when anonymous voting is in progress, unless it's ST changing that player's vote
     const voteId = this._store.state.players.players[index].id;
-    if (this._isSpectator && this._store.state.session.isSecretVote && voteId != this._store.state.session.playerId) return;
+    if (
+      this._isSpectator && voteId != this._store.state.session.playerId && 
+      this._store.state.session.isSecretVote && this._store.state.players.players[this._store.state.session.nomination[1]].role.team != "traveler"
+    ) return;
     
     const { session, players } = this._store.state;
     const playerCount = players.players.length;
@@ -1122,14 +1129,15 @@ class LiveSession {
   _handleLock([lock, vote]) {
     if (!this._isSpectator) return;
     this._store.commit("session/lockVote", lock);
-    // do not lock vote when anonymous voting is in progress
-    if (this._isSpectator && this._store.state.session.isSecretVote) return;
+    
     if (lock > 1) {
       const { lockedVote, nomination } = this._store.state.session;
       const { players } = this._store.state.players;
       const index = (nomination[1] + lockedVote - 1) % players.length;
+      // record as not voted when anonymous voting is in progress
+      const displayVote = this._store.state.session.isSecretVote ? false : vote;
       if (this._store.state.session.votes[index] !== vote) {
-        this._store.commit("session/vote", [index, vote]);
+        this._store.commit("session/vote", [index, displayVote]);
       }
     }
   }
