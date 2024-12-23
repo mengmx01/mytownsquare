@@ -93,10 +93,10 @@
           @click="nominatePlayer(player)"
           title="Nominate this player"
         />
-        <div v-if="!player.id && session.isSpectator" class="sitDown">
+        <div v-if="!player.id && session.isSpectator" class="sitDown" :style=font>
           <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 坐下
         </div>
-        <div v-if="!player.id && !session.isSpectator && grimoire.isShowVacant" class="sitDown">
+        <div v-if="!player.id && !session.isSpectator && grimoire.isShowVacant" class="sitDown" :style="font">
           <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 空位
         </div>
           
@@ -276,6 +276,11 @@ export default {
       } else {
         return { width: 12 + this.grimoire.zoom + unit };
       }
+    },
+    font: function() {
+      const width = this.windowWidth;
+      const referenceWidth = 1280;
+      return "font-size: " + (this.grimoire.zoom + 10) * 2 * width / referenceWidth + "px";
     }
   },
   data() {
