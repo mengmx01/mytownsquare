@@ -119,36 +119,44 @@ const mutations = {
     votedPlayers.forEach(player => {
       player.seat = players.indexOf(player) + 1;
     });
-    state.voteHistory.push({
+    this.commit("session/addVotes", {
       timestamp: new Date(),
-      nominator: (state.nomination[0] + 1).toString() + ". " + players[state.nomination[0]].name,
-      nominee: (state.nomination[1] + 1).toString() + ". " + players[state.nomination[1]].name,
+      nominator: (state.nomination[0] + 1).toString() + ". " + (players[state.nomination[0]].id ? players[state.nomination[0]].name : ""),
+      nominee: (state.nomination[1] + 1).toString() + ". " + (players[state.nomination[1]].id ? players[state.nomination[1]].name : ""),
       type: isExile ? "流放" : "处决",
       mode: state.isSecretVote ? "闭眼" : "睁眼",
       majority: Math.ceil(
         players.filter(player => !player.isDead || isExile).length / 2
       ),
       votes: votedPlayers
-        // .filter((player, index) => state.votes[index])
-        .map(({ seat, name }) => (seat + ". " + name))
+        .map(({ seat, name }) => (seat + ". " + name)),
+      save: true
+    })
+  },
+  addVotes(state, {timestamp, nominator, nominee, type, mode, majority, votes, save}) {
+    // 重写时间
+    const newTime = save ? timestamp : new Date(timestamp);
+    state.voteHistory.push({
+      timestamp: newTime,
+      nominator,
+      nominee,
+      type,
+      mode,
+      majority,
+      votes
     });
   },
-  addVoteSelected(state) {
-    state.voteSelected.push(false);
+  addVoteSelected(state, {selected}) {
+    state.voteSelected.push(selected);
   },
   setVoteSelected(state, {index, value}) {
     Vue.set(state.voteSelected, index, value);
   },
   clearVoteHistory(state, voteIndex = null) {
-    if (voteIndex == null) {
+    if (voteIndex == null || voteIndex.length === 0) {
       state.voteHistory = [];
       state.voteSelected = [];
       return;
-    }
-    const length = voteIndex.length;
-    if (length === 0) {
-      state.voteHistory = [];
-      state.voteSelected = [];
     }
     else {
       state.voteHistory = state.voteHistory.filter((_, index) => !voteIndex.includes(index));

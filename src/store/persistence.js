@@ -78,6 +78,18 @@ module.exports = store => {
     store.commit("session/setSpectator", spectator);
     store.commit("session/setSessionId", sessionId);
   }
+  if (localStorage.getItem("votes")) {
+    const votes = JSON.parse(localStorage.getItem("votes"));
+    votes.forEach(voteHistory => {
+      store.commit("session/addVotes", voteHistory);
+    })
+  }
+  if (localStorage.getItem("votesSelected")) {
+    const votesSelected = JSON.parse(localStorage.getItem("votesSelected"));
+    votesSelected.forEach(voteSelected => {
+      store.commit("session/addVoteSelected", voteSelected);
+    })
+  }
   if (localStorage.getItem("customBootlegger")) {
     const customBootlegger = JSON.parse(localStorage.getItem("customBootlegger"));
     store.commit("session/setBootlegger", customBootlegger);
@@ -222,6 +234,40 @@ module.exports = store => {
           localStorage.removeItem("claimedSeat");
         }
         break;
+      case "session/addVotes": {
+        if (payload.save) {
+          const votes = localStorage.getItem("votes") ? JSON.parse(localStorage.getItem("votes")) : [];
+          payload.save = false;
+          votes.push(payload);
+          localStorage.setItem("votes", JSON.stringify(votes));
+        }
+        break;
+      }
+      case "session/addVoteSelected": {
+        if (payload.save) {
+          const votesSelected = localStorage.getItem("votesSelected") ? JSON.parse(localStorage.getItem("votesSelected")) : [];
+          payload.save = false;
+          votesSelected.push(payload);
+          localStorage.setItem("votesSelected", JSON.stringify(votesSelected));
+        }
+        break;
+      }
+      case "session/clearVoteHistory": {
+        if (!localStorage.getItem("votes")) break;
+        if (!localStorage.getItem("votesSelected")) break;
+        if (!payload || payload.length === 0) {
+          localStorage.removeItem("votes");
+          localStorage.removeItem("votesSelected");
+        } else {
+          const votes = JSON.parse(localStorage.getItem("votes"));
+          const votesSelected = JSON.parse(localStorage.getItem("votesSelected"))
+          const newVotes = votes.filter((_, index) => !payload.includes(index));
+          const newVotesSelected = votesSelected.filter((_, index) => !payload.includes(index));
+          localStorage.setItem("votes", JSON.stringify(newVotes));
+          localStorage.setItem("votesSelected", JSON.stringify(newVotesSelected));
+        }
+        break;
+      }
       case "session/setBootlegger":
         localStorage.setItem("customBootlegger", JSON.stringify(payload));
         break;
