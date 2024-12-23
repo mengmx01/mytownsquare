@@ -147,7 +147,7 @@ export default {
       if (this.isChatMin) return;
       const ratio = this.windowWidth / this.windowHeight;
       if (ratio < 1) return 'width: 300px; height: 400px;';
-      return 'width: 30%; height: 40%;';
+      return 'width: 25%; height: 40%;';
     }
   },
   data() {
@@ -907,7 +907,6 @@ export default {
 }
 
 .chat.alert .title::after {
-    content: '看私信！！！';
     font-size: 70%;
     font-weight: bold;
     position: absolute;

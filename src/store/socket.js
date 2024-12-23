@@ -178,6 +178,7 @@ class LiveSession {
             "session/addHistory",
             this._store.state.players.players
           );
+          this._store.commit("session/addVoteSelected", {selected: false, save: true});
         }
         this._store.commit("session/nomination", { nomination: params });
         break;
