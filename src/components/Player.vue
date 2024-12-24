@@ -279,8 +279,9 @@ export default {
     },
     font: function() {
       const width = this.windowWidth;
-      const referenceWidth = 1280;
-      return "font-size: " + (this.grimoire.zoom + 10) * 2 * width / referenceWidth + "px";
+      const height = this.windowHeight;
+      const referenceWidth = 1080;
+      return "font-size: " + (this.grimoire.zoom + 20) * Math.min(width, height) / referenceWidth + "px";
     }
   },
   data() {
@@ -631,7 +632,7 @@ export default {
     background: rgba(0, 0, 0, 0.5);
     padding: 2px 5px;
     border-radius: 10px;
-    border: 3px solid #000;
+    border: 2px solid #000;
     // margin-left: 15px;
     cursor: pointer;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
