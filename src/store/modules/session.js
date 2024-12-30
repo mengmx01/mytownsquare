@@ -43,7 +43,7 @@ const state = () => ({
   timer: 480,
   interval: null,
   isTalking: false,
-  isListening: false
+  listeningFrame: null
 });
 
 const getters = {};
@@ -70,7 +70,7 @@ const mutations = {
   setNomination: set("nomination"),
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
   setTalking: set("isTalking"),
-  setListening: set("isListening"),
+  setListeningFrame: set("listeningFrame"),
   setSecretVote: set("isSecretVote"),
   setBootlegger: set("bootlegger"),
   claimSeat: set("claimedSeat"),
@@ -217,10 +217,12 @@ const mutations = {
   },
   startTalking(state, seatNum){
     if (seatNum < 0) return;
+    state.isTalking = true;
     this.commit("players/setIsTalking", {seatNum, isTalking: true});
   },
   stopTalking(state, seatNum){
     if (seatNum < 0) return;
+    state.isTalking = false;
     this.commit("players/setIsTalking", {seatNum, isTalking: false});
   }
 };

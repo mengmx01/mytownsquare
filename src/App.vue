@@ -141,7 +141,7 @@ export default {
           this.$store.commit("toggleModal");
           break;
         case "f2":
-          this.$refs.menu.stopListening(false);
+          this.$refs.menu.stopListening('keyboard');
           break;
       }
     },
@@ -150,8 +150,8 @@ export default {
       switch (key.toLocaleLowerCase()) {
         case "f2":
           if (this.session.claimedSeat < 0) return;
-          if (this.session.isListening) return;
-          this.$refs.menu.startListening(false);
+          if (this.session.listeningFrame) return;
+          this.$refs.menu.startListening('keyboard');
           break;
       }
     },

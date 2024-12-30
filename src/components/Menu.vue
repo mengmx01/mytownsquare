@@ -1,15 +1,15 @@
 <template>
   <div id="controls">
     <span v-if="session.sessionId">
-      <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && session.isListening"
-      @click="stopListening()"
+      <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && listeningFrame"
+      @click="stopListening(microphoneSetting)"
       />
-      <font-awesome-icon icon="microphone-slash" v-if="microphoneSetting === 'free' && !session.isListening"
-      @click="startListening()"
+      <font-awesome-icon icon="microphone-slash" v-if="microphoneSetting === 'free' && !listeningFrame"
+      @click="startListening(microphoneSetting)"
       />
       <font-awesome-icon icon="keyboard" v-if="microphoneSetting === 'keyboard'" :style="keyboardIcon"/>
       
-      <select id="microphone" v-model="microphoneSetting">
+      <select id="microphone" v-model="microphoneSetting" @change="stopListening(microphoneSetting)">
         <option value="free">自由发言</option>
         <option value="keyboard">按f2发言</option>
       </select>
@@ -335,7 +335,7 @@ export default {
     },
     keyboardIcon() {
       return {
-        color: this.session.isListening ? 'red' : 'white'
+        color: this.listeningFrame ? 'red' : 'white'
       }
     }
   },
@@ -348,7 +348,13 @@ export default {
       distributingGrimoire: false,
       isSendingBluff: true,
       recognition: null,
-      microphoneSetting: "free"
+      microphoneSetting: "free",
+      // 语音检测
+      audioContext: null,
+      audioStream: null,
+      analyser: null,
+      source: null,
+      listeningFrame: null // also in session.js for global reference
     };
   },
   methods: {
@@ -612,19 +618,76 @@ export default {
       this.$store.commit("session/stopTimer");
       this.timing = false;
     },
-    startListening(free = true) {
-      if (this.session.isListening) return;
-      if (this.microphoneSetting === "free" && !free) return;
-      if (this.microphoneSetting === "keyboard" && free) return;
-      this.$store.commit("session/setListening", true);
-      this.recognition.start();
+    async initAudio() {
+      // Initialize audioContext and audioStream if not already done
+      if (!this.audioContext) {
+        this.audioContext = new AudioContext();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioStream = stream;
+
+        this.source = this.audioContext.createMediaStreamSource(stream);
+        this.analyser = this.audioContext.createAnalyser();
+        this.analyser.fftSize = 256;
+        this.source.connect(this.analyser);
+      }
     },
-    stopListening(free = true) {
-      if (!this.session.isListening) return;
-      if (this.microphoneSetting === "free" && !free) return;
-      if (this.microphoneSetting === "keyboard" && free) return;
-      this.$store.commit("session/setListening", false);
-      this.recognition.stop();
+    runAudioDetection() {
+      // Web Audio API 语音检测
+      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      const SILENCE_THRESHOLD = 120; // Adjust as needed
+      const HUMAN_VOICE_RANGE = { min: 250, max: 400 }; // Adjust based on actual FFT resolution
+
+      // Check for microphone activity
+      const detectSpeechActivity = () => {
+        if (!this.analyser) return;
+        this.analyser.getByteFrequencyData(dataArray);
+
+        // Analyze frequency bins corresponding to the human voice range
+        const sampleRate = this.audioContext.sampleRate;
+        const binCount = this.analyser.frequencyBinCount;
+        const binSize = sampleRate / (2 * binCount);
+        let totalVolume = 0;
+        for (let i = 0; i < binCount; i++) {
+          const frequency = i * binSize;
+          if (frequency >= HUMAN_VOICE_RANGE.min && frequency <= HUMAN_VOICE_RANGE.max) {
+            totalVolume += dataArray[i];
+          }
+        }
+
+        if (totalVolume > SILENCE_THRESHOLD && !this.session.isTalking) {
+          if (!this.session.isTalking) {
+            this.$store.commit("session/startTalking", this.session.claimedSeat);
+          }
+        } else if (totalVolume <= SILENCE_THRESHOLD && this.session.isTalking) {
+          if (this.session.isTalking) {
+            this.$store.commit("session/stopTalking", this.session.claimedSeat);
+          }
+        }
+
+        this.listeningFrame = requestAnimationFrame(detectSpeechActivity);
+        this.$store.commit("session/setListeningFrame", this.listeningFrame);
+      }
+
+      detectSpeechActivity();
+    },
+    startListening(mode) {
+      if (this.listeningFrame) return;
+      if (mode != this.microphoneSetting) return;
+      
+      this.initAudio().then(() => {
+        this.runAudioDetection();
+      })
+    },
+    stopListening(mode) {
+      if (!this.listeningFrame) return;
+      if (mode != this.microphoneSetting) return;
+
+      if (this.listeningFrame) {
+        cancelAnimationFrame(this.listeningFrame);
+        this.listeningFrame = null;
+        this.$store.commit("session/setListeningFrame", null);
+      }
+      this.$store.commit("session/stopTalking", this.session.claimedSeat);
     },
     ...mapMutations([
       "toggleGrimoire",
@@ -637,19 +700,6 @@ export default {
       "setZoom",
       "toggleModal"
     ])
-  },
-  mounted() {
-    // 语音检测
-    this.recognition = new window.webkitSpeechRecognition;
-    this.recognition.continuous = false;
-    this.recognition.onend = () => {
-      this.$store.commit("session/stopTalking", this.session.claimedSeat);
-      if (this.session.isListening) this.recognition.start();
-    }
-    this.recognition.onspeechstart = () => {
-      if (!this.session.isListening) return;
-      this.$store.commit("session/startTalking", this.session.claimedSeat);
-    }
   }
 };
 </script>

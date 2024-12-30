@@ -106,6 +106,9 @@ class LiveSession {
         "getGamestate",
         this._store.state.session.playerId
       );
+      if (this._store.state.session.claimedSeat >= 0 && !this._store.state.session.isListening && !this._store.state.session.isTalking) {
+        this._store.commit("session/stopTalking", this._store.state.session.claimedSeat);
+      }
     } else {
       this.sendGamestate();
     }
@@ -279,6 +282,9 @@ class LiveSession {
     this._store.commit("session/setPlayerCount", 0);
     this._store.commit("session/setPing", 0);
     this._isSpectator = this._store.state.session.isSpectator;
+    if (this._store.state.session.claimedSeat >= 0) {
+      this._store.commit("session/stopTalking", this._store.state.session.claimedSeat)
+    }
     this._open(channel);
   }
 
