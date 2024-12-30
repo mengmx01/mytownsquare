@@ -315,7 +315,7 @@ wss.on("connection", function connection(ws, req) {
     }
   });
   ws.on("close", () => {
-    console.log("client " + ws.playerId + " is disconnecting! ==========");
+    console.log("client " + ws.playerId + " is disconnecting! Code: " + code + " Reason: " + reason + "==========");
   })
 });
 
