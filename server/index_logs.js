@@ -1,6 +1,6 @@
 const fs = require("fs");
-const https = require("https");
-// const http = require("http");
+// const https = require("https");
+const http = require("http");
 const WebSocket = require("ws");
 const client = require("prom-client");
 const path = require("path");
@@ -22,8 +22,8 @@ if (process.env.NODE_ENV !== "development") {
   options.key = fs.readFileSync("key.pem");
 }
 
-const server = https.createServer(options);
-// const server = http.createServer(options);
+// const server = https.createServer(options);
+const server = http.createServer(options);
 
 const skipVerification = true;
 
@@ -116,13 +116,20 @@ for (let metric in metrics) {
 
 // a new client connects
 wss.on("connection", function connection(ws, req) {
-  console.log("connection established!");
-  console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-  console.log(req.headers.origin);
+  console.log("new connection established! ==========================");
+  console.log("requesting from port" + (req.headers['x-forwarded-for'] || req.connection.remoteAddress));
+  console.log("requesting from origin " + req.headers.origin);
   // url pattern: clocktower.online/<channel>/<playerId|host>
   const url = req.url.toLocaleLowerCase().split("/");
   ws.playerId = url.pop();
   ws.channel = url.pop();
+  console.log("connected client player ID ---------------------------")
+  if (channels[ws.channel]) {
+    channels[ws.channel].forEach(client => {
+      console.log(client.playerId);
+    });
+  }
+  console.log("end --------------------------------------------------")
   // check for another host on this channel
   if (
     ws.playerId === "host" &&
@@ -307,6 +314,9 @@ wss.on("connection", function connection(ws, req) {
         break;
     }
   });
+  ws.on("close", () => {
+    console.log("client " + ws.playerId + " is disconnecting! ==========");
+  })
 });
 
 // start ping interval timer
