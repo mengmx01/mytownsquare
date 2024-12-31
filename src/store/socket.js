@@ -572,6 +572,11 @@ class LiveSession {
           value: role
         });
       }
+    } else if (property === "isSecretVoteless") {
+      // 如果是玩家则直接移除投票标记，否则不更新
+      if (player.id === this._store.state.session.playerId) {
+        this._store.commit("players/update", { player, property: 'isVoteless', value });
+      }
     } else {
       // just update the player otherwise
       this._store.commit("players/update", { player, property, value });
@@ -1036,12 +1041,20 @@ class LiveSession {
           this._store.state.session.votes[index],
           !this._isSpectator
         ]);
-      } else { // otherwise only to ST
-        this._sendDirect("host", "vote", [
-          index,
-          this._store.state.session.votes[index],
-          !this._isSpectator
-        ])
+      } else { // otherwise only send direct messages
+        if (this._isSpectator) {
+          this._sendDirect("host", "vote", [
+            index,
+            this._store.state.session.votes[index],
+            !this._isSpectator
+          ])
+        } else {
+          this._sendDirect(player.id, "vote", [
+            index,
+            this._store.state.session.votes[index],
+            !this._isSpectator
+          ])
+        }
       }
     }
   }

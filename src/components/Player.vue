@@ -113,9 +113,9 @@
       <!-- Ghost vote icon -->
       <font-awesome-icon
         icon="vote-yea"
-        class="has-vote"
+        :class="player.isSecretVoteless ? 'secret-no-vote' : 'has-vote'"
         v-if="player.isDead && !player.isVoteless"
-        @click="updatePlayer('isVoteless', true)"
+        @click="toggleVote()"
         title="Ghost vote"
       />
 
@@ -341,6 +341,17 @@ export default {
         if (this.player.isVoteless) {
           this.updatePlayer("isVoteless", false);
         }
+        if (this.player.isSecretVoteless) {
+          this.updatePlayer("isSecretVoteless", false);
+          this.updatePlayer("isVoteless", false);
+        }
+      }
+    },
+    toggleVote() {
+      if (this.session.isSecretVote && !this.player.isSecretVoteless) {
+        this.updatePlayer('isSecretVoteless', true);
+      } else {
+        this.updatePlayer('isVoteless', true);
       }
     },
     changeName() {
@@ -719,6 +730,24 @@ li.move:not(.from) .player .overlay svg.move {
 }
 
 .has-vote {
+  position: absolute;
+  margin-top: -15%;
+  right: 2px;
+}
+
+.player .secret-no-vote {
+  color: red;
+  filter: drop-shadow(0 0 3px black);
+  transition: opacity 250ms;
+  z-index: 2;
+
+  #townsquare.public & {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.secret-no-vote {
   position: absolute;
   margin-top: -15%;
   right: 2px;

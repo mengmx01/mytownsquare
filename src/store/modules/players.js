@@ -5,6 +5,7 @@ const NEWPLAYER = {
   role: {},
   reminders: [],
   isVoteless: false,
+  isSecretVoteless: false,
   isDead: false,
   pronouns: "",
   newMessages: 0,
