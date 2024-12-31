@@ -166,10 +166,10 @@ wss.on("connection", function connection(ws, req) {
       ws.send(JSON.stringify(["popup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
     }
   }
-  if (ws.playerRole != "host" && !channels[ws.channel]) {
-    ws.close(1000, `房间"${ws.channel}"不存在！`)
-    return;
-  }
+  // if (ws.playerRole != "host" && !channels[ws.channel]) {
+  //   ws.close(1000, `房间"${ws.channel}"不存在！`)
+  //   return;
+  // }
   ws.isAlive = true;
   ws.pingStart = new Date().getTime();
   ws.counter = 0;
