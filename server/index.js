@@ -16,7 +16,6 @@ register.setDefaultLabels({
 const PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
 
 const options = {};
-console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV !== "development") {
   options.cert = fs.readFileSync("cert.pem");
   options.key = fs.readFileSync("key.pem");
@@ -119,25 +118,54 @@ wss.on("connection", function connection(ws, req) {
   // url pattern: clocktower.online/<channel>/<playerId|host>
   const url = req.url.toLocaleLowerCase().split("/");
   ws.playerId = url.pop();
+  if (ws.playerId === "host") {
+    ws.playerId = url.pop();
+    ws.playerRole = "host";
+  } else {
+    ws.playerRole = "player";
+  }
   ws.channel = url.pop();
+  ws.playerIp = req.connection.remoteAddress.split(", ")[0];
   // check for another host on this channel
   if (
-    ws.playerId === "host" &&
+    ws.playerRole === "host" &&
     channels[ws.channel] &&
     channels[ws.channel].some(
       client =>
         client !== ws &&
         client.readyState === WebSocket.OPEN &&
-        client.playerId === "host"
+        (client.playerRole === "host" || client.playerRole === "_host")
     )
   ) {
-    console.log(ws.channel, "duplicate host");
-    ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
-    metrics.connection_terminated_host.inc();
-    return;
+    const playerId = [];
+    const playerIdHost = [];
+    channels[ws.channel].forEach(client => {
+      if (
+        client !== ws &&
+        client.readyState === WebSocket.OPEN &&
+        (client.playerRole === "host" || client.playerRole === "_host")
+      ) {
+        playerId.push(client.playerId);
+        if (client.playerRole === "host") {
+          playerIdHost.push(client.playerId);
+        }
+      }
+    });
+    
+    if (!playerId.includes(ws.playerId)) {
+      console.log(ws.channel, "duplicate host");
+      ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
+      metrics.connection_terminated_host.inc();
+      return;
+    } else if (playerIdHost.includes(ws.playerId)) {
+      console.log(ws.channel, "duplicate entry");
+      
+      ws.send(JSON.stringify(["popup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
+    }
   }
-  if (ws.playerId != "host" && !channels[ws.channel]) {
+  if (ws.playerRole != "host" && !channels[ws.channel]) {
     ws.close(1000, `房间"${ws.channel}"不存在！`)
+    return;
   }
   ws.isAlive = true;
   ws.pingStart = new Date().getTime();
@@ -147,6 +175,8 @@ wss.on("connection", function connection(ws, req) {
     channels[ws.channel] = [];
   }
   channels[ws.channel].push(ws);
+  // 说书人重连后删除 _host 标签
+  channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
   // start ping pong
   ws.ping(noop);
   ws.on("pong", heartbeat);
@@ -176,7 +206,7 @@ wss.on("connection", function connection(ws, req) {
           if (
             client !== ws &&
             client.readyState === WebSocket.OPEN &&
-            (ws.playerId === "host" || client.playerId === "host")
+            (ws.playerRole === "host" || client.playerRole === "host")
           ) {
             client.send(
               data.replace(/latency/, (client.latency || 0) + (ws.latency || 0))
@@ -200,9 +230,9 @@ wss.on("connection", function connection(ws, req) {
             if (
               client !== ws &&
               client.readyState === WebSocket.OPEN &&
-              dataToPlayer[client.playerId]
+              !!(dataToPlayer[client.playerId] || dataToPlayer[client.playerRole])
             ) {
-              client.send(JSON.stringify(dataToPlayer[client.playerId]));
+              client.send(JSON.stringify(dataToPlayer[client.playerRole === "host" ? "host" : client.playerId]));
               metrics.messages_outgoing.inc();
             }
           });
@@ -211,79 +241,63 @@ wss.on("connection", function connection(ws, req) {
         }
         break;
       case '"uploadfile"':
-          try {
-            const uploadData = JSON.parse(data)[1];
-            const uploadType = Object.keys(uploadData)[0];
-            const playerId = Object.values(uploadData)[0][0];
-            const uploadContent = Object.values(uploadData)[0][1];
-            
-            switch(uploadType) {
-              case "uploadProfileImage":
-                // const extension = uploadContent.split(";base64,")[0].split("/").pop();
-                const extension = 'webp';
-                const profileImageData = uploadContent.split(";base64,").pop();
-                const version = new Date().getTime();
-                // const folderPath = path.join(__dirname, "profile_images");
-                const folderPath = "/usr/share/nginx/html/dist/profile_images";
-                if (!fs.existsSync(folderPath)){
-                    fs.mkdirSync(folderPath);
-                }
-                const fileName = playerId + "." + extension;
-                const filePath = path.join(folderPath, fileName);
-                // fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
-                //   if (err) {
-                //     console.error('Failed to save image:', err);
-                //   } else {
-                //     channels[ws.channel].forEach(function each(client) {
-                //       if (
-                //         client === ws &&
-                //         client.readyState === WebSocket.OPEN
-                //       ) {
-                //         client.send(JSON.stringify(["profileImageReceived", fileName]));
-                //         metrics.messages_outgoing.inc();
-                //       }
-                //     });
-                //   }
-                // });
-                sharp(Buffer.from(profileImageData, 'base64'))
-                  .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
-                  .toFormat('webp') // Convert to WebP format
-                  .toBuffer((err, buffer, info) => {
-                    if (err) {
-                      console.error('Failed to process image:', err);
-                      return;
+        try {
+          const uploadData = JSON.parse(data)[1];
+          const uploadType = Object.keys(uploadData)[0];
+          const playerId = Object.values(uploadData)[0][0];
+          const uploadContent = Object.values(uploadData)[0][1];
+          
+          switch(uploadType) {
+            case "uploadProfileImage":
+              // const extension = uploadContent.split(";base64,")[0].split("/").pop();
+              const extension = 'webp';
+              const profileImageData = uploadContent.split(";base64,").pop();
+              const version = new Date().getTime();
+              // const folderPath = path.join(__dirname, "profile_images");
+              const folderPath = "/usr/share/nginx/html/dist/profile_images";
+              if (!fs.existsSync(folderPath)){
+                  fs.mkdirSync(folderPath);
+              }
+              const fileName = playerId + "." + extension;
+              const filePath = path.join(folderPath, fileName);
+              sharp(Buffer.from(profileImageData, 'base64'))
+                .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
+                .toFormat('webp') // Convert to WebP format
+                .toBuffer((err, buffer, info) => {
+                  if (err) {
+                    console.error('Failed to process image:', err);
+                    return;
+                  }
+                  // Create an empty 512x512 image to use as the base
+                  sharp({
+                    create: {
+                      width: 512,
+                      height: 512,
+                      channels: 4, // Ensure alpha channel for transparency
+                      background: { r: 0, g: 0, b: 0, alpha: 0 }
                     }
-                    // Create an empty 512x512 image to use as the base
-                    sharp({
-                      create: {
-                        width: 512,
-                        height: 512,
-                        channels: 4, // Ensure alpha channel for transparency
-                        background: { r: 0, g: 0, b: 0, alpha: 0 }
-                      }
-                    })
-                    .composite([{ input: buffer, gravity: 'center' }]) // Composite the resized image onto the center
-                    .toFormat('webp') // Convert to WebP format
-                    .toFile(filePath, (err, info) => {
-                      if (err) {
-                        console.error('Failed to save image:', err);
-                      } else {
-                        channels[ws.channel].forEach(function each(client) {
-                          const fileLink = fileName + "?v=" + version;
-                          if (client === ws && client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(["profileImageReceived", fileLink]));
-                            metrics.messages_outgoing.inc();
-                          }
-                        });
-                      }
-                    });
+                  })
+                  .composite([{ input: buffer, gravity: 'center' }]) // Composite the resized image onto the center
+                  .toFormat('webp') // Convert to WebP format
+                  .toFile(filePath, (err, info) => {
+                    if (err) {
+                      console.error('Failed to save image:', err);
+                    } else {
+                      channels[ws.channel].forEach(function each(client) {
+                        const fileLink = fileName + "?v=" + version;
+                        if (client === ws && client.readyState === WebSocket.OPEN) {
+                          client.send(JSON.stringify(["profileImageReceived", fileLink]));
+                          metrics.messages_outgoing.inc();
+                        }
+                      });
+                    }
                   });
-                break;
-            }
-          } catch (e) {
-            console.log("error receiving uploaded file!", e);
+                });
+              break;
           }
-        // })
+        } catch (e) {
+          console.log("error receiving uploaded file!", e);
+        }
         break;
       default:
         // all other messages
@@ -303,6 +317,46 @@ wss.on("connection", function connection(ws, req) {
         break;
     }
   });
+  ws.on("close", (code, reason) => {
+    // 删除房间中断线的连接，以更好处理重复的说书人
+    var close = false;
+    if (code === 1000) {
+      // 如果正常退出（解散）房间，正常删除记录
+      close = true;
+    } else if (code === 1001 || code === 1006) {
+      // 如果说书人因为刷新、关闭或者网络波动断连，加入角色为_host的伪连接以保证房间不被移除
+      if (ws.playerRole === "host") {
+        var count = 0;
+        for (let client in channels[ws.channel]) {
+          if (client.playerRole === "host") count = count + 1;
+          if (count > 1) break;
+        }
+        // 只在最后一个说书人断连时加入_host
+        if (count > 1) {
+          const wsHost = Array.from(ws);
+          wsHost.playerRole = "_host";
+          channels[ws.channel].push(wsHost);
+        }
+      }
+      close = true;
+    }
+
+    if (close) {
+      // 每次断连只删除一个
+      var removed = false;
+      channels[ws.channel] = channels[ws.channel].filter(client => {
+        if (client.playerId === ws.playerId && !removed) {
+          removed = true;
+          return false;
+        }
+        return true;
+      });
+    }
+
+    if (Object.keys(channels[ws.channel]).length == 0) {
+      delete channels[ws.channel];
+    }
+  })
 });
 
 // start ping interval timer
