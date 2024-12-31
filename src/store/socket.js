@@ -31,7 +31,8 @@ class LiveSession {
       this._wss +
         channel +
         "/" +
-        (this._isSpectator ? this._store.state.session.playerId : "host")
+        this._store.state.session.playerId + 
+        (!this._isSpectator ? "/host" : "")
     );
     this._socket.addEventListener("message", this._handleMessage.bind(this));
     this._socket.onopen = this._onOpen.bind(this);
@@ -145,6 +146,9 @@ class LiveSession {
       console.log("unsupported socket message", data);
     }
     switch (command) {
+      case "popup":
+        this._alertPopup(params);
+        break;
       case "getGamestate":
         this.sendGamestate(params);
         break;
@@ -271,11 +275,14 @@ class LiveSession {
    */
   connect(channel) {
     if (!this._store.state.session.playerId) {
+      var playerId;
+      // 禁止host、_host和player作为playerId
+      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player") {
+        playerId = Math.random().toString(36).substr(2);
+      }
       this._store.commit(
         "session/setPlayerId",
-        Math.random()
-          .toString(36)
-          .substr(2)
+        playerId
       );
     }
     this._pings = {};
@@ -304,6 +311,10 @@ class LiveSession {
       this._socket.close(1000);
       this._socket = null;
     }
+  }
+
+  _alertPopup(text){
+    alert(text);
   }
 
   /**

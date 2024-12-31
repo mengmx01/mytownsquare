@@ -366,16 +366,17 @@ export default {
     },
     changeName() {
       var name = prompt("输入玩家昵称").trim();
-      if (!name) return; //will not execute because .trim() incurs error first
+      if (!name) return; // will not execute because .trim() incurs error first
       while (name === "空座位" || name === "说书人"){
         alert("昵称非法！");
         name = prompt("输入玩家昵称").trim();
-        if (!name) return; //will not execute because .trim() incurs error first
+        if (!name) return; // will not execute because .trim() incurs error first
       }
       this.$store.commit("session/setPlayerName", name);
     },
     hostSession() {
       if (this.session.sessionId) return;
+      // const sessionId = prompt("请输入房间号").toString();
       const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
@@ -391,7 +392,7 @@ export default {
         for(let i=0; i < numPlayers; i++){
           this.addPlayer();
         }
-        // this.copySessionUrl();
+        this.copySessionUrl();
       };
     },
     copySessionUrl() {
