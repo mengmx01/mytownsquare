@@ -259,11 +259,8 @@ class LiveSession {
       case "bootlegger":
         this._handleSetBootlegger(params);
         break;
-      case "startedTalking":
-        this._handleStartTalking(params);
-        break;
-      case "stoppedTalking":
-        this._handleStopTalking(params);
+      case "setTalking":
+        this._handleSetTalking(params);
         break;
     }
   }
@@ -1086,35 +1083,18 @@ class LiveSession {
    * Set talking status to true to enable glowing animation
    * Send this update to all clients in the channel
    */
-  startTalking(payload){
-    if (payload < 0) return;
-    this._send("startedTalking", payload);
+  setTalking(payload){
+    if (payload.seatNum < 0 || payload.seatNum >= this._store.state.players.players.length) return;
+    if (!this._store.state.players.players[payload.seatNum].id || this._store.state.players.players[payload.seatNum].id != this._store.state.session.playerId) return;
+    this._send("setTalking", payload);
   }
 
   /**
    * Set talking status to true to enable glowing animation when received
    */
-  _handleStartTalking(payload){
-    if (payload < 0) return;
-    this._store.state.players.players[payload].isTalking = true;
-  }
-
-  
-  /**
-   * Set talking status to false to disable glowing animation
-   * Send this update to all clients in the channel
-   */
-  stopTalking(payload){
-    if (payload < 0) return;
-    this._send("stoppedTalking", payload);
-  }
-
-  /**
-   * Set talking status to false to disable glowing animation when received
-   */
-  _handleStopTalking(payload){
-    if (payload < 0) return;
-    this._store.state.players.players[payload].isTalking = false;
+  _handleSetTalking(payload){
+    if (payload.seatNum < 0 || payload.seatNum >= this._store.state.players.players.length) return;
+    this._store.state.players.players[payload.seatNum].isTalking = payload.isTalking;
   }
 
   /**
@@ -1382,11 +1362,8 @@ export default store => {
       // case "session/setBootlegger":
       //   session.setBootlegger(payload);
       //   break;
-      case "session/startTalking":
-        session.startTalking(payload);
-        break;
-      case "session/stopTalking":
-        session.stopTalking(payload);
+      case "session/setTalking":
+        session.setTalking(payload);
         break;
     }
   });

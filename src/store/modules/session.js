@@ -69,7 +69,6 @@ const mutations = {
   },
   setNomination: set("nomination"),
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
-  setTalking: set("isTalking"),
   setListeningFrame: set("listeningFrame"),
   setSecretVote: set("isSecretVote"),
   setBootlegger: set("bootlegger"),
@@ -215,15 +214,11 @@ const mutations = {
   stopTimer(state){
     clearInterval(state.interval);
   },
-  startTalking(state, seatNum){
-    if (seatNum < 0) return;
-    state.isTalking = true;
-    this.commit("players/setIsTalking", {seatNum, isTalking: true});
-  },
-  stopTalking(state, seatNum){
-    if (seatNum < 0) return;
-    state.isTalking = false;
-    this.commit("players/setIsTalking", {seatNum, isTalking: false});
+  setTalking(state, {seatNum, isTalking}){
+    if (seatNum < 0 || seatNum >= this.state.players.players.length ) return;
+    if (!this.state.players.players[seatNum].id || this.state.players.players[seatNum].id != state.playerId) return;
+    state.isTalking = isTalking;
+    this.commit("players/setIsTalking", {seatNum, isTalking});
   }
 };
 

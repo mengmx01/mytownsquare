@@ -15,8 +15,11 @@
       <div class="button townsfolk" @click="copy">
         <font-awesome-icon icon="copy" /> 复制JSON
       </div>
-      <div class="button demon" @click="load" v-if="!session.isSpectator">
-        <font-awesome-icon icon="cog" /> 加载状态
+      <div class="button demon" @click="loadRoles">
+        <font-awesome-icon icon="cog" /> 加载角色
+      </div>
+      <div class="button" @click="loadState" v-if="!session.isSpectator">
+        <font-awesome-icon icon="cog" /> 加载状态（不推荐）
       </div>
     </div>
   </Modal>
@@ -60,8 +63,64 @@ export default {
     copy: function() {
       navigator.clipboard.writeText(this.input || this.gamestate);
     },
-    load: function() {
+    loadRoles: function() {
+      try {
+        const data = JSON.parse(this.input || this.gamestate);
+        const { bluffs, edition, roles, fabled, players } = data;
+        if (roles && !this.session.isSpectator) {
+          this.$store.commit("setCustomRoles", roles);
+        }
+        if (edition && !this.session.isSpectator) {
+          this.$store.commit("setEdition", edition);
+        }
+        if (bluffs.length) {
+          bluffs.forEach((role, index) => {
+            this.$store.commit("players/setBluff", {
+              index,
+              role: this.$store.state.roles.get(role) || {}
+            });
+          });
+        }
+        if (fabled && !this.session.isSpectator) {
+          this.$store.commit("players/setFabled", {
+            fabled: fabled.map(
+              f =>
+                this.$store.state.fabled.get(f) ||
+                this.$store.state.fabled.get(f.id) ||
+                f
+            )
+          });
+        }
+        if (players && players.length > 0) {
+          const mappedPlayers = this.players.players;
+          for (let i=0; i<players.length; i++) {
+            if (i >= mappedPlayers.length) {
+              if (!this.session.isSpectator) {
+                this.$store.commit("players/add", "")
+              } else {
+                break;
+              }
+            }
+            const player = players[i];
+            const role = this.roles.get(player.role) ? this.roles.get(player.role) : {};
+            const mappedPlayer = mappedPlayers[i];
+            if (role.team != 'traveler' && mappedPlayer.role.team != 'traveler' || !this.session.isSpectator) {
+              this.$store.commit("players/update", {
+                player: mappedPlayer,
+                property: "role",
+                value: role
+              });
+            }
+          }
+        }
+      } catch (e) {
+        alert("无法加载JSON：" + e);
+      }
+    },
+    loadState: function() {
       if (this.session.isSpectator) return;
+      const prompt = confirm("确定要加载所有状态吗？（包括玩家、头像等）");
+      if (!prompt) return;
       try {
         const data = JSON.parse(this.input || this.gamestate);
         const { bluffs, edition, roles, fabled, players } = data;
@@ -103,7 +162,7 @@ export default {
         }
         this.toggleModal("gameState");
       } catch (e) {
-        alert("Unable to parse JSON: " + e);
+        alert("无法加载JSON：" + e);
       }
     },
     ...mapMutations(["toggleModal"])

@@ -657,11 +657,11 @@ export default {
 
         if (totalVolume > SILENCE_THRESHOLD && !this.session.isTalking) {
           if (!this.session.isTalking) {
-            this.$store.commit("session/startTalking", this.session.claimedSeat);
+            this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: true});
           }
         } else if (totalVolume <= SILENCE_THRESHOLD && this.session.isTalking) {
           if (this.session.isTalking) {
-            this.$store.commit("session/stopTalking", this.session.claimedSeat);
+            this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: false});
           }
         }
 
@@ -688,7 +688,7 @@ export default {
         this.listeningFrame = null;
         this.$store.commit("session/setListeningFrame", null);
       }
-      this.$store.commit("session/stopTalking", this.session.claimedSeat);
+      this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: false});
     },
     ...mapMutations([
       "toggleGrimoire",

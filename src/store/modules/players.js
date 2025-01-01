@@ -232,7 +232,10 @@ const mutations = {
     state.image = image;
   },
   setIsTalking(state, {seatNum, isTalking}) {
-    state.players[seatNum].isTalking = isTalking;
+    if (seatNum >= state.players.length) return;
+    if (!state.players[seatNum].id || state.players[seatNum].id != this.state.session.playerId) return;
+    const player = state.players[seatNum];
+    player.isTalking = isTalking;
   }
 };
 
