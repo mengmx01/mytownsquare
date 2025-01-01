@@ -150,6 +150,11 @@
                 :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
             /></em>
           </li>
+          <li @click="clearLocalStorage">
+            清空储存
+            <em
+              ><font-awesome-icon icon="trash-alt"/></em>
+          </li>
         </template>
 
         <template v-if="tab === 'session'">
@@ -689,6 +694,12 @@ export default {
         this.$store.commit("session/setListeningFrame", null);
       }
       this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: false});
+    },
+    clearLocalStorage() {
+      const clear = confirm("确定清空所有内容吗？（将清除昵称头像和聊天记录等）");
+      if (!clear) return;
+      localStorage.clear();
+      alert("清理完成，请刷新网页！");
     },
     ...mapMutations([
       "toggleGrimoire",
