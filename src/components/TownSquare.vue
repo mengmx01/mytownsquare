@@ -112,6 +112,9 @@
       </div>
       </form>
     </div>
+    <!-- <div id="version">
+      <a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024109577号-1</a>
+    </div> -->
   </div>
 </template>
 
@@ -974,4 +977,19 @@ export default {
 #townsquare:not(.spectator) .fabled ul li:hover .token:before {
   opacity: 1;
 }
+
+#version {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background-color: transparent;
+    color: white;
+    padding: 0px;
+}
+
+#version a {
+    color: white;
+    text-decoration: none;
+}
+
 </style>

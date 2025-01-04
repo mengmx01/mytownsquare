@@ -3,6 +3,7 @@ class LiveSession {
     // this._wss = "ws://43.139.3.156:8080/";
     // this._wss = "wss://botcgrimoire.site:8080/";
     this._wss = "wss://botcgrimoire.uk:8443/";
+    // this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;

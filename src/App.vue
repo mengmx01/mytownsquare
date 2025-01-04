@@ -38,7 +38,7 @@
     <VoteHistoryModal />
     <GameStateModal />
     <Gradients />
-    <span id="version">v{{ version }}</span>
+    <!-- <span id="version">v{{ version }}</span> -->
   </div>
 </template>
 
