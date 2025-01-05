@@ -326,7 +326,7 @@ import { mapMutations, mapState } from "vuex";
 
 export default {
   computed: {
-    ...mapState(["grimoire", "session", "edition"]),
+    ...mapState(["grimoire", "session", "edition", "channels"]),
     ...mapState("players", ["players"]),
     formattedTime() {
       const minutes = Math.floor(this.session.timer / 60);
@@ -381,8 +381,8 @@ export default {
     },
     hostSession() {
       if (this.session.sessionId) return;
-      // const sessionId = prompt("请输入房间号").toString();
-      const sessionId = Math.round(Math.random() * 10000).toString();
+      const sessionId = prompt("请输入房间号").toString();
+      // const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
       );
@@ -399,6 +399,25 @@ export default {
         }
         this.copySessionUrl();
       };
+      // let intervalId = setInterval(() => {
+      //   if (!this.session.firstCheck) {
+      //     clearInterval(intervalId);
+      //     intervalId = null;
+      //     // clearTimeout(timeoutId);
+      //   }
+      // }, 100);
+      // const timeoutId = setTimeout(() => {
+      //   clearInterval(intervalId);
+      //   intervalId = null;
+      //   // if (intervalId) {
+      //   //   alert("无法连接到服务器！");
+      //   //   return;
+      //   // }
+      //   // if (!channelAvailable) {
+      //   //   alert("该房间已有说书人！")
+      //   //   return;
+      //   // }
+      // }, 3000);
     },
     copySessionUrl() {
       const url = window.location.href.split("#")[0];
@@ -542,6 +561,8 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
+        this.$store.commit("session/setFirstHostCheck", true);
+        this.$store.commit("session/setFirstJoinCheck", true);
         
         // clear seats and return to intro
         if (this.session.nomination) {

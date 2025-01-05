@@ -84,6 +84,17 @@ class LiveSession {
   }
   
   /**
+   * Request some server side information.
+   * @param playerId player ID or "host"
+   * @param command
+   * @param params
+   * @private
+   */
+  _request(command, playerId, params) {
+    this._send("request", { [command]: [playerId, params] })
+  }
+
+  /**
    * Upload a file to the server (stored).
    * Currently only supports images for profile pictures
    * @param playerId player ID or "host"
@@ -103,6 +114,9 @@ class LiveSession {
    */
   _onOpen() {
     if (this._isSpectator) {
+      if (this._store.state.session.firstJoinCheck) {
+        this.requestExistChannel();
+      }
       this._sendDirect(
         "host",
         "getGamestate",
@@ -112,6 +126,9 @@ class LiveSession {
         this._store.commit("session/stopTalking", this._store.state.session.claimedSeat);
       }
     } else {
+      if (this._store.state.session.firstHostCheck) {
+        this.requestDuplicateHost();
+      }
       this.sendGamestate();
     }
     this._ping(true);
@@ -147,8 +164,14 @@ class LiveSession {
       console.log("unsupported socket message", data);
     }
     switch (command) {
-      case "popup":
-        this._alertPopup(params);
+      case "alertPopup":
+        alert(params);
+        break;
+      case "duplicatedHost":
+        this._handleDuplicateHost(params);
+        break;
+      case "existingChannel":
+        this._handleExistChannel(params);
         break;
       case "getGamestate":
         this.sendGamestate(params);
@@ -311,8 +334,51 @@ class LiveSession {
     }
   }
 
+  /**
+   * Alert any messages from the server
+   */
   _alertPopup(text){
     alert(text);
+  }
+
+  /**
+   * Send request to server to check if there are more than one host.
+   */
+  requestDuplicateHost() {
+    this._request("checkDuplicateHost", this._store.state.session.playerId);
+  }
+  
+  /**
+   * @param duplicate indicator to if there is a duplicated host
+   */
+  _handleDuplicateHost(duplicate) {
+    if (duplicate) {
+      alert(`房间"${this._store.state.session.sessionId}"已经存在说书人！`)
+      this._store.commit("session/setSessionId", "");
+      this._store.commit("players/clear");
+    } else {
+      this._store.commit("session/firstHostCheck", false);
+    }
+  }
+
+  /**
+   * Send request to server to check if the channel exists (has a host).
+   */
+  requestExistChannel() {
+    this._request("checkExistChannel", this._store.state.session.playerId);
+  }
+
+  /**
+   * @param existing indicator to if there is the appointed session has a host.
+   */
+  _handleExistChannel(existing) {
+    if (!existing) {
+      alert(`房间"${this._store.state.session.sessionId}"不存在！`);
+      this._store.commit("session/setSessionId", "");
+      this._store.commit("session/setSpectator", false);
+    } else {
+      this._store.commit("session/firstJoinCheck", false);
+    }
   }
 
   /**
@@ -1261,6 +1327,11 @@ export default store => {
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
+      case"requestDuplicateHost":
+        if (!state.session.sessionId) {
+          session.requestDuplicateHost()
+        }
+        break;
       case "session/setSessionId":
         if (state.session.sessionId) {
           session.connect(state.session.sessionId);

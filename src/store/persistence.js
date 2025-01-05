@@ -64,6 +64,12 @@ module.exports = store => {
     );
   }
   /**** Session related data *****/
+  if (localStorage.getItem("firstHostCheck")) {
+    store.commit("session/setFirstHostCheck", JSON.parse(localStorage.getItem("firstHostCheck")));
+  }
+  if (localStorage.getItem("firstJoinCheck")) {
+    store.commit("session/setFirstJoinCheck", JSON.parse(localStorage.getItem("firstJoinCheck")));
+  }
   if (localStorage.getItem("playerId")) {
     store.commit("session/setPlayerId", localStorage.getItem("playerId"));
   }
@@ -212,6 +218,12 @@ module.exports = store => {
         } else {
           localStorage.removeItem("session");
         }
+        break;
+      case "session/setFirstHostCheck":
+        localStorage.setItem("firstHostCheck", JSON.stringify(payload));
+        break;
+      case "session/setFirstJoinCheck":
+        localStorage.setItem("firstJoinCheck", JSON.stringify(payload));
         break;
       case "session/setPlayerId":
         if (payload) {

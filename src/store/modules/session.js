@@ -16,6 +16,8 @@ const handleVote = (state, [index, vote]) => {
 
 const state = () => ({
   sessionId: "",
+  firstHostCheck: true,
+  firstJoinCheck: true,
   isSpectator: false,
   isReconnecting: false,
   playerCount: 0,
@@ -56,6 +58,8 @@ const set = key => (state, val) => {
 };
 
 const mutations = {
+  setFirstHostCheck: set("firstHostCheck"),
+  setFirstJoinCheck: set("firstJoinCheck"),
   setPlayerId: set("playerId"),
   setSpectator: set("isSpectator"),
   setReconnecting: set("isReconnecting"),
