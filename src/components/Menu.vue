@@ -381,8 +381,8 @@ export default {
     },
     hostSession() {
       if (this.session.sessionId) return;
-      const sessionId = prompt("请输入房间号").toString();
-      // const sessionId = Math.round(Math.random() * 10000).toString();
+      // const sessionId = prompt("请输入房间号").toString();
+      const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
       );

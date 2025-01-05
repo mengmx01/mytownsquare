@@ -228,7 +228,6 @@ wss.on("connection", function connection(ws, req) {
         switch (command) {
           case "checkDuplicateHost":
             for (let i=0; i<channels[ws.channel].length; i++) {
-              console.log(i);
               if (
                 channels[ws.channel][i].readyState === WebSocket.OPEN &&
                 (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host") &&
@@ -237,7 +236,6 @@ wss.on("connection", function connection(ws, req) {
                 ws.send(JSON.stringify(["duplicatedHost", true]));
                 break;
               } else if (i + 1 === channels[ws.channel].length) {
-                console.log('sending');
                 ws.send(JSON.stringify(["duplicatedHost", false]));
               }
             }
