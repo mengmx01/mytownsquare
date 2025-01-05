@@ -152,15 +152,15 @@ wss.on("connection", function connection(ws, req) {
       }
     });
     
-    if (!playerId.includes(ws.playerId)) {
-      console.log(ws.channel, "duplicate host");
-      ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
-      metrics.connection_terminated_host.inc();
-      return;
-    } else if (playerIdHost.includes(ws.playerId)) {
+    // if (!playerId.includes(ws.playerId)) {
+    //   console.log(ws.channel, "duplicate host");
+    //   ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
+    //   metrics.connection_terminated_host.inc();
+    //   return;
+    // } else if (playerIdHost.includes(ws.playerId)) {
+    if (playerIdHost.includes(ws.playerId)) {
       console.log(ws.channel, "duplicate entry");
-      
-      ws.send(JSON.stringify(["popup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
+      ws.send(JSON.stringify(["alertPopup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
     }
   }
   // if (ws.playerRole != "host" && !channels[ws.channel]) {
@@ -214,6 +214,47 @@ wss.on("connection", function connection(ws, req) {
             metrics.messages_outgoing.inc();
           }
         });
+        break;
+      case '"request"':
+        // console.log(
+        //   new Date(),
+        //   wss.clients.size,
+        //   ws.channel,
+        //   ws.playerId,
+        //   data
+        // );
+        const command = Object.keys(JSON.parse(data)[1])[0];
+        const playerId = JSON.parse(data)[1][command][0];
+        switch (command) {
+          case "checkDuplicateHost":
+            for (let i=0; i<channels[ws.channel].length; i++) {
+              console.log(i);
+              if (
+                channels[ws.channel][i].readyState === WebSocket.OPEN &&
+                (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host") &&
+                playerId != channels[ws.channel][i].playerId
+              ) {
+                ws.send(JSON.stringify(["duplicatedHost", true]));
+                break;
+              } else if (i + 1 === channels[ws.channel].length) {
+                console.log('sending');
+                ws.send(JSON.stringify(["duplicatedHost", false]));
+              }
+            }
+            break;
+          case "checkExistChannel":
+            for (let i=0; i<channels[ws.channel].length; i++) {
+              if (
+                channels[ws.channel][i].readyState === WebSocket.OPEN &&
+                (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host")
+              ) {
+                ws.send(JSON.stringify(["existingChannel", true]));
+                break;
+              } else if (i + 1 === channels[ws.channel].length) {
+                ws.send(JSON.stringify(["existingChannel", false]));
+              }
+            }
+        }
         break;
       case '"direct"':
         // handle "direct" messages differently
