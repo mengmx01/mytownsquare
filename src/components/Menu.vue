@@ -399,25 +399,6 @@ export default {
         }
         this.copySessionUrl();
       };
-      // let intervalId = setInterval(() => {
-      //   if (!this.session.firstCheck) {
-      //     clearInterval(intervalId);
-      //     intervalId = null;
-      //     // clearTimeout(timeoutId);
-      //   }
-      // }, 100);
-      // const timeoutId = setTimeout(() => {
-      //   clearInterval(intervalId);
-      //   intervalId = null;
-      //   // if (intervalId) {
-      //   //   alert("无法连接到服务器！");
-      //   //   return;
-      //   // }
-      //   // if (!channelAvailable) {
-      //   //   alert("该房间已有说书人！")
-      //   //   return;
-      //   // }
-      // }, 3000);
     },
     copySessionUrl() {
       const url = window.location.href.split("#")[0];
