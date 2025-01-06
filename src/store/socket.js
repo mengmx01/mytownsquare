@@ -345,6 +345,7 @@ class LiveSession {
    * Send request to server to check if there are more than one host.
    */
   requestDuplicateHost() {
+    if (!this._store.state.session.firstHostCheck) return;
     this._request("checkDuplicateHost", this._store.state.session.playerId);
   }
   
@@ -352,12 +353,13 @@ class LiveSession {
    * @param duplicate indicator to if there is a duplicated host
    */
   _handleDuplicateHost(duplicate) {
+    if (!this._store.state.session.firstHostCheck) return;
     if (duplicate) {
       alert(`房间"${this._store.state.session.sessionId}"已经存在说书人！`)
       this._store.commit("session/setSessionId", "");
       this._store.commit("players/clear");
     } else {
-      this._store.commit("session/firstHostCheck", false);
+      this._store.commit("session/setFirstHostCheck", false);
     }
   }
 
@@ -365,6 +367,7 @@ class LiveSession {
    * Send request to server to check if the channel exists (has a host).
    */
   requestExistChannel() {
+    if (!this._store.state.session.firstJoinCheck) return;
     this._request("checkExistChannel", this._store.state.session.playerId);
   }
 
@@ -372,12 +375,13 @@ class LiveSession {
    * @param existing indicator to if there is the appointed session has a host.
    */
   _handleExistChannel(existing) {
+    if (!this._store.state.session.firstJoinCheck) return;
     if (!existing) {
       alert(`房间"${this._store.state.session.sessionId}"不存在！`);
       this._store.commit("session/setSessionId", "");
       this._store.commit("session/setSpectator", false);
     } else {
-      this._store.commit("session/firstJoinCheck", false);
+      this._store.commit("session/setFirstJoinCheck", false);
     }
   }
 
