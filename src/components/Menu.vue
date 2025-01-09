@@ -184,11 +184,11 @@
             </li>
             <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
               发送伪装身份
-              <em><font-awesome-icon icon="demon"/></em>
+              <em><font-awesome-icon icon="hat-wizard"/></em>
             </li>
             <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
               发送魔典
-              <em><font-awesome-icon icon="demon"/></em>
+              <em><font-awesome-icon icon="book"/></em>
             </li>
             <li
               v-if="session.voteHistory.length || !session.isSpectator"
