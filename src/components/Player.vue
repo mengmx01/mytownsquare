@@ -116,7 +116,7 @@
       <!-- Ghost vote icon -->
       <font-awesome-icon
         icon="vote-yea"
-        :class="player.isSecretVoteless ? 'secret-no-vote' : 'has-vote'"
+        :class="(session.sessionId && player.isSecretVoteless && !session.isSpectator) ? 'secret-no-vote' : 'has-vote'"
         v-if="player.isDead && !player.isVoteless"
         @click="toggleVote()"
         title="Ghost vote"

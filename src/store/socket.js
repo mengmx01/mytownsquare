@@ -1,7 +1,7 @@
 class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
-    // this._wss = "wss://botcgrimoire.site:8080/";
+    // this._wss = "wss://botcgrimoire.site:443/ws/";
     this._wss = "wss://botcgrimoire.uk:8443/";
     // this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
@@ -399,6 +399,7 @@ class LiveSession {
       image: player.image,
       isDead: player.isDead,
       isVoteless: player.isVoteless,
+      isSecretVoteless: player.isSecretVoteless,
       pronouns: player.pronouns,
       ...(player.role && player.role.team === "traveler"
         ? { roleId: player.role.id }
@@ -466,10 +467,14 @@ class LiveSession {
       const player = players[x];
       const { roleId } = state;
       // update relevant properties
-      ["name", "id", "image", "isDead", "isVoteless", "pronouns"].forEach(property => {
+      ["name", "id", "image", "isDead", "isSecretVoteless", "isVoteless", "pronouns"].forEach(property => {
         const value = state[property];
         if (player[property] !== value) {
-          this._store.commit("players/update", { player, property, value });
+          if (property === "isVoteless") {
+            if (value || !player.isSecretVoteless) this._store.commit("players/update", { player, property, value });
+          } else {
+            this._store.commit("players/update", { player, property, value });
+          }
         }
       });
       // roles are special, because of travelers
@@ -592,13 +597,13 @@ class LiveSession {
     if (property === "role") {
       if (value.team && value.team === "traveler") {
         // update local gamestate to remember this player as a traveler
-        this._gamestate[index].roleId = value.id;
+        if (this._gamestate[index]) this._gamestate[index].roleId = value.id;
         this._send("player", {
           index,
           property,
           value: value.id
         });
-      } else if (this._gamestate[index].roleId) {
+      } else if (this._gamestate[index] && this._gamestate[index].roleId) {
         // player was previously a traveler
         delete this._gamestate[index].roleId;
         this._send("player", { index, property, value: "" });
@@ -641,10 +646,15 @@ class LiveSession {
         });
       }
     } else if (property === "isSecretVoteless") {
-      // 如果是玩家则直接移除投票标记，否则不更新
-      if (player.id === this._store.state.session.playerId) {
-        this._store.commit("players/update", { player, property: 'isVoteless', value });
-      }
+      // if (value === true) {
+        this._store.commit("players/update", { player, property, value });
+        // 如果是玩家则同时移除投票标记
+        if (player.id === this._store.state.session.playerId && value) {
+          this._store.commit("players/update", { player, property: 'isVoteless', value });
+        }
+      // }
+    } else if (property === "isVoteless") {
+      if (!player.isSecretVoteless || value) this._store.commit("players/update", { player, property, value });
     } else {
       // just update the player otherwise
       this._store.commit("players/update", { player, property, value });
