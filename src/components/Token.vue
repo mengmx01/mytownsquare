@@ -9,7 +9,7 @@
         backgroundImage: `url(${
           role.image && grimoire.isImageOptIn
             ? role.image
-            : require('../assets/icons/' + (role.imageAlt || role.id) + '.png')
+            : require('../assets/icons/' + (role.imageAlt || role.id.replace(/old1$/, '')) + '.png')
         })`
       }"
     ></span>
