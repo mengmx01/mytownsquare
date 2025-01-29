@@ -1,6 +1,6 @@
 <template>
   <div id="controls">
-    <span v-if="session.sessionId">
+    <span v-if="session.sessionId & session.isSpectator">
       <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && listeningFrame"
       @click="stopListening(microphoneSetting)"
       />
@@ -9,7 +9,7 @@
       />
       <font-awesome-icon icon="keyboard" v-if="microphoneSetting === 'keyboard'" :style="keyboardIcon"/>
       
-      <select id="microphone" v-model="microphoneSetting" @change="stopListening(microphoneSetting)">
+      <select v-show="!isHandHeld" id="microphone" v-model="microphoneSetting" @change="stopListening(microphoneSetting)">
         <option value="free">自由发言</option>
         <option value="keyboard">按f2发言</option>
       </select>
@@ -342,6 +342,12 @@ export default {
       return {
         color: this.listeningFrame ? 'red' : 'white'
       }
+    },
+    isHandHeld() {
+      const deviceType = navigator.userAgent.toLocaleLowerCase();
+      console.log(deviceType);
+      if (/mobile|android|touch|webos|iphone|ipod/i.test(deviceType)) return true;
+      return false;
     }
   },
   data() {
