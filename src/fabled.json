@@ -1,15 +1,5 @@
 [
   {
-    "id": "storyteller",
-    "firstNightReminder": "",
-    "otherNightReminder": "",
-    "reminders": [],
-    "setup": false,
-    "name": "说书人",
-    "team": "fabled",
-    "ability": "点击和说书人私聊。"
-  },
-  {
     "id": "doomsayer",
     "firstNightReminder": "",
     "otherNightReminder": "",

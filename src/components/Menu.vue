@@ -136,13 +136,13 @@
                 :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
             /></em>
           </li>
-          <li v-if="!session.isSpectator" @click="toggleShowVacant">
+          <!-- <li v-if="!session.isSpectator" @click="toggleShowVacant">
             显示空座位
             <em
               ><font-awesome-icon
                 :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
             /></em>
-          </li>
+          </li> -->
           <li @click="toggleMuted">
             静音
             <em
@@ -394,6 +394,8 @@ export default {
       );
       if (!Number(numPlayers)) return;
       if (numPlayers < 0) return;
+      if (!this.session.playerName) this.changeName();
+      if (!this.session.playerName) return;
       if (sessionId) {
         this.$store.commit("session/clearVoteHistory", []);
         this.$store.commit("session/setSpectator", false);
@@ -401,7 +403,7 @@ export default {
         numPlayers = Math.min(numPlayers, 20);
         this.$store.commit("players/clear");
         for(let i=0; i < numPlayers; i++){
-          this.addPlayer();
+          this.addPlayer(this.session.playerProfileImage === "default.webp" ? "default_storyteller.webp" : this.session.playerProfileImage, this.session.playerName);
         }
         this.copySessionUrl();
       };
@@ -568,12 +570,12 @@ export default {
         }
       }
     },
-    addPlayer() {
+    addPlayer(stImage = null, stName = null) {
       if (this.session.isSpectator) return;
       if (this.players.length >= 20) return;
       
       // setting name to a default value, combining with the seat number
-      this.$store.commit("players/add", "");
+      this.$store.commit("players/add", {name: "", stImage, stName});
     },
     randomizeSeatings() {
       if (this.session.isSpectator) return;

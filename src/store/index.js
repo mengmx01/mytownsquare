@@ -112,7 +112,7 @@ export default new Vuex.Store({
       isStatic: false,
       isMuted: false,
       isImageOptIn: true,
-      isShowVacant: false,
+      // isShowVacant: false,
       zoom: 0,
       background: ""
     },

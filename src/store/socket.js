@@ -1,8 +1,8 @@
 class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
-    // this._wss = "wss://botcgrimoire.site:443/ws/";
-    this._wss = "wss://botcgrimoire.uk:8443/";
+    this._wss = "wss://botcgrimoire.site:443/ws/";
+    // this._wss = "wss://botcgrimoire.uk:8443/";
     // this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
@@ -298,7 +298,7 @@ class LiveSession {
     if (!this._store.state.session.playerId) {
       var playerId;
       // 禁止host、_host和player作为playerId
-      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player") {
+      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player" || playerId === "default") {
         playerId = Math.random().toString(36).substr(2);
       }
       this._store.commit(

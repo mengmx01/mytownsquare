@@ -48,7 +48,9 @@ module.exports = store => {
       // fabled: JSON.parse(localStorage.fabled).map(
       //   fabled => store.state.fabled.get(fabled.id) || fabled
       // )
-      fabled: JSON.parse(localStorage.fabled)
+      fabled: JSON.parse(localStorage.fabled),
+      stImage: localStorage.getItem("playerProfileImage") || "default_storyteller.webp",
+      stName: localStorage.getItem("playerName")
     });
   }
   if (localStorage.players) {

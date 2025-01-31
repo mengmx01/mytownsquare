@@ -24,7 +24,7 @@ const state = () => ({
   ping: 0,
   playerId: "",
   playerName:"",
-  playerProfileImage: null,
+  playerProfileImage: "default.webp",
   claimedSeat: -1,
   nomination: false,
   votes: [],

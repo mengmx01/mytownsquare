@@ -103,7 +103,7 @@ const mutations = {
     state.players = [];
     state.bluffs = [];
     this.commit("players/setFabled", { fabled: [] });
-    state.fabled = [];
+    // state.fabled = [];
   },
   set(state, players = []) {
     state.players = players;
@@ -122,22 +122,23 @@ const mutations = {
       state.players[index][property] = value;
     }
   },
-  add(state, name) {
+  add(state, {name, stImage = null, stName = null}) {
     state.players.push({
       ...NEWPLAYER,
       name
     });
     if (state.fabled.length === 0) {
-      state.fabled.push({
+      this.commit("players/setFabled", {fabled: {
         "id": "storyteller",
+        "image": ("https://botcgrimoire.site/profile_images/" + stImage),
         "firstNightReminder": "",
         "otherNightReminder": "",
         "reminders": [],
         "setup": false,
-        "name": "说书人",
+        "name": stName,
         "team": "fabled",
         "ability": "点击和说书人私聊。"
-      });
+      }})
     }
   },
   remove(state, index) {
@@ -165,7 +166,7 @@ const mutations = {
   updateBluff(state, bluffs) {
     state.bluffs = bluffs;
   },
-  setFabled(state, { index, fabled } = {}) {
+  setFabled(state, { index, fabled, stImage, stName } = {}) {
     if (index !== undefined) {
       if (index == 0) return; // do not ever remove the first fabled i.e. storyteller
 
@@ -179,11 +180,12 @@ const mutations = {
     } else if (fabled) {
       const fabledStoryteller = {
         "id": "storyteller",
+        "image": ("https://botcgrimoire.site/profile_images/" + stImage),
         "firstNightReminder": "",
         "otherNightReminder": "",
         "reminders": [],
         "setup": false,
-        "name": "说书人",
+        "name": stName,
         "team": "fabled",
         "ability": "点击和说书人私聊。"
       };
@@ -205,10 +207,11 @@ const mutations = {
 
       // add storyteller fabled to allow direct messages
       if (!Array.isArray(fabled)) {
+        // if (fabled.length === 0 && fabled.id != "storyteller") state.fabled.push(fabledStoryteller);
         state.fabled.push(fabled);
       } else {
         // add in Story Teller if there isn't already one
-        if (fabled.length === 0 || fabled[0].id != "storyteller"){
+        if (fabled.length > 0 &&  fabled[0].id != "storyteller"){
           fabled.unshift(fabledStoryteller)
         }
         state.fabled = fabled;
