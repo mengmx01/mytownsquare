@@ -128,6 +128,7 @@ wss.on("connection", function connection(ws, req) {
     ws.playerRole = "player";
   }
   ws.channel = url.pop();
+  console.log("requesting for channel " + ws.channel);
   ws.playerIp = req.connection.remoteAddress.split(", ")[0];
   // check for another host on this channel
   if (
@@ -298,19 +299,19 @@ wss.on("connection", function connection(ws, req) {
           const uploadContent = Object.values(uploadData)[0][1];
           
           switch(uploadType) {
-            case "uploadProfileImage":
+            case "uploadAvatar":
               // const extension = uploadContent.split(";base64,")[0].split("/").pop();
               const extension = 'webp';
-              const profileImageData = uploadContent.split(";base64,").pop();
+              const avatarData = uploadContent.split(";base64,").pop();
               const version = new Date().getTime();
-              // const folderPath = path.join(__dirname, "profile_images");
-              const folderPath = "/usr/share/nginx/html/dist/profile_images";
+              const folderPath = path.join(__dirname, "avatars");
+              // const folderPath = "/usr/share/nginx/html/dist/avatars";
               if (!fs.existsSync(folderPath)){
                   fs.mkdirSync(folderPath);
               }
               const fileName = playerId + "." + extension;
               const filePath = path.join(folderPath, fileName);
-              sharp(Buffer.from(profileImageData, 'base64'))
+              sharp(Buffer.from(avatarData, 'base64'))
                 .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
                 .toFormat('webp') // Convert to WebP format
                 .toBuffer((err, buffer, info) => {
@@ -336,7 +337,7 @@ wss.on("connection", function connection(ws, req) {
                       channels[ws.channel].forEach(function each(client) {
                         const fileLink = fileName + "?v=" + version;
                         if (client === ws && client.readyState === WebSocket.OPEN) {
-                          client.send(JSON.stringify(["profileImageReceived", fileLink]));
+                          client.send(JSON.stringify(["avatarReceived", fileLink]));
                           metrics.messages_outgoing.inc();
                         }
                       });
@@ -372,11 +373,11 @@ wss.on("connection", function connection(ws, req) {
     var close = false;
     if (code === 1000) {
       // 如果正常退出（解散）房间，正常删除记录
-      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
+      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
       close = true;
     } else if (code === 1001 || code === 1006) {
       // 如果说书人因为刷新、关闭或者网络波动断连，加入角色为_host的伪连接以保证房间不被移除
-      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting! Code: " + code + " Reason: " + (code === 1001 ? "刷新或关闭" : "网络波动")); 
+      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: " + (code === 1001 ? "刷新或关闭" : "网络波动")); 
       if (ws.playerRole === "host") {
         var count = 0;
         for (let client in channels[ws.channel]) {
