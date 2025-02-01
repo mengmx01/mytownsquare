@@ -24,7 +24,7 @@ const state = () => ({
   ping: 0,
   playerId: "",
   playerName:"",
-  playerProfileImage: "default.webp",
+  playerAvatar: "default.webp",
   claimedSeat: -1,
   nomination: false,
   votes: [],
@@ -201,11 +201,11 @@ const mutations = {
       Vue.set(state.newStMessage, 0, newNum);
     }
   },
-  setPlayerProfileImage(state){
-    state.playerProfileImage = "";
+  setPlayerAvatar(state){
+    state.playerAvatar = "";
   },
-  updatePlayerProfileImage(state, link){
-    state.playerProfileImage = link;
+  updatePlayerAvatar(state, link){
+    state.playerAvatar = link;
   },
   startTimer(state, time){
     if (time) state.timer = time;

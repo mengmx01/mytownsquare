@@ -49,7 +49,7 @@ module.exports = store => {
       //   fabled => store.state.fabled.get(fabled.id) || fabled
       // )
       fabled: JSON.parse(localStorage.fabled),
-      stImage: localStorage.getItem("playerProfileImage") || "default_storyteller.webp",
+      stImage: localStorage.getItem("playerAvatar") || "default_storyteller.webp",
       stName: localStorage.getItem("playerName")
     });
   }
@@ -111,8 +111,8 @@ module.exports = store => {
       })
     })
   }
-  if (localStorage.getItem("playerProfileImage")) {
-    store.commit("session/updatePlayerProfileImage", localStorage.getItem("playerProfileImage"));
+  if (localStorage.getItem("playerAvatar")) {
+    store.commit("session/updatePlayerAvatar", localStorage.getItem("playerAvatar"));
   }
   if (localStorage.getItem("secretVote")) {
     store.commit("session/setSecretVote", JSON.parse(localStorage.getItem("secretVote")));
@@ -294,8 +294,8 @@ module.exports = store => {
           localStorage.removeItem("chatHistory");
         }
         break;
-      case "session/updatePlayerProfileImage":
-        localStorage.setItem("playerProfileImage", payload);
+      case "session/updatePlayerAvatar":
+        localStorage.setItem("playerAvatar", payload);
         break;
       case "session/setSecretVote":
         localStorage.setItem("secretVote", JSON.stringify(payload));

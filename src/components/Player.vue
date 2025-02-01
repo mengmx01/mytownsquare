@@ -20,14 +20,14 @@
 
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
-      <div v-if="player.id" class="profileImage">
-        <!-- <img :src="`https://botcgrimoire.uk/profile_images/${player.image}`" 
+      <div v-if="player.id" class="avatar">
+        <!-- <img :src="`https://botcgrimoire.uk/avatars/${player.image}`" 
           :class="{ on: player.role.id }"
         > -->
-        <img :src="`https://botcgrimoire.site/profile_images/${player.image}`" 
+        <img :src="`https://botcgrimoire.site/avatars/${player.image}`" 
           :class="{ on: player.role.id }"
         >
-        <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
+        <!-- <img :src="`http://localhost:3000/avatars/${player.image}`" 
             :class="{ on: player.role.id }"
         > -->
       </div>
@@ -596,27 +596,27 @@ export default {
   transform: perspective(400px) rotateY(0deg);
   backface-visibility: hidden;
 }
-.player .profileImage,.player .token {
+.player .avatar,.player .token {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
 }
 
-.player .profileImage {
+.player .avatar {
   border-radius: 50%;
   padding: 6%;
   cursor: pointer;
 }
 
-.player .profileImage img {
+.player .avatar img {
   border-radius: 50%;
   pointer-events: none;
   width: 100%;
   height: 100%;
 }
 
-.player .profileImage img.on {
+.player .avatar img.on {
   filter: blur(3px)
 }
 

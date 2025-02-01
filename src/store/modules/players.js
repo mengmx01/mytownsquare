@@ -130,7 +130,7 @@ const mutations = {
     if (state.fabled.length === 0) {
       this.commit("players/setFabled", {fabled: {
         "id": "storyteller",
-        "image": ("https://botcgrimoire.site/profile_images/" + stImage),
+        "image": ("https://botcgrimoire.site/avatars/" + stImage),
         "firstNightReminder": "",
         "otherNightReminder": "",
         "reminders": [],
@@ -180,7 +180,7 @@ const mutations = {
     } else if (fabled) {
       const fabledStoryteller = {
         "id": "storyteller",
-        "image": ("https://botcgrimoire.site/profile_images/" + stImage),
+        "image": ("https://botcgrimoire.site/avatars/" + stImage),
         "firstNightReminder": "",
         "otherNightReminder": "",
         "reminders": [],

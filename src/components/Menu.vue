@@ -111,7 +111,7 @@
             背景图
             <em><font-awesome-icon icon="image"/></em>
           </li>
-          <li @click="$emit('trigger', ['uploadProfileImage'])">
+          <li @click="$emit('trigger', ['uploadAvatar'])">
             上传头像
             <em><font-awesome-icon icon="user"/></em>
           </li>
@@ -403,7 +403,7 @@ export default {
         numPlayers = Math.min(numPlayers, 20);
         this.$store.commit("players/clear");
         for(let i=0; i < numPlayers; i++){
-          this.addPlayer(this.session.playerProfileImage === "default.webp" ? "default_storyteller.webp" : this.session.playerProfileImage, this.session.playerName);
+          this.addPlayer(this.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.session.playerAvatar, this.session.playerName);
         }
         this.copySessionUrl();
       };

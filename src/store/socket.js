@@ -96,7 +96,7 @@ class LiveSession {
 
   /**
    * Upload a file to the server (stored).
-   * Currently only supports images for profile pictures
+   * Currently only supports images for avatar pictures
    * @param playerId player ID or "host"
    * @param command
    * @param params
@@ -274,8 +274,8 @@ class LiveSession {
       case "stopTimer":
         this._handleStopTimer(params);
         break;
-      case "profileImageReceived":
-        this._profileImageReceived(params);
+      case "avatarReceived":
+        this._avatarReceived(params);
         break;
       case "secretVote":
         this._handleSecretVote(params);
@@ -697,23 +697,23 @@ class LiveSession {
   }
 
   /**
-   * Upload profile image to the server and create a link.
+   * Upload avatar image to the server and create a link.
    * @param image
    */
-  uploadProfileImage(image) {
-    this._uploadFile("uploadProfileImage", this._store.state.session.playerId, image);
+  uploadAvatar(image) {
+    this._uploadFile("uploadAvatar", this._store.state.session.playerId, image);
   }
   
   /**
    * Confirmation on receiving the uploaded image.
    * @param image
    */
-  _profileImageReceived(link) {
+  _avatarReceived(link) {
     const playerId = this._store.state.session.playerId;
     const linkId = link.split(".")[0];
     if (playerId != linkId) return;
 
-    this._store.commit("session/updatePlayerProfileImage", link);
+    this._store.commit("session/updatePlayerAvatar", link);
     alert("上传成功！");
   }
 
@@ -806,8 +806,8 @@ class LiveSession {
     if (!this._isSpectator) return;
     const players = this._store.state.players.players;
     if (players.length > seat && (seat < 0 || !players[seat].id)) {
-      // this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
-      this._sendDirect("host", "claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
+      // this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerAvatar]);
+      this._sendDirect("host", "claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerAvatar]);
     }
   }
 
@@ -1439,8 +1439,8 @@ export default store => {
       case "session/stopTimer":
         session.stopTimer(payload);
         break;
-      case "session/setPlayerProfileImage":
-        session.uploadProfileImage(payload);
+      case "session/setPlayerAvatar":
+        session.uploadAvatar(payload);
         break;
       case "session/setSecretVote":
         session.setSecretVote(payload);

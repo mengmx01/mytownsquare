@@ -42,7 +42,7 @@ export default {
     };
   },
   methods: {
-    uploadProfileImage() {
+    uploadAvatar() {
       this.$refs.upload.click();
     },
     onFileChange(event) {
@@ -86,7 +86,7 @@ export default {
     sendImage() {
       const canvas = this.cropper.getCroppedCanvas();
       this.croppedImage = canvas.toDataURL('image/webp')
-      this.$store.commit("session/setPlayerProfileImage", this.croppedImage);
+      this.$store.commit("session/setPlayerAvatar", this.croppedImage);
       this.closeCropping();
     },
     closeCropping() {
