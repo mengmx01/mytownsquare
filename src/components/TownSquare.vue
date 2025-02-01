@@ -380,7 +380,7 @@ export default {
     },
     sendChat(){
       if (this.message === "") return;
-      const sender = this.session.isSpectator ? this.session.playerName : "说书人";
+      const sender = this.session.playerName;
       const playerId = this.session.isSpectator ? this.session.playerId : this.chattingPlayer;
       const message = sender.concat(": ", this.message);
       this.$store.commit("session/updateChatSent", {message, playerId});
