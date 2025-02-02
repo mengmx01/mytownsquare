@@ -43,6 +43,10 @@ module.exports = store => {
       });
     });
   }
+  if (localStorage.getItem("playerProfileImage")) {
+    localStorage.setItem("playerAvatar", localStorage.getItem("playerProfileImage"));
+    localStorage.removeItem("playerProfileImage");
+  }
   if (localStorage.fabled !== undefined) {
     store.commit("players/setFabled", {
       // fabled: JSON.parse(localStorage.fabled).map(
