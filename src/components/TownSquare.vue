@@ -99,7 +99,7 @@
         </span>
       </div>
       <div ref="chatContent" class="content" @scroll="checkToBottom">
-        <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.playerId) || (!session.isSpectator && player.id === chattingPlayer)">
+        <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.stId) || (!session.isSpectator && player.id === chattingPlayer)">
           <ul v-for="(content, chatIndex) in player.chat" :key="chatIndex">{{ content }}</ul>
         </div>
       </div>
@@ -209,7 +209,7 @@ export default {
         this.$store.commit("session/claimSeat", -1);
       } else {
         this.$store.commit("session/claimSeat", playerIndex);
-        this.$store.commit("session/createChatHistory", this.session.playerId);
+        this.$store.commit("session/createChatHistory", this.session.stId);
       }
     },
     openReminderModal(playerIndex) {
@@ -347,11 +347,11 @@ export default {
       
       // display player name or ST in the chat title
       if(this.session.isSpectator){
-        this.$refs.chatWith.innerText = "说书人";
+        const name = this.fabled[0].name; //if fabled is messed up this may cause issues
+        this.$refs.chatWith.innerText = name;
         this.$store.commit("session/setStMessage", 0);
       }else{
         const name = this.players[playerIndex].name;
-        // name = name.split(". ")[1];
         this.$refs.chatWith.innerText = name;
         this.chattingPlayer = this.players[playerIndex].id;
         this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0})
@@ -381,15 +381,18 @@ export default {
     sendChat(){
       if (this.message === "") return;
       const sender = this.session.playerName;
-      const playerId = this.session.isSpectator ? this.session.playerId : this.chattingPlayer;
+      const sendingPlayerId = this.session.playerId;
+      const receivingPlayerId = this.session.isSpectator ? "host" : this.chattingPlayer;
       const message = sender.concat(": ", this.message);
-      this.$store.commit("session/updateChatSent", {message, playerId});
+      this.$store.commit("session/updateChatSent", {message, sendingPlayerId, receivingPlayerId});
       this.message = "";
 
       this.scrollToBottom();
     },
     scrollToBottom(){
-      this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
+      this.$nextTick(() => {
+        this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
+      });
     },
     checkToBottom() {
       if (this.$refs.chatContent.scrollTop === 0){

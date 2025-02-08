@@ -122,6 +122,11 @@ class LiveSession {
         "getGamestate",
         this._store.state.session.playerId
       );
+      this._sendDirect(
+        "host",
+        "getStId",
+        this._store.state.session.playerId
+      )
       if (this._store.state.session.claimedSeat >= 0 && !this._store.state.session.isListening && !this._store.state.session.isTalking) {
         this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
       }
@@ -176,6 +181,9 @@ class LiveSession {
       case "getGamestate":
         this.sendGamestate(params);
         break;
+      case "getStId":
+        this.sendStId(params);
+        break;
       case "edition":
         this._updateEdition(params);
         break;
@@ -184,6 +192,9 @@ class LiveSession {
         break;
       case "gs":
         this._updateGamestate(params);
+        break;
+      case "stId":
+        this._updateStId(params);
         break;
       case "player":
         this._updatePlayer(params);
@@ -513,6 +524,17 @@ class LiveSession {
       this._store.commit("session/setMarkedPlayer", {val: markedPlayer, force: false});
       this._store.commit("players/setFabled", {fabled});
     }
+  }
+
+  sendStId(playerId = "") {
+    if (this._isSpectator) return;
+    this._sendDirect(playerId, "stId", this._store.state.session.playerId)
+  }
+
+  _updateStId(data) {
+    if (!this._isSpectator) return;
+    // this._store.state.session.stId = data;
+    this._store.commit("session/setStId", data);
   }
 
   /**
@@ -1266,19 +1288,19 @@ class LiveSession {
    * @param payload
    */
   updateChatSent(payload) {
-    this._send("chat", payload);
+    this._sendDirect(payload.playerId, "chat", payload);
   }
 
   /**
    * Update chat history when received.
    * @param payload
    */
-  _handleChat({message, playerId}){
-    if (this._isSpectator && playerId != this._store.state.session.playerId) return;
-    this._store.commit("session/updateChatReceived", {message, playerId});
+  _handleChat({message, sendingPlayerId, receivingPlayerId}){
+    if (this._isSpectator && receivingPlayerId != this._store.state.session.playerId) return;
+    this._store.commit("session/updateChatReceived", {message, playerId: sendingPlayerId});
     const num = 1;
     if (!this._isSpectator){
-      this._store.commit("players/setPlayerMessage", {playerId, num});
+      this._store.commit("players/setPlayerMessage", {playerId: sendingPlayerId, num});
     } else{
       this._store.commit("session/setStMessage", num);
     }

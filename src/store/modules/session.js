@@ -61,6 +61,7 @@ const mutations = {
   setFirstHostCheck: set("firstHostCheck"),
   setFirstJoinCheck: set("firstJoinCheck"),
   setPlayerId: set("playerId"),
+  setStId: set("stId"),
   setSpectator: set("isSpectator"),
   setReconnecting: set("isReconnecting"),
   setPlayerCount: set("playerCount"),
@@ -182,12 +183,13 @@ const mutations = {
     if (chatIndex(state, playerId) >= 0) return; // do nothing if it already exists
     Vue.set(state.chatHistory, state.chatHistory.length, {id: playerId, chat: []});
   },
-  updateChatSent(state, {message, playerId}){
-    if (state.isSpectator && playerId != state.playerId) return;
-    state.chatHistory[chatIndex(state, playerId)]["chat"].push(message);
+  updateChatSent(state, {message, sendingPlayerId, receivingPlayerId}){
+    if (state.isSpectator && sendingPlayerId != state.playerId) return;
+    receivingPlayerId = receivingPlayerId === "host" ? state.stId : receivingPlayerId;
+    state.chatHistory[chatIndex(state, receivingPlayerId)]["chat"].push(message);
   },
   updateChatReceived(state, {message, playerId}){
-    if (state.isSpectator && playerId != state.playerId) return;
+    if (state.isSpectator && playerId != state.stId) return;
     const playerIndex = chatIndex(state, playerId);
     const oldMessages = state.chatHistory[playerIndex]["chat"];
     Vue.set(state.chatHistory, playerIndex, {id: playerId, chat: [...oldMessages, message]})

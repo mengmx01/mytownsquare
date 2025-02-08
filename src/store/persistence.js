@@ -82,6 +82,9 @@ module.exports = store => {
   if (localStorage.getItem("playerName")) {
     store.commit("session/setPlayerName", localStorage.getItem("playerName"));
   }
+  if (localStorage.getItem("stId")) {
+    store.commit("session/setStId", localStorage.getItem("stId"));
+  }
   if (localStorage.getItem("claimedSeat")) {
     store.commit("session/claimSeat", Number(localStorage.getItem("claimedSeat")));
   }
@@ -244,6 +247,9 @@ module.exports = store => {
         } else {
           localStorage.removeItem("playerName");
         }
+        break;
+      case "session/setStId":
+        localStorage.setItem("stId", payload);
         break;
       case "session/claimSeat":
         if (payload >= 0) {
