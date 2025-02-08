@@ -568,6 +568,9 @@ export default {
         if (this.session.isSecretVote) {
           this.$store.commit("session/setSecretVote", false)
         }
+
+        // close chat box
+        this.$store.commit("session/setChatOpen", false);
       }
     },
     addPlayer(stImage = null, stName = null) {

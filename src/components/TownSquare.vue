@@ -90,7 +90,7 @@
     <ReminderModal :player-index="selectedPlayer"></ReminderModal>
     <RoleModal :player-index="selectedPlayer"></RoleModal>
 
-    <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
+    <div v-show="session.isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
       <div class="title" @click="maximiseChat()">
         <span ref="chatWith" style="cursor: text; user-select: text; pointer-events: auto;"></span> 
         <span class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="session.isSpectator && item > 0">{{ item }}</span>
@@ -98,7 +98,7 @@
           <font-awesome-icon icon="times" :class="{ turnedIcon45: isChatMin}"/>
         </span>
       </div>
-      <div ref="chatContent" class="content" @scroll="checkToBottom">
+      <div ref="chatContent" class="content" @scroll="checkToBottom" >
         <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.stId) || (!session.isSpectator && player.id === chattingPlayer)">
           <ul v-for="(content, chatIndex) in player.chat" :key="chatIndex">{{ content }}</ul>
         </div>
@@ -163,13 +163,21 @@ export default {
       isBluffsOpen: true,
       isFabledOpen: true,
       isChatMin: false,
-      isChatOpen: false,
       minimising: false,
       chattingPlayer: "",
       message: "",
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight
     };
+  },
+  watch: {
+    "session.chatHistory": {
+      handler() {
+        if (this.$refs.chatContent.scrollTop >= -20) {
+          this.scrollToBottom();
+        }
+      }
+    }
   },
   mounted(){
     window.addEventListener("resize", this.handleResize);
@@ -371,7 +379,7 @@ export default {
         this.minimising = false;
         return;
       }
-      this.isChatOpen = true;
+      this.$store.commit("session/setChatOpen", true);
       this.isChatMin = false;
     },
     minimiseChat(){
@@ -380,6 +388,14 @@ export default {
     },
     sendChat(){
       if (this.message === "") return;
+      if (this.session.isSpectator && this.session.claimedSeat < 0) return;
+      if (!this.session.isSpectator) {
+        let seated = false;
+        this.players.forEach(player => {
+          if (player.id === this.chattingPlayer) seated = true;
+        });
+        if (!seated) return;
+      }
       const sender = this.session.playerName;
       const sendingPlayerId = this.session.playerId;
       const receivingPlayerId = this.session.isSpectator ? "host" : this.chattingPlayer;
@@ -393,10 +409,11 @@ export default {
       this.$nextTick(() => {
         this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
       });
+      this.checkToBottom();
     },
     checkToBottom() {
-      if (this.$refs.chatContent.scrollTop === 0){
-        // scrolled to bottom
+      if (this.$refs.chatContent.scrollTop >= -20){
+        // 划至最底则删除红点
         if (!this.session.isSpectator) {
           this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
         } else{
@@ -406,10 +423,12 @@ export default {
     },
     typing(){
       this.session.chatting = true;
-      if (!this.session.isSpectator) {
-        this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
-      } else{
-        this.$store.commit("session/setStMessage", 0);
+      if (this.$refs.chatContent.scrollTop >= -20){
+        if (!this.session.isSpectator) {
+          this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
+        } else{
+          this.$store.commit("session/setStMessage", 0);
+        }
       }
     }
   }
