@@ -212,7 +212,7 @@ wss.on("connection", function connection(ws, req) {
       .split(",", 1)
       .pop();
     switch (messageType) {
-      case '"ping"':
+      case '"ping"': {
         // ping messages will only be sent host -> all or all -> host
         channels[ws.channel].forEach(function each(client) {
           if (
@@ -227,7 +227,8 @@ wss.on("connection", function connection(ws, req) {
           }
         });
         break;
-      case '"request"':
+      }
+      case '"request"': {
         // console.log(
         //   new Date(),
         //   wss.clients.size,
@@ -235,6 +236,11 @@ wss.on("connection", function connection(ws, req) {
         //   ws.playerId,
         //   data
         // );
+        const feedback = JSON.parse(data).pop();
+        if (feedback) {
+          ws.send(JSON.stringify(["feedback", feedback]));
+        }
+
         const command = Object.keys(JSON.parse(data)[1])[0];
         const playerId = JSON.parse(data)[1][command][0];
         switch (command) {
@@ -266,7 +272,8 @@ wss.on("connection", function connection(ws, req) {
             }
         }
         break;
-      case '"direct"':
+      }
+      case '"direct"': {
         // handle "direct" messages differently
         // console.log(
         //   new Date(),
@@ -276,6 +283,11 @@ wss.on("connection", function connection(ws, req) {
         //   data
         // );
         try {
+          const feedback = JSON.parse(data)[2];
+          if (feedback) {
+            ws.send(JSON.stringify(["feedback", feedback]));
+          }
+
           const dataToPlayer = JSON.parse(data)[1];
           channels[ws.channel].forEach(function each(client) {
             if (
@@ -291,8 +303,14 @@ wss.on("connection", function connection(ws, req) {
           console.log("error parsing direct message JSON", e);
         }
         break;
-      case '"uploadfile"':
+      }
+      case '"uploadfile"': {
         try {
+          const feedback = JSON.parse(data).pop();
+          if (feedback) {
+            ws.send(JSON.stringify(["feedback", feedback]));
+          }
+
           const uploadData = JSON.parse(data)[1];
           const uploadType = Object.keys(uploadData)[0];
           const playerId = Object.values(uploadData)[0][0];
@@ -304,8 +322,8 @@ wss.on("connection", function connection(ws, req) {
               const extension = 'webp';
               const avatarData = uploadContent.split(";base64,").pop();
               const version = new Date().getTime();
-              const folderPath = path.join(__dirname, "avatars");
-              // const folderPath = "/usr/share/nginx/html/dist/avatars";
+              // const folderPath = path.join(__dirname, "avatars");
+              const folderPath = "/usr/share/nginx/html/dist/avatars";
               if (!fs.existsSync(folderPath)){
                   fs.mkdirSync(folderPath);
               }
@@ -350,7 +368,8 @@ wss.on("connection", function connection(ws, req) {
           console.log("error receiving uploaded file!", e);
         }
         break;
-      default:
+      }
+      default: {
         // all other messages
         // console.log(
         //   new Date(),
@@ -359,6 +378,11 @@ wss.on("connection", function connection(ws, req) {
         //   ws.playerId,
         //   data
         // );
+        const feedback = JSON.parse(data).pop();
+        if (feedback && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(["feedback", feedback]));
+        }
+        
         channels[ws.channel].forEach(function each(client) {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             client.send(data);
@@ -366,6 +390,7 @@ wss.on("connection", function connection(ws, req) {
           }
         });
         break;
+      }
     }
   });
   ws.on("close", (code, reason) => {
