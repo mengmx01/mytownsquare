@@ -173,7 +173,7 @@ export default {
   watch: {
     "session.chatHistory": {
       handler() {
-        if (this.$refs.chatContent.scrollTop >= -20) {
+        if (this.$refs.chatContent.scrollTop >= -20 && this.isChatOpen && !this.isChatMin) {
           this.scrollToBottom();
         }
       }
