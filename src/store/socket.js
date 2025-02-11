@@ -12,6 +12,8 @@ class LiveSession {
     this._store = store;
     this._pingInterval = 3600 * 1000; // 30 seconds between pings //set to 1hr now to prevent kicking players
     this._pingTimer = null;
+    this._sendInterval = 3 * 1000; // 3 seconds between pings
+    this._sendTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
     this._pings = {}; // map of player IDs to ping
@@ -61,9 +63,9 @@ class LiveSession {
    * @param params
    * @private
    */
-  _send(command, params) {
+  _send(command, params, feedback = false) {
     if (this._socket && this._socket.readyState === 1) {
-      this._socket.send(JSON.stringify([command, params]));
+      this._socket.send(JSON.stringify([command, params, feedback]));
     }
   }
 
@@ -75,11 +77,11 @@ class LiveSession {
    * @param params
    * @private
    */
-  _sendDirect(playerId, command, params) {
+  _sendDirect(playerId, command, params, feedback = false) {
     if (playerId) {
-      this._send("direct", { [playerId]: [command, params] });
+      this._send("direct", { [playerId]: [command, params]}, feedback);
     } else {
-      this._send(command, params);
+      this._send(command, params, feedback);
     }
   }
   
@@ -90,8 +92,8 @@ class LiveSession {
    * @param params
    * @private
    */
-  _request(command, playerId, params) {
-    this._send("request", { [command]: [playerId, params] })
+  _request(command, playerId, params, feedback = false) {
+    this._send("request", { [command]: [playerId, params] }, feedback);
   }
 
   /**
@@ -102,10 +104,67 @@ class LiveSession {
    * @param params
    * @private
    */
-  _uploadFile(command, playerId, params) {
+  _uploadFile(command, playerId, params, feedback = false) {
     if (playerId) {
-      this._send("uploadFile", { [command]: [playerId, params] });
+      this._send("uploadFile", { [command]: [playerId, params] }, feedback);
     }
+  }
+
+  _startSendQueue() {
+      if (!this._store.messageQueue) return;
+      for (let message of this._store.messageQueue) {
+        switch (message.type) {
+          case "direct":
+            this._sendDirect(message.playerId, message.command, message.params, message.id);
+            break;
+          case "request":
+            this._request(message.command, message.playerId, message.params, message.id);
+            break;
+          case "uploadFile":
+            this._uploadFile(message.command, message.playerId, message.params, message.id);
+            break;
+          default:
+            this._send(message.command, message.params, message.id);
+        }
+      }
+  }
+
+  _stopSendQueue() {
+    clearInterval(this._sendTimer);
+    this._sendTimer = null;
+  }
+
+  /**
+   * 
+   * @param type 
+   * @param playerId
+   * @param command 
+   * @param params 
+   * @param id id for identifying and deleting the query
+   */
+  addToQueue(type, playerId, command, params, id) {
+    if (!this._store.messageQueue) this._store.messageQueue = [];
+    this._store.messageQueue.push({type, playerId, command, params, id});
+    this._startSendQueue();
+    this._sendTimer = setInterval(() => {
+      this._startSendQueue();
+    }, this._sendInterval);
+  }
+
+  /**
+   * 
+   * @param id id for identifying and deleting the query
+   */
+  _deleteFromQueue(id) {
+    if (!this._store.messageQueue || typeof this._store.messageQueue != 'object') return;
+    if (this._store.messageQueue.length <= 0) return;
+    for (let i=0; i<this._store.messageQueue.length; i++) {
+      if (this._store.messageQueue[i].id === id) {
+        this._store.messageQueue.splice(i,1);
+        break;
+      }
+    }
+    if (this._store.messageQueue.length === 0) this._stopSendQueue();
   }
 
   /**
@@ -211,6 +270,9 @@ class LiveSession {
         break;
       case "ping":
         this._handlePing(params);
+        break;
+      case "feedback":
+        this._deleteFromQueue(params);
         break;
       case "nomination":
         if (!this._isSpectator) return;
@@ -750,34 +812,34 @@ class LiveSession {
     // if (!this._players.length) return;
     if (!this._isSpectator) {
       // remove players that haven't sent a ping in twice the timespan
-      for (let player in this._players) {
-        if (now - this._players[player] > this._pingInterval * 2) {
-          delete this._players[player];
-          delete this._pings[player];
-        }
-      }
-      // remove claimed seats from players that are no longer connected
-      this._store.state.players.players.forEach(player => {
-        if (player.id && !this._players[player.id]) {
-          // if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
+      // for (let player in this._players) {
+      //   if (now - this._players[player] > this._pingInterval * 2) {
+      //     delete this._players[player];
+      //     delete this._pings[player];
+      //   }
+      // }
+      // // remove claimed seats from players that are no longer connected
+      // this._store.state.players.players.forEach(player => {
+      //   if (player.id && !this._players[player.id]) {
+      //     // if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
           if (open_session) return;
-          this._store.commit("players/update", {
-            player,
-            property: "id",
-            value: ""
-          });
-          this._store.commit("players/update", {
-            player,
-            property: "name",
-            value: ""
-          });
-          this._store.commit("players/update", {
-            player,
-            property: "image",
-            value: ""
-          });
-        }
-      });
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "id",
+      //       value: ""
+      //     });
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "name",
+      //       value: ""
+      //     });
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "image",
+      //       value: ""
+      //     });
+      //   }
+      // });
       // store new player data
       if (playerIdOrCount) {
         this._players[playerIdOrCount] = now;
@@ -1060,7 +1122,8 @@ class LiveSession {
       (players.length > nomination[0] && players.length > nomination[1])
     ) {
       this.setVotingSpeed(this._store.state.session.votingSpeed);
-      this._send("nomination", nomination);
+      // this._send("nomination", nomination);
+      this.addToQueue("", this._store.state.session.playerId, "nomination", nomination, new Date().getTime());
     }
   }
 
@@ -1288,7 +1351,8 @@ class LiveSession {
    * @param payload
    */
   updateChatSent(payload) {
-    this._sendDirect(payload.playerId, "chat", payload);
+    // this._sendDirect(payload.receivingPlayerId, "chat", payload);
+    this.addToQueue("direct", payload.receivingPlayerId, "chat", payload, new Date().getTime());
   }
 
   /**
