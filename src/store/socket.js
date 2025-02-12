@@ -10,7 +10,7 @@ class LiveSession {
     this._isSpectator = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 3600 * 1000; // 30 seconds between pings //set to 1hr now to prevent kicking players
+    this._pingInterval = 180 * 1000; // 30 seconds between pings //set to 3 minutes
     this._pingTimer = null;
     this._sendInterval = 3 * 1000; // 3 seconds between pings
     this._sendTimer = null;
