@@ -91,7 +91,7 @@ const actions = {
         pronouns,
         image
       }));
-      commit("setFabled", { fabled: [] });
+      commit("setFabled", { fabled: [], stImage: this.state.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.state.session.playerAvatar, stName: this.state.session.playerName });
     }
     commit("set", players);
     commit("setBluff");
@@ -211,7 +211,7 @@ const mutations = {
         state.fabled.push(fabled);
       } else {
         // add in Story Teller if there isn't already one
-        if (fabled.length > 0 &&  fabled[0].id != "storyteller"){
+        if (stImage && stName && (fabled.length > 0 && fabled[0].id != "storyteller" || fabled.length === 0)){
           fabled.unshift(fabledStoryteller)
         }
         state.fabled = fabled;
