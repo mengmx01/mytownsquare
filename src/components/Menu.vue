@@ -410,7 +410,7 @@ export default {
         numPlayers = Math.min(numPlayers, 20);
         this.$store.commit("players/clear");
         for(let i=0; i < numPlayers; i++){
-          this.addPlayer(this.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.session.playerAvatar, this.session.playerName);
+          this.addPlayer();
         }
         this.copySessionUrl();
       };
@@ -564,7 +564,7 @@ export default {
         if (this.session.nomination) {
           this.$store.commit("session/nomination");
         }
-        this.$store.commit("players/clear");
+        this.$store.commit("players/clear", true);
 
         // clear customBootlegger
         if (this.session.bootlegger) {

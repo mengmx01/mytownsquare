@@ -91,7 +91,7 @@ const actions = {
         pronouns,
         image
       }));
-      commit("setFabled", { fabled: [], stImage: this.state.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.state.session.playerAvatar, stName: this.state.session.playerName });
+      commit("setFabled", { fabled: [] });
     }
     commit("set", players);
     commit("setBluff");
@@ -99,10 +99,10 @@ const actions = {
 };
 
 const mutations = {
-  clear(state) {
+  clear(state, emptyFabled = false) {
     state.players = [];
     state.bluffs = [];
-    this.commit("players/setFabled", { fabled: [] });
+    this.commit("players/setFabled", { fabled: [], emptyFabled });
     // state.fabled = [];
   },
   set(state, players = []) {
@@ -122,23 +122,13 @@ const mutations = {
       state.players[index][property] = value;
     }
   },
-  add(state, {name, stImage = null, stName = null}) {
+  add(state, {name}) {
     state.players.push({
       ...NEWPLAYER,
       name
     });
     if (state.fabled.length === 0) {
-      this.commit("players/setFabled", {fabled: {
-        "id": "storyteller",
-        "image": ("https://botcgrimoire.site/avatars/" + stImage),
-        "firstNightReminder": "",
-        "otherNightReminder": "",
-        "reminders": [],
-        "setup": false,
-        "name": stName,
-        "team": "fabled",
-        "ability": "点击和说书人私聊。"
-      }})
+      this.commit("players/setFabled", {fabled: []})
     }
   },
   remove(state, index) {
@@ -166,7 +156,9 @@ const mutations = {
   updateBluff(state, bluffs) {
     state.bluffs = bluffs;
   },
-  setFabled(state, { index, fabled, stImage, stName } = {}) {
+  setFabled(state, { index, fabled, stImage, stName, emptyFabled = false} = {}) {
+    if (!stImage) stImage = this.state.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.state.session.playerAvatar;
+    if (!stName) stName = this.state.session.playerName;
     if (index !== undefined) {
       if (index == 0) return; // do not ever remove the first fabled i.e. storyteller
 
@@ -211,7 +203,7 @@ const mutations = {
         state.fabled.push(fabled);
       } else {
         // add in Story Teller if there isn't already one
-        if (stImage && stName && (fabled.length > 0 && fabled[0].id != "storyteller" || fabled.length === 0)){
+        if (!emptyFabled && (fabled.length > 0 && fabled[0].id != "storyteller" || fabled.length === 0)){
           fabled.unshift(fabledStoryteller)
         }
         state.fabled = fabled;

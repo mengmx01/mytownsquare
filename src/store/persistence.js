@@ -53,8 +53,7 @@ module.exports = store => {
       //   fabled => store.state.fabled.get(fabled.id) || fabled
       // )
       fabled: JSON.parse(localStorage.fabled),
-      stImage: localStorage.getItem("playerAvatar") || "default_storyteller.webp",
-      stName: localStorage.getItem("playerName")
+      emptyFabled: true
     });
   }
   if (localStorage.players) {
