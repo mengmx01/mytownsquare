@@ -39,7 +39,7 @@ const state = () => ({
   isRolesDistributed: false,
   isBluffsDistributed: false,
   isGrimoireDistributed: false,
-  isChatOpoen: false,
+  isChatOpen: false,
   chatHistory: [],
   newStMessage: [0],
   bootlegger: "",
