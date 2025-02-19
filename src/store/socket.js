@@ -6,13 +6,15 @@ class LiveSession {
     // this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
+    // this._wss = "ws://192.168.10.3:8081/";
     this._socket = null;
     this._isSpectator = true;
+    this._isAlive = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 180 * 1000; // 30 seconds between pings //set to 3 minutes
+    this._pingInterval = 3 * 1000; // 30 seconds between pings
     this._pingTimer = null;
-    this._sendInterval = 3 * 1000; // 3 seconds between pings
+    this._sendInterval = 3 * 1000; // 3 seconds between unsent message cycles
     this._sendTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
@@ -41,7 +43,7 @@ class LiveSession {
     this._socket.onopen = this._onOpen.bind(this);
     this._socket.onclose = err => {
       this._socket = null;
-      clearInterval(this._pingTimer);
+      clearTimeout(this._pingTimer);
       this._pingTimer = null;
       if (err.code !== 1000) {
         // connection interrupted, reconnect after 3 seconds
@@ -195,17 +197,16 @@ class LiveSession {
       }
       this.sendGamestate();
     }
-    this._ping(true);
+    this._ping();
   }
 
   /**
    * Send a ping message with player ID and ST flag.
    * @private
    */
-  _ping(open_session = false) {
-    if (this._isSpectator) open_session = true;
-    this._handlePing([open_session]);
-    this._send("ping", [open_session,
+  _ping() {
+    this._handlePing();
+    this._send("ping", [
       this._isSpectator
         ? this._store.state.session.playerId
         : Object.keys(this._players).length,
@@ -213,6 +214,13 @@ class LiveSession {
     ]);
     clearTimeout(this._pingTimer);
     this._pingTimer = setTimeout(this._ping.bind(this), this._pingInterval);
+    // if (this._store.state.session.sessionId && 
+    //   !this._isAlive && !this._store.state.session.isReconnecting
+    // ) {
+    //   this._isAlive = true;
+    //   this.connect(this._store.state.session.sessionId);
+    // }
+    // this._isAlive = false;
   }
 
   /**
@@ -270,6 +278,9 @@ class LiveSession {
         break;
       case "ping":
         this._handlePing(params);
+        break;
+      case "pong":
+        this._handlePong(params);
         break;
       case "feedback":
         this._deleteFromQueue(params);
@@ -369,7 +380,7 @@ class LiveSession {
    */
   connect(channel) {
     if (!this._store.state.session.playerId) {
-      var playerId;
+      let playerId;
       // 禁止host、_host和player作为playerId
       while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player" || playerId === "default") {
         playerId = Math.random().toString(36).substr(2);
@@ -807,11 +818,11 @@ class LiveSession {
    * @param latency
    * @private
    */
-  _handlePing([open_session = false, playerIdOrCount = 0, latency] = []) {
+  _handlePing([playerIdOrCount = 0, latency] = []) {
     const now = new Date().getTime();
     // if (!this._players.length) return;
     if (!this._isSpectator) {
-      // remove players that haven't sent a ping in twice the timespan
+      // // remove players that haven't sent a ping in twice the timespan
       // for (let player in this._players) {
       //   if (now - this._players[player] > this._pingInterval * 2) {
       //     delete this._players[player];
@@ -821,8 +832,7 @@ class LiveSession {
       // // remove claimed seats from players that are no longer connected
       // this._store.state.players.players.forEach(player => {
       //   if (player.id && !this._players[player.id]) {
-      //     // if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
-          if (open_session) return;
+      //     if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
       //     this._store.commit("players/update", {
       //       player,
       //       property: "id",
@@ -865,6 +875,10 @@ class LiveSession {
         this._isSpectator ? playerIdOrCount : Object.keys(this._players).length
       );
     }
+  }
+
+  _handlePong() {
+    this._isAlive = true;
   }
 
   /**
@@ -942,7 +956,7 @@ class LiveSession {
       this._store.commit("players/update", { player, property: "id", value });
     }
     // update player session list as if this was a ping
-    this._handlePing([true, true, value, 0]);
+    this._handlePing([true, value, 0]);
   }
 
 
@@ -1007,7 +1021,7 @@ class LiveSession {
     this._store.state.players.players.forEach(player => {
       if (player.id && player.role && player.role.team == team) {
         if (team === "demon"){
-          var lunatic = false;
+          let lunatic = false;
           player.reminders.forEach(reminder => {
             if (reminder.role === "lunatic") {
               lunatic = true;
@@ -1547,7 +1561,7 @@ export default store => {
     store.commit("toggleGrimoire", false);
 
     if (!session._store.state.session.playerName) {
-      var name = prompt("输入玩家昵称");
+      let name = prompt("输入玩家昵称");
       if (name) {
         name = name.trim();
         while (name === "空座位" || name === "说书人"){
