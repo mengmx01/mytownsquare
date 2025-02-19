@@ -13,7 +13,9 @@ register.setDefaultLabels({
   app: "clocktower-online"
 });
 
-const PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
+// const PLAYERS_PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
+const PLAYERS_PING_INTERVAL = 1000 * 2; // 2 seconds
+const CHANNELS_PING_INTERVAL = 1000 * 30; // 30 seconds
 
 const options = {};
 if (process.env.NODE_ENV !== "development") {
@@ -50,6 +52,39 @@ function heartbeat() {
 
 // map of channels currently in use
 const channels = {};
+
+// messages to be sent to clients which need confirmation for successfully sent to client
+const messageQueues = {}; // currently only stores direct messages
+const sendIntervals = {};
+function startSendQueue(channel, type) {
+  sendIntervals[channel][type] = setInterval(() => {
+    if (!messageQueues[channel]) return;
+    if (!messageQueues[channel][type]) return;
+
+    for (let i=0; i<messageQueues[channel][type].length; i++) {
+      const key = Object.keys(messageQueues[channel][type][i])[0];
+      for (let client of channels[channel]) {
+        if ((client.playerRole === key || client.playerId === key) && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(messageQueues[channel][type][i][key]));
+          messageQueues[channel][type].splice(i, 1);
+          if (messageQueues[channel][type].length <= 0) stopSendQueue(channel, type);
+          i--; // 删除请求的同时将指针拨回
+          break;
+        }
+      }
+    }
+  }, PLAYERS_PING_INTERVAL)
+}
+
+function stopSendQueue(channel, type) {
+  if (!sendIntervals[channel]) return;
+  if (!sendIntervals[channel][type]) return;
+  clearInterval(sendIntervals[channel][type]);
+  sendIntervals[channel][type] = null;
+}
+
+// unique messages received to avoid sending multiple times to client
+const messageUniques = {};
 
 // metrics
 const metrics = {
@@ -127,8 +162,9 @@ wss.on("connection", function connection(ws, req) {
   } else {
     ws.playerRole = "player";
   }
+  
   ws.channel = url.pop();
-  console.log("requesting for channel " + ws.channel);
+  console.log("requesting for channel " + ws.channel + " from player " + ws.playerId);
   ws.playerIp = req.connection.remoteAddress.split(", ")[0];
   // check for another host on this channel
   if (
@@ -175,12 +211,19 @@ wss.on("connection", function connection(ws, req) {
   ws.pingStart = new Date().getTime();
   ws.counter = 0;
   // add channel to list
+  // also create message lists for the channel
   if (!channels[ws.channel]) {
     channels[ws.channel] = [];
+
+    messageQueues[ws.channel] = {direct: []}; // currently only stores direct messages
+    sendIntervals[ws.channel] = {direct: null};
+    messageUniques[ws.channel] = [];
   }
   channels[ws.channel].push(ws);
   // 说书人重连后删除 _host 标签
-  channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
+  if (ws.playerRole === 'host') {
+    channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
+  }
   console.log("connected client player ID ---------------------------")
   if (channels[ws.channel]) {
     channels[ws.channel].forEach(client => {
@@ -194,10 +237,18 @@ wss.on("connection", function connection(ws, req) {
   ws.on("pong", heartbeat);
   // handle message
   ws.on("message", function incoming(data) {
+    if (Object.keys(messageUniques[ws.channel]).includes(data)) {
+      clearTimeout(messageUniques[ws.channel][data].timeout);
+      messageUniques[ws.channel][data].timeout = setTimeout(() => {
+        if (!messageUniques[ws.channel]) return;
+        if (!messageUniques[ws.channel][data]) return;
+        delete messageUniques[ws.channel][data];
+      }, 3 * 60 * 1000);
+    };
     metrics.messages_incoming.inc();
     // check rate limit (max 5msg/second)
     ws.counter++;
-    if (ws.counter > (5 * PING_INTERVAL) / 1000) {
+    if (ws.counter > (5 * sendIntervals) / 1000) {
       console.log(ws.channel, "disconnecting user due to spam");
       ws.close(
         1000,
@@ -213,6 +264,7 @@ wss.on("connection", function connection(ws, req) {
       .pop();
     switch (messageType) {
       case '"ping"': {
+        ws.send(JSON.stringify(["pong"]));
         // ping messages will only be sent host -> all or all -> host
         channels[ws.channel].forEach(function each(client) {
           if (
@@ -239,6 +291,7 @@ wss.on("connection", function connection(ws, req) {
         const feedback = JSON.parse(data).pop();
         if (feedback) {
           ws.send(JSON.stringify(["feedback", feedback]));
+          if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
         }
 
         const command = Object.keys(JSON.parse(data)[1])[0];
@@ -261,7 +314,7 @@ wss.on("connection", function connection(ws, req) {
           case "checkExistChannel":
             for (let i=0; i<channels[ws.channel].length; i++) {
               if (
-                channels[ws.channel][i].readyState === WebSocket.OPEN &&
+                // channels[ws.channel][i].readyState === WebSocket.OPEN &&
                 (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host")
               ) {
                 ws.send(JSON.stringify(["existingChannel", true]));
@@ -286,8 +339,15 @@ wss.on("connection", function connection(ws, req) {
           const feedback = JSON.parse(data)[2];
           if (feedback) {
             ws.send(JSON.stringify(["feedback", feedback]));
+            if (!Object.keys(messageUniques[ws.channel]).includes(data)) messageUniques[ws.channel][data] = {timeout: null};
+            messageUniques[ws.channel][data].timeout = setTimeout(() => {
+              if (!messageUniques[ws.channel]) return;
+              if (!messageUniques[ws.channel][data]) return;
+              delete messageUniques[ws.channel][data];
+            }, 3 * 60 * 1000)
           }
 
+          let disconnected = true;
           const dataToPlayer = JSON.parse(data)[1];
           channels[ws.channel].forEach(function each(client) {
             if (
@@ -297,8 +357,13 @@ wss.on("connection", function connection(ws, req) {
             ) {
               client.send(JSON.stringify(dataToPlayer[client.playerRole === "host" ? "host" : client.playerId]));
               metrics.messages_outgoing.inc();
+              if (client.isAlive) disconnected = false;
             }
           });
+          if (disconnected) {
+            messageQueues[ws.channel].direct.push(dataToPlayer);
+            startSendQueue(ws.channel, 'direct');
+          }
         } catch (e) {
           console.log("error parsing direct message JSON", e);
         }
@@ -309,6 +374,7 @@ wss.on("connection", function connection(ws, req) {
           const feedback = JSON.parse(data).pop();
           if (feedback) {
             ws.send(JSON.stringify(["feedback", feedback]));
+            if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
           }
 
           const uploadData = JSON.parse(data)[1];
@@ -381,8 +447,8 @@ wss.on("connection", function connection(ws, req) {
         const feedback = JSON.parse(data).pop();
         if (feedback && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(["feedback", feedback]));
+          if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
         }
-        
         channels[ws.channel].forEach(function each(client) {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             client.send(data);
@@ -395,7 +461,7 @@ wss.on("connection", function connection(ws, req) {
   });
   ws.on("close", (code, reason) => {
     // 删除房间中断线的连接，以更好处理重复的说书人
-    var close = false;
+    let close = false;
     if (code === 1000) {
       // 如果正常退出（解散）房间，正常删除记录
       console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
@@ -404,14 +470,14 @@ wss.on("connection", function connection(ws, req) {
       // 如果说书人因为刷新、关闭或者网络波动断连，加入角色为_host的伪连接以保证房间不被移除
       console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: " + (code === 1001 ? "刷新或关闭" : "网络波动")); 
       if (ws.playerRole === "host") {
-        var count = 0;
-        for (let client in channels[ws.channel]) {
+        let count = 0;
+        for (let client of channels[ws.channel]) {
           if (client.playerRole === "host") count = count + 1;
           if (count > 1) break;
         }
         // 只在最后一个说书人断连时加入_host
-        if (count > 1) {
-          const wsHost = Array.from(ws);
+        if (count === 1) {
+          const wsHost = JSON.parse(JSON.stringify(ws));
           wsHost.playerRole = "_host";
           channels[ws.channel].push(wsHost);
         }
@@ -419,55 +485,71 @@ wss.on("connection", function connection(ws, req) {
       close = true;
     }
 
-    if (close) {
+    if (close) { // 断连的同时移除连接（1000 1001 1006）
       // 每次断连只删除一个
-      var removed = false;
-      channels[ws.channel] = channels[ws.channel].filter(client => {
-        if (client.playerId === ws.playerId && !removed) {
-          removed = true;
-          return false;
-        }
-        return true;
-      });
+      const firstConnection = channels[ws.channel].filter(client => client.playerId === ws.playerId && client.playerRole != "_host")[0];
+      const index = channels[ws.channel].indexOf(firstConnection);
+      channels[ws.channel].splice(index, 1);
+      // channels[ws.channel] = channels[ws.channel].filter(client => {
+      //   if (client.playerId === ws.playerId && !removed) {
+      //     removed = true;
+      //     return false;
+      //   }
+      //   return true;
+      // });
     }
 
     if (Object.keys(channels[ws.channel]).length == 0) {
       delete channels[ws.channel];
+      Object.keys(sendIntervals[ws.channel]).forEach(type => {
+        stopSendQueue(ws.channel, type);
+      })
+      delete sendIntervals[ws.channels];
+      delete messageQueues[ws.channel];
+      Object.keys(messageUniques[ws.channel]).forEach(data => {
+        clearTimeout(messageUniques[ws.channel][data].timeout);
+      })
+      delete messageUniques[ws.channel];
     }
   })
 });
 
 // start ping interval timer
-const interval = setInterval(function ping() {
+const playersInterval = setInterval(function ping() {
   // ping each client
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
       metrics.connection_terminated_timeout.inc();
       return ws.terminate();
+    } else {
+      ws.send(JSON.stringify(["pong"]));
     }
     ws.isAlive = false;
     ws.pingStart = new Date().getTime();
     ws.ping(noop);
   });
+}, PLAYERS_PING_INTERVAL);
+const channelsInterval = setInterval(function ping() {
   // clean up empty channels
   for (let channel in channels) {
     if (
-      !channels[channel].length ||
-      !channels[channel].some(
-        ws =>
-          ws &&
-          (ws.readyState === WebSocket.OPEN ||
-            ws.readyState === WebSocket.CONNECTING)
-      )
+      !channels[channel].length // ||
+      // !channels[channel].some(
+      //   ws =>
+      //     ws &&
+      //     (ws.readyState === WebSocket.OPEN ||
+      //       ws.readyState === WebSocket.CONNECTING)
+      // )
     ) {
       metrics.channels_list.remove({ name: channel });
       delete channels[channel];
     }
   }
-}, PING_INTERVAL);
+}, CHANNELS_PING_INTERVAL);
 // handle server shutdown
 wss.on("close", function close() {
-  clearInterval(interval);
+  clearInterval(playersInterval);
+  clearInterval(channelsInterval)
 });
 
 // prod mode with stats API
