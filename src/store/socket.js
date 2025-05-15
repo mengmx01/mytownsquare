@@ -112,9 +112,9 @@ class LiveSession {
     }
   }
 
-  _startSendQueue() {
-      if (!this._store.messageQueue) return;
-      for (let message of this._store.messageQueue) {
+  _sendQueue() {
+      if (this._store.state.session.messageQueue.length <= 0) return;
+      for (let message of this._store.state.session.messageQueue) {
         switch (message.type) {
           case "direct":
             this._sendDirect(message.playerId, message.command, message.params, message.id);
@@ -131,6 +131,14 @@ class LiveSession {
       }
   }
 
+  _startSendQueue() {
+    this._stopSendQueue();
+    this._sendQueue();
+    this._sendTimer = setInterval(() => {
+      this._sendQueue();
+    }, this._sendInterval);
+  }
+
   _stopSendQueue() {
     clearInterval(this._sendTimer);
     this._sendTimer = null;
@@ -138,35 +146,36 @@ class LiveSession {
 
   /**
    * 
-   * @param type 
-   * @param playerId
-   * @param command 
-   * @param params 
-   * @param id id for identifying and deleting the query
-   */
-  addToQueue(type, playerId, command, params, id) {
-    if (!this._store.messageQueue) this._store.messageQueue = [];
-    this._store.messageQueue.push({type, playerId, command, params, id});
-    this._startSendQueue();
-    this._sendTimer = setInterval(() => {
-      this._startSendQueue();
-    }, this._sendInterval);
-  }
-
-  /**
-   * 
    * @param id id for identifying and deleting the query
    */
   _deleteFromQueue(id) {
-    if (!this._store.messageQueue || typeof this._store.messageQueue != 'object') return;
-    if (this._store.messageQueue.length <= 0) return;
-    for (let i=0; i<this._store.messageQueue.length; i++) {
-      if (this._store.messageQueue[i].id === id) {
-        this._store.messageQueue.splice(i,1);
+    if (this._store.state.session.messageQueue.length <= 0) return;
+    for (let i=0; i<this._store.state.session.messageQueue.length; i++) {
+      if (this._store.state.session.messageQueue[i].id === id) {
+        this._checkQueue(this._store.state.session.messageQueue[i]);
+        // this._store.state.session.messageQueue.splice(i,1);
+        this._store.commit("session/deleteMessageQueue", i)
         break;
       }
     }
-    if (this._store.messageQueue.length === 0) this._stopSendQueue();
+  }
+
+  /** 
+   * 
+   * @param message check the specific message and perform certain actions before deleting
+   */
+  _checkQueue(message) {
+    switch (message.type) {
+      case "direct": 
+        switch (message.command) {
+          case "chat": {
+            const receivingPlayerId = message.params.receivingPlayerId === "host" ? this._store.state.session.stId : message.params.receivingPlayerId;
+            this._store.commit("session/updateChatReceived", {message: message.params.message, playerId: receivingPlayerId}); // sending out to other players, receivingPlayerId is the recorded chat ID
+          }
+          break;
+        }
+        break;
+    }
   }
 
   /**
@@ -1136,8 +1145,6 @@ class LiveSession {
       (players.length > nomination[0] && players.length > nomination[1])
     ) {
       this.setVotingSpeed(this._store.state.session.votingSpeed);
-      // this._send("nomination", nomination);
-      this.addToQueue("", this._store.state.session.playerId, "nomination", nomination, new Date().getTime());
     }
   }
 
@@ -1359,15 +1366,6 @@ class LiveSession {
     if (this._isSpectator) return;
     this._send("remove", payload);
   }
-  
-  /**
-   * Send message to a player or ST.
-   * @param payload
-   */
-  updateChatSent(payload) {
-    // this._sendDirect(payload.receivingPlayerId, "chat", payload);
-    this.addToQueue("direct", payload.receivingPlayerId, "chat", payload, new Date().getTime());
-  }
 
   /**
    * Update chat history when received.
@@ -1527,8 +1525,11 @@ export default store => {
           session.sendPlayer(payload);
         }
         break;
-      case "session/updateChatSent":
-        session.updateChatSent(payload);
+      case "session/addMessageQueue":
+        session._startSendQueue();
+        break;
+      case "session/deleteMessageQueue":
+        if (session._store.state.session.messageQueue.length <= 0) session._stopSendQueue();
         break;
       case "session/setTimer":
         session.setTimer(payload);

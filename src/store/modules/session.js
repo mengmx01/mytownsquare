@@ -40,6 +40,7 @@ const state = () => ({
   isBluffsDistributed: false,
   isGrimoireDistributed: false,
   isChatOpen: false,
+  messageQueue: [],
   chatHistory: [],
   newStMessage: [0],
   bootlegger: "",
@@ -110,6 +111,8 @@ const mutations = {
     state.votingSpeed = votingSpeed || state.votingSpeed;
     state.lockedVote = lockedVote || 0;
     state.isVoteInProgress = isVoteInProgress || false;
+
+    state.messageQueue.push({type: "", playerId: state.playerId, command: "nomination", params: nomination, id: new Date().getTime()});
   },
   /**
    * Create an entry in the vote history log. Requires current player array because it might change later in the game.
@@ -185,16 +188,22 @@ const mutations = {
     if (chatIndex(state, playerId) >= 0) return; // do nothing if it already exists
     Vue.set(state.chatHistory, state.chatHistory.length, {id: playerId, chat: []});
   },
-  updateChatSent(state, {message, sendingPlayerId, receivingPlayerId}){
-    if (state.isSpectator && sendingPlayerId != state.playerId) return;
-    receivingPlayerId = receivingPlayerId === "host" ? state.stId : receivingPlayerId;
-    state.chatHistory[chatIndex(state, receivingPlayerId)]["chat"].push(message);
+  updateChatSent(state, chatContent){
+    if (state.isSpectator && chatContent.sendingPlayerId != state.playerId) return;
+    this.commit("session/addMessageQueue", {type: "direct", playerId:chatContent.receivingPlayerId, command: "chat", params:chatContent, id: new Date().getTime()})
   },
   updateChatReceived(state, {message, playerId}){
     if (state.isSpectator && playerId != state.stId) return;
     const playerIndex = chatIndex(state, playerId);
     const oldMessages = state.chatHistory[playerIndex]["chat"];
     Vue.set(state.chatHistory, playerIndex, {id: playerId, chat: [...oldMessages, message]})
+  },
+  addMessageQueue(state, {type, playerId, command, params, id}) {
+    state.messageQueue.push({type, playerId, command, params, id});
+  },
+  deleteMessageQueue(state, index) {
+    if (state.messageQueue.length  === 0) return;
+    state.messageQueue.splice(index, 1);
   },
   setStMessage(state, num) {
     if (num > 0){
