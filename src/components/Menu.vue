@@ -72,89 +72,91 @@
         <template v-if="tab === 'grimoire'">
           <!-- Grimoire -->
           <li class="headline">魔典</li>
-          <li @click="toggleGrimoire" v-if="players.length">
-            <template v-if="!grimoire.isPublic">隐藏</template>
-            <template v-if="grimoire.isPublic">显示</template>
-            <em>[G]</em>
-          </li>
-          <li @click="toggleNight" v-if="!session.isSpectator">
-            <template v-if="!grimoire.isNight">切换至夜晚</template>
-            <template v-if="grimoire.isNight">切换至白天</template>
-            <em>[S]</em>
-          </li>
-          <li @click="toggleNightOrder" v-if="players.length">
-            夜间顺序
-            <em>
-              <font-awesome-icon
-                :icon="[
-                  'fas',
-                  grimoire.isNightOrder ? 'check-square' : 'square'
-                ]"
-              />
-            </em>
-          </li>
-          <li v-if="players.length">
-            缩放
-            <em>
-              <font-awesome-icon
-                @click="setZoom(grimoire.zoom - 1)"
-                icon="search-minus"
-              />
-              {{ Math.round(100 + grimoire.zoom * 10) }}%
-              <font-awesome-icon
-                @click="setZoom(grimoire.zoom + 1)"
-                icon="search-plus"
-              />
-            </em>
-          </li>
-          <li @click="setBackground">
-            背景图
-            <em><font-awesome-icon icon="image"/></em>
-          </li>
-          <li @click="$emit('trigger', ['uploadAvatar'])">
-            上传头像
-            <em><font-awesome-icon icon="user"/></em>
-          </li>
-          <li @click="changeName">
-            设置昵称
-            <em><font-awesome-icon icon="user-edit"/></em>
-          </li>
-          <li v-if="!edition.isOfficial" @click="imageOptIn">
-            <small>允许自定义图标</small>
-            <em
-              ><font-awesome-icon
-                :icon="[
-                  'fas',
-                  grimoire.isImageOptIn ? 'check-square' : 'square'
-                ]"
-            /></em>
-          </li>
-          <li @click="toggleStatic">
-            关闭动画
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
-            /></em>
-          </li>
-          <!-- <li v-if="!session.isSpectator" @click="toggleShowVacant">
-            显示空座位
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
-            /></em>
-          </li> -->
-          <li @click="toggleMuted">
-            静音
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
-            /></em>
-          </li>
-          <li @click="clearLocalStorage">
-            清空储存
-            <em
-              ><font-awesome-icon icon="trash-alt"/></em>
-          </li>
+          <div class="options">
+            <li @click="toggleGrimoire" v-if="players.length">
+              <template v-if="!grimoire.isPublic">隐藏</template>
+              <template v-if="grimoire.isPublic">显示</template>
+              <em>[G]</em>
+            </li>
+            <li @click="toggleNight" v-if="!session.isSpectator">
+              <template v-if="!grimoire.isNight">切换至夜晚</template>
+              <template v-if="grimoire.isNight">切换至白天</template>
+              <em>[S]</em>
+            </li>
+            <li @click="toggleNightOrder" v-if="players.length">
+              夜间顺序
+              <em>
+                <font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isNightOrder ? 'check-square' : 'square'
+                  ]"
+                />
+              </em>
+            </li>
+            <li v-if="players.length">
+              缩放
+              <em>
+                <font-awesome-icon
+                  @click="setZoom(grimoire.zoom - 1)"
+                  icon="search-minus"
+                />
+                {{ Math.round(100 + grimoire.zoom * 10) }}%
+                <font-awesome-icon
+                  @click="setZoom(grimoire.zoom + 1)"
+                  icon="search-plus"
+                />
+              </em>
+            </li>
+            <li @click="setBackground">
+              背景图
+              <em><font-awesome-icon icon="image"/></em>
+            </li>
+            <li @click="$emit('trigger', ['uploadAvatar'])">
+              上传头像
+              <em><font-awesome-icon icon="user"/></em>
+            </li>
+            <li @click="changeName">
+              设置昵称
+              <em><font-awesome-icon icon="user-edit"/></em>
+            </li>
+            <li v-if="!edition.isOfficial" @click="imageOptIn">
+              <small>允许自定义图标</small>
+              <em
+                ><font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isImageOptIn ? 'check-square' : 'square'
+                  ]"
+              /></em>
+            </li>
+            <li @click="toggleStatic">
+              关闭动画
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
+              /></em>
+            </li>
+            <!-- <li v-if="!session.isSpectator" @click="toggleShowVacant">
+              显示空座位
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
+              /></em>
+            </li> -->
+            <li @click="toggleMuted">
+              静音
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
+              /></em>
+            </li>
+            <li @click="clearLocalStorage">
+              清空储存
+              <em
+                ><font-awesome-icon icon="trash-alt"/></em>
+            </li>
+          </div>
         </template>
 
         <template v-if="tab === 'session'">
@@ -165,124 +167,132 @@
           <li class="headline" v-else>
             联机
           </li>
-          <template v-if="!session.sessionId">
-            <li @click="hostSession">创建房间<em>[H]</em></li>
-            <li @click="joinSession">加入房间<em>[J]</em></li>
-          </template>
-          <template v-else>
-            <li v-if="session.ping">
-              与{{ session.isSpectator ? "说书人" : "玩家" }}延迟
-              <em>{{ session.ping }}ms</em>
-            </li>
-            <li @click="copySessionUrl">
-              复制链接
-              <em><font-awesome-icon icon="copy"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeAsk">
-              发送角色
-              <em><font-awesome-icon icon="theater-masks"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
-              发送伪装身份
-              <em><font-awesome-icon icon="hat-wizard"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
-              发送魔典
-              <em><font-awesome-icon icon="book"/></em>
-            </li>
-            <li
-              v-if="session.voteHistory.length || !session.isSpectator"
-              @click="toggleModal('voteHistory')"
-            >
-              投票记录<em>[V]</em>
-            </li>
-            <li @click="leaveSession">
-              <span v-if="session.isSpectator">退出房间</span>
-              <span v-if="!session.isSpectator">解散房间</span>
-              <em>{{ session.sessionId }}</em>
-            </li>
-          </template>
+          <div class="options">
+            <template v-if="!session.sessionId">
+              <li @click="hostSession">创建房间<em>[H]</em></li>
+              <li @click="joinSession">加入房间<em>[J]</em></li>
+            </template>
+            <template v-else>
+              <li v-if="session.ping">
+                与{{ session.isSpectator ? "说书人" : "玩家" }}延迟
+                <em>{{ session.ping }}ms</em>
+              </li>
+              <li @click="copySessionUrl">
+                复制链接
+                <em><font-awesome-icon icon="copy"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeAsk">
+                发送角色
+                <em><font-awesome-icon icon="theater-masks"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
+                发送伪装身份
+                <em><font-awesome-icon icon="hat-wizard"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
+                发送魔典
+                <em><font-awesome-icon icon="book"/></em>
+              </li>
+              <li
+                v-if="session.voteHistory.length || !session.isSpectator"
+                @click="toggleModal('voteHistory')"
+              >
+                投票记录<em>[V]</em>
+              </li>
+              <li @click="leaveSession">
+                <span v-if="session.isSpectator">退出房间</span>
+                <span v-if="!session.isSpectator">解散房间</span>
+                <em>{{ session.sessionId }}</em>
+              </li>
+            </template>
+          </div>
         </template>
 
         <template v-if="tab === 'players' && !session.isSpectator">
           <!-- Users -->
           <li class="headline">玩家</li>
-          <li @click="addPlayer" v-if="players.length < 20">添加座位<!--<em>[A]</em>--></li>
-          <li @click="randomizeSeatings" v-if="players.length > 2">
-            随机座位
-            <em><font-awesome-icon icon="dice"/></em>
-          </li>
-          <li @click="clearPlayers" v-if="players.length">
-            移除全部
-            <em><font-awesome-icon icon="trash-alt"/></em>
-          </li>
+          <div class="options">
+            <li @click="addPlayer" v-if="players.length < 20">添加座位<!--<em>[A]</em>--></li>
+            <li @click="randomizeSeatings" v-if="players.length > 2">
+              随机座位
+              <em><font-awesome-icon icon="dice"/></em>
+            </li>
+            <li @click="clearPlayers" v-if="players.length">
+              移除全部
+              <em><font-awesome-icon icon="trash-alt"/></em>
+            </li> 
+          </div>
         </template>
 
         <template v-if="tab === 'characters'">
           <!-- Characters -->
           <li class="headline">角色</li>
-          <li v-if="!session.isSpectator" @click="toggleModal('edition')">
-            选择剧本
-            <em>[E]</em>
-          </li>
-          <li
-            @click="toggleModal('roles')"
-            v-if="!session.isSpectator && players.length > 4"
-          >
-            配置角色
-            <em>[C]</em>
-          </li>
-          <li v-if="!session.isSpectator" @click="toggleModal('fabled')">
-            添加传奇角色
-            <em>[F]</em>
-          </li>
-          <li v-if="!session.isSpectator" @click="customiseBootlegger">
-            <small>
-              自定义私货商人
-            </small>
-            <em>[B]</em>
-          </li>
-          <li @click="clearRoles" v-if="players.length">
-            移除全部
-            <em><font-awesome-icon icon="trash-alt"/></em>
-          </li>
+          <div class="options">
+            <li v-if="!session.isSpectator" @click="toggleModal('edition')">
+              选择剧本
+              <em>[E]</em>
+            </li>
+            <li
+              @click="toggleModal('roles')"
+              v-if="!session.isSpectator && players.length > 4"
+            >
+              配置角色
+              <em>[C]</em>
+            </li>
+            <li v-if="!session.isSpectator" @click="toggleModal('fabled')">
+              添加传奇角色
+              <em>[F]</em>
+            </li>
+            <li v-if="!session.isSpectator" @click="customiseBootlegger">
+              <small>
+                自定义私货商人
+              </small>
+              <em>[B]</em>
+            </li>
+            <li @click="clearRoles" v-if="players.length">
+              移除全部
+              <em><font-awesome-icon icon="trash-alt"/></em>
+            </li>
+          </div>
         </template>
 
         <template v-if="tab === 'help'">
           <!-- Help -->
           <li class="headline">帮助</li>
-          <li @click="toggleModal('reference')">
-            角色技能表
-            <em>[R]</em>
-          </li>
-          <li @click="toggleModal('nightOrder')">
-            夜间顺序表
-            <em>[N]</em>
-          </li>
-          <li @click="toggleModal('gameState')">
-            游戏状态JSON
-            <em><font-awesome-icon icon="file-code"/></em>
-          </li>
-          <!-- <li>
-            <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
-              Join Discord
-            </a>
-            <em>
+          <div>
+            <li @click="toggleModal('reference')">
+              角色技能表
+              <em>[R]</em>
+            </li>
+            <li @click="toggleModal('nightOrder')">
+              夜间顺序表
+              <em>[N]</em>
+            </li>
+            <li @click="toggleModal('gameState')">
+              游戏状态JSON
+              <em><font-awesome-icon icon="file-code"/></em>
+            </li>
+            <!-- <li>
               <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
-                <font-awesome-icon :icon="['fab', 'discord']" />
+                Join Discord
               </a>
-            </em>
-          </li> -->
-          <li>
-            <a href="https://github.com/bra1n/townsquare" target="_blank">
-              源代码
-            </a>
-            <em>
+              <em>
+                <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'discord']" />
+                </a>
+              </em>
+            </li> -->
+            <li>
               <a href="https://github.com/bra1n/townsquare" target="_blank">
-                <font-awesome-icon :icon="['fab', 'github']" />
+                源代码
               </a>
-            </em>
-          </li>
+              <em>
+                <a href="https://github.com/bra1n/townsquare" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'github']" />
+                </a>
+              </em>
+            </li>
+          </div>
         </template>
       </ul>
     </div>
@@ -749,6 +759,21 @@ export default {
   }
 }
 
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgb(54, 54, 54); 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(97, 97, 97); 
+}
+
 // Controls
 #controls {
   position: absolute;
@@ -839,6 +864,11 @@ export default {
     box-shadow: 0 0 10px black;
     border: 3px solid black;
     border-radius: 10px 0 10px 10px;
+
+    .options {
+      overflow-y: auto;
+      max-height: calc(85vh - 100px); /* Adjust this value as needed */
+    }
 
     li {
       padding: 2px 5px;
