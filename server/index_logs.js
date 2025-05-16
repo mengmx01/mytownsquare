@@ -520,7 +520,7 @@ const playersInterval = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
       metrics.connection_terminated_timeout.inc();
-      return ws.terminate();
+      // return ws.terminate();
     } else {
       ws.send(JSON.stringify(["pong"]));
     }
