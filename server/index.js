@@ -14,8 +14,8 @@ register.setDefaultLabels({
 });
 
 // const PLAYERS_PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
-const PLAYERS_PING_INTERVAL = 1000 * 2; // 2 seconds
-const CHANNELS_PING_INTERVAL = 1000 * 30; // 30 seconds
+const PLAYERS_PING_INTERVAL = 1000 * 60 * 3; // 3 minutes
+const CHANNELS_PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
 
 const options = {};
 if (process.env.NODE_ENV !== "development") {
@@ -66,14 +66,11 @@ function startSendQueue(channel, type) {
       for (let client of channels[channel]) {
         if ((client.playerRole === key || client.playerId === key) && client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify(messageQueues[channel][type][i][key]));
-          messageQueues[channel][type].splice(i, 1);
-          if (messageQueues[channel][type].length <= 0) stopSendQueue(channel, type);
-          i--; // 删除请求的同时将指针拨回
           break;
         }
       }
     }
-  }, PLAYERS_PING_INTERVAL)
+  }, 1000 * 3)
 }
 
 function stopSendQueue(channel, type) {
@@ -281,9 +278,9 @@ wss.on("connection", function connection(ws, req) {
           ws.send(JSON.stringify(["feedback", feedback]));
           if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
         }
-
+        
         const command = Object.keys(JSON.parse(data)[1])[0];
-        const playerId = JSON.parse(data)[1][command][0];
+        const [playerId, params] = JSON.parse(data)[1][command];
         switch (command) {
           case "checkDuplicateHost":
             for (let i=0; i<channels[ws.channel].length; i++) {
@@ -311,6 +308,18 @@ wss.on("connection", function connection(ws, req) {
                 ws.send(JSON.stringify(["existingChannel", false]));
               }
             }
+            break;
+          case "deleteMessage":
+            const type = params[0];
+            if (!messageQueues[ws.channel][type]) return;
+            if (messageQueues[ws.channel][type].length === 0) return;
+            const id = params[1];
+            for(let i=0; i<messageQueues[ws.channel][type].length; i++) {
+              if (Object.values(messageQueues[ws.channel][type][i])[0][2] === id) {//检测feedback id是否相同，后期队列扩充可能需要优化
+                messageQueues[ws.channel][type].splice(i, 1)
+              }
+              break;
+            }
         }
         break;
       }
@@ -324,19 +333,23 @@ wss.on("connection", function connection(ws, req) {
         //   data
         // );
         try {
+          const dataToPlayer = JSON.parse(data)[1];
           const feedback = JSON.parse(data)[2];
           if (feedback) {
             ws.send(JSON.stringify(["feedback", feedback]));
-            if (!Object.keys(messageUniques[ws.channel]).includes(data)) messageUniques[ws.channel][data] = {timeout: null};
+            if (Object.keys(messageUniques[ws.channel]).includes(data)) return;
+            messageUniques[ws.channel][data] = {timeout: null};
             messageUniques[ws.channel][data].timeout = setTimeout(() => {
               if (!messageUniques[ws.channel]) return;
               if (!messageUniques[ws.channel][data]) return;
               delete messageUniques[ws.channel][data];
-            }, 3 * 60 * 1000)
+            }, 1 * 60 * 1000) // delete duplicates after 1 minute
+            const player = Object.keys(dataToPlayer)[0];
+            dataToPlayer[player].push(feedback);
+            messageQueues[ws.channel].direct.push(dataToPlayer);
+            startSendQueue(ws.channel, 'direct');
           }
 
-          let disconnected = true;
-          const dataToPlayer = JSON.parse(data)[1];
           channels[ws.channel].forEach(function each(client) {
             if (
               client !== ws &&
@@ -345,13 +358,8 @@ wss.on("connection", function connection(ws, req) {
             ) {
               client.send(JSON.stringify(dataToPlayer[client.playerRole === "host" ? "host" : client.playerId]));
               metrics.messages_outgoing.inc();
-              if (client.isAlive) disconnected = false;
             }
           });
-          if (disconnected) {
-            messageQueues[ws.channel].direct.push(dataToPlayer);
-            startSendQueue(ws.channel, 'direct');
-          }
         } catch (e) {
           console.log("error parsing direct message JSON", e);
         }

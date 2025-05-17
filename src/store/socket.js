@@ -238,9 +238,9 @@ class LiveSession {
    * @private
    */
   _handleMessage({ data }) {
-    let command, params;
+    let command, params, feedback;
     try {
-      [command, params] = JSON.parse(data);
+      [command, params, feedback] = JSON.parse(data);
     } catch (err) {
       console.log("unsupported socket message", data);
     }
@@ -356,7 +356,7 @@ class LiveSession {
         this._updatePlayerPronouns(params);
         break;
       case "chat":
-        this._handleChat(params);
+        this._handleChat(params, feedback);
         break;
       case "setTimer":
         this._handleSetTimer(params);
@@ -1145,6 +1145,7 @@ class LiveSession {
       (players.length > nomination[0] && players.length > nomination[1])
     ) {
       this.setVotingSpeed(this._store.state.session.votingSpeed);
+      this._send("nomination", nomination);
     }
   }
 
@@ -1371,7 +1372,8 @@ class LiveSession {
    * Update chat history when received.
    * @param payload
    */
-  _handleChat({message, sendingPlayerId, receivingPlayerId}){
+  _handleChat({message, sendingPlayerId, receivingPlayerId}, feedback){
+    if (feedback) this._request("deleteMessage", this._store.state.session.playerId, ["direct", feedback]);
     if (this._isSpectator && receivingPlayerId != this._store.state.session.playerId) return;
     this._store.commit("session/updateChatReceived", {message, playerId: sendingPlayerId});
     const num = 1;
