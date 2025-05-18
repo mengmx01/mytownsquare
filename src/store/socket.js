@@ -285,6 +285,9 @@ class LiveSession {
         this._updateSeat(params);
         this._createChatHistory(params);
         break;
+      case "leaveSeat":
+        this._updateLeaveSeat();
+        break;
       case "ping":
         this._handlePing(params);
         break;
@@ -769,6 +772,14 @@ class LiveSession {
       // just update the player otherwise
       this._store.commit("players/update", { player, property, value });
     }
+  }
+
+  emptyPlayer({id}) {
+    this._sendDirect(id, "leaveSeat")
+  }
+
+  _updateLeaveSeat() {
+    this._store.state.session.claimedSeat = -1;
   }
 
   /**
@@ -1542,6 +1553,9 @@ export default store => {
         } else {
           session.sendPlayer(payload);
         }
+        break;
+      case "players/empty":
+        session.emptyPlayer(payload);
         break;
       case "session/addMessageQueue":
         session._startSendQueue();

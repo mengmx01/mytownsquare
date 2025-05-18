@@ -134,6 +134,23 @@ const mutations = {
   remove(state, index) {
     state.players.splice(index, 1);
   },
+  empty(state, {player}) {
+    this.commit("players/update", {
+      player,
+      property: 'id',
+      value: ''
+    });
+    this.commit("players/update", {
+      player,
+      property: 'name',
+      value: ''
+    });
+    this.commit("players/update", {
+      player,
+      property: 'image',
+      value: ''
+    });
+  },
   swap(state, [from, to]) {
 
     [state.players[from], state.players[to]] = [

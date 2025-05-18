@@ -104,7 +104,7 @@
         </div>
       </div>
       <form class="chatbox" @submit.prevent="sendChat">
-        <input type="text" id="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
+        <input type="text" id="message" ref="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
         <button type="submit" class="send">发送</button>
       <div class="toBottom" v-if="false">
           移至底部
@@ -233,30 +233,23 @@ export default {
     },
     removePlayer(playerIndex) {
       if (this.session.isSpectator || this.session.lockedVote) return;
-      if (
-        confirm(
-          //`确定要移除玩家 ${this.players[playerIndex].name}？`
-          `确定要移除该座位吗？`
-        )
-      ) {
-        const { nomination } = this.session;
-        if (nomination) {
-          if (nomination.includes(playerIndex)) {
-            // abort vote if removed player is either nominator or nominee
-            this.$store.commit("session/nomination");
-          } else if (
-            nomination[0] > playerIndex ||
-            nomination[1] > playerIndex
-          ) {
-            // update nomination array if removed player has lower index
-            this.$store.commit("session/setNomination", [
-              nomination[0] > playerIndex ? nomination[0] - 1 : nomination[0],
-              nomination[1] > playerIndex ? nomination[1] - 1 : nomination[1]
-            ]);
-          }
+      const { nomination } = this.session;
+      if (nomination) {
+        if (nomination.includes(playerIndex)) {
+          // abort vote if removed player is either nominator or nominee
+          this.$store.commit("session/nomination");
+        } else if (
+          nomination[0] > playerIndex ||
+          nomination[1] > playerIndex
+        ) {
+          // update nomination array if removed player has lower index
+          this.$store.commit("session/setNomination", [
+            nomination[0] > playerIndex ? nomination[0] - 1 : nomination[0],
+            nomination[1] > playerIndex ? nomination[1] - 1 : nomination[1]
+          ]);
         }
-        this.$store.commit("players/remove", playerIndex);
       }
+      this.$store.commit("players/remove", playerIndex);
     },
     swapPlayer(from, to) {
       if (this.session.isSpectator || this.session.lockedVote) return;
@@ -381,6 +374,10 @@ export default {
       }
       this.$store.commit("session/setChatOpen", true);
       this.isChatMin = false;
+
+      this.$nextTick(() => {
+        this.$refs.message.focus();
+      });
     },
     minimiseChat(){
       this.isChatMin = true;

@@ -128,7 +128,7 @@
       </div>
       <div
         class="name"
-        @click="isMenuOpen = !isMenuOpen"
+        @click="checkOverTop()"
         :class="{ active: isMenuOpen }"
       >
         <span v-if="player.id">{{ player.name }}</span>
@@ -140,7 +140,7 @@
       </div>
 
       <transition name="fold">
-        <ul class="menu" v-if="isMenuOpen">
+        <ul class="menu" ref="playerMenu" v-if="isMenuOpen" :style="[playerMenuAdjustment, { '--before': (menuTop < 0 ? Math.round(menuNewTop - menuTop) + 5 : 5) + 'px' }]">
           <li
             @click="changePronouns"
             v-if="
@@ -285,6 +285,15 @@ export default {
       const height = this.windowHeight;
       const referenceWidth = 1080;
       return "font-size: " + (this.grimoire.zoom + 20) * Math.min(width, height) / referenceWidth + "px";
+    },
+    playerMenuAdjustment() {
+      if (!this.menuTop) return null;
+      if (this.menuTop === 0) return null;
+      const position = {
+        top: '0px',
+        height: this.menuHeight + 'px'
+      }
+      return position;
     }
   },
   data() {
@@ -293,7 +302,10 @@ export default {
       isSwap: false,
       newMessages: 0,
       windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight
+      windowHeight: window.innerHeight,
+      menuTop: null,
+      menuHeight: null,
+      menuNewTop: null
     };
   },
   mounted(){
@@ -367,6 +379,24 @@ export default {
       reminders.splice(this.player.reminders.indexOf(reminder), 1);
       this.updatePlayer("reminders", reminders, true);
     },
+    async checkOverTop() {
+      this.isMenuOpen = !this.isMenuOpen;
+      if (!this.isMenuOpen) {
+        this.menuTop = null;
+        this.menuHeight = null;
+        return;
+      };
+      await this.$nextTick();
+      const position = this.$refs.playerMenu.getBoundingClientRect();
+      const top = position.top < 0 ? Math.floor(position.top) : 0;
+      this.menuTop = top;
+      this.menuHeight = Math.ceil(Math.abs(position.height));
+
+      await this.$nextTick();
+      this.menuNewTop = this.$refs.playerMenu.getBoundingClientRect().top;
+      console.log('top');
+      console.log(this.menuNewTop);
+    },
     updatePlayer(property, value, closeMenu = false) {
       if (
         this.session.isSpectator &&
@@ -384,13 +414,19 @@ export default {
       }
     },
     emptyPlayer(){
-      this.updatePlayer('id', '', true);
-      this.updatePlayer('name', '', true);
-      this.updatePlayer('image', '', true)
+      this.$store.commit("players/empty", {player: this.player, id: this.player.id});
     },
     removePlayer() {
       this.isMenuOpen = false;
-      this.$emit("trigger", ["removePlayer"]);
+      if (
+        confirm(
+          //`确定要移除玩家 ${this.players[playerIndex].name}？`
+          `确定要移除该座位吗？`
+        )
+      ) {
+        this.emptyPlayer();
+        this.$emit("trigger", ["removePlayer"]);
+      }
     },
     swapPlayer(player) {
       this.isMenuOpen = false;
@@ -514,6 +550,7 @@ export default {
 
 /****** Life token *******/
 .player {
+  z-index: 1;
   
   .life {
     border-radius: 50%;
@@ -967,7 +1004,8 @@ li.move:not(.from) .player .overlay svg.move {
     border: 10px solid transparent;
     border-right-color: black;
     right: 100%;
-    bottom: 5px;
+    bottom: var(--before);
+    // bottom: 5px;
     margin-right: 2px;
   }
 
