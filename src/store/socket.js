@@ -376,6 +376,9 @@ class LiveSession {
       case "bootlegger":
         this._handleSetBootlegger(params);
         break;
+      case "useOldOrder":
+        this._handleSetUseOldOrder(params);
+        break;
       case "setTalking":
         this._handleSetTalking(params);
         break;
@@ -512,6 +515,7 @@ class LiveSession {
         isNight: grimoire.isNight,
         isVoteHistoryAllowed: session.isVoteHistoryAllowed,
         isSecretVote: session.isSecretVote,
+        isUseOldOrder: session.isUseOldOrder,
         nomination: session.nomination,
         votingSpeed: session.votingSpeed,
         lockedVote: session.lockedVote,
@@ -536,6 +540,7 @@ class LiveSession {
       isNight,
       isVoteHistoryAllowed,
       isSecretVote,
+      isUseOldOrder,
       nomination,
       votingSpeed,
       votes,
@@ -594,6 +599,7 @@ class LiveSession {
       this._store.commit("toggleNight", !!isNight);
       this._store.commit("session/setVoteHistoryAllowed", isVoteHistoryAllowed);
       this._store.commit("session/setSecretVote", isSecretVote);
+      this._store.commit("session/setUseOldOrder", isUseOldOrder);
       const nominatedPlayer = nomination.length ? players[nomination[1]] : null;
       this._store.commit("session/nomination", {
         nomination,
@@ -1267,6 +1273,16 @@ class LiveSession {
     this._store.state.session.bootlegger = content;
   }
 
+  setUseOldOrder(isUseOldOrder){
+    if (this._isSpectator) return;
+    this._send("useOldOrder", isUseOldOrder);
+  }
+
+  _handleSetUseOldOrder(isUseOldOrder){
+    if (!this._isSpectator) return;
+    this._store.state.session.isUseOldOrder = isUseOldOrder;
+  }
+
   /**
    * Set talking status to true to enable glowing animation
    * Send this update to all clients in the channel
@@ -1547,6 +1563,9 @@ export default store => {
         break;
       case "session/setSecretVote":
         session.setSecretVote(payload);
+        break;
+      case "session/setUseOldOrder":
+        session.setUseOldOrder(payload);
         break;
       // case "session/setBootlegger":
       //   session.setBootlegger(payload);

@@ -27,6 +27,10 @@ module.exports = store => {
     store.commit("toggleGrimoire", false);
     updatePagetitle(false);
   }
+  if (localStorage.getItem("useOldOrder")) {
+    console.log('storing');
+    store.commit("session/setUseOldOrder", JSON.parse(localStorage.getItem("useOldOrder")));
+  }
   if (localStorage.roles !== undefined) {
     store.commit("setCustomRoles", JSON.parse(localStorage.roles));
     store.commit("setEdition", { id: "custom" });
@@ -308,6 +312,9 @@ module.exports = store => {
         break;
       case "session/setSecretVote":
         localStorage.setItem("secretVote", JSON.stringify(payload));
+        break;
+      case "session/setUseOldOrder":
+        localStorage.setItem("useOldOrder", JSON.stringify(payload));
         break;
     }
   });

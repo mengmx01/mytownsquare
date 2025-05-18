@@ -39,6 +39,7 @@ const state = () => ({
   isRolesDistributed: false,
   isBluffsDistributed: false,
   isGrimoireDistributed: false,
+  isUseOldOrder: false,
   isChatOpen: false,
   messageQueue: [],
   chatHistory: [],
@@ -80,6 +81,7 @@ const mutations = {
   setChatOpen: set("isChatOpen"),
   setSecretVote: set("isSecretVote"),
   setBootlegger: set("bootlegger"),
+  setUseOldOrder: set("isUseOldOrder"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
   distributeBluffs(state, {val}){

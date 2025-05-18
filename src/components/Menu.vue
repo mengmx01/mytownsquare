@@ -130,6 +130,16 @@
                   ]"
               /></em>
             </li>
+            <li v-if="!edition.isOfficial" @click="toggleForwardEvilInfo">
+              <small>提前邪恶互认和信息</small>
+              <em
+                ><font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isForwardEvilInfo ? 'check-square' : 'square'
+                  ]"
+              /></em>
+            </li>
             <li @click="toggleStatic">
               关闭动画
               <em
@@ -137,13 +147,13 @@
                   :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
               /></em>
             </li>
-            <!-- <li v-if="!session.isSpectator" @click="toggleShowVacant">
-              显示空座位
+            <li v-if="!session.isSpectator" @click="toggleUseOldOrder">
+              使用原夜间顺序
               <em
                 ><font-awesome-icon
-                  :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
+                  :icon="['fas', session.isUseOldOrder ? 'check-square' : 'square']"
               /></em>
-            </li> -->
+            </li>
             <li @click="toggleMuted">
               静音
               <em
@@ -583,7 +593,11 @@ export default {
 
         // reset secret vote
         if (this.session.isSecretVote) {
-          this.$store.commit("session/setSecretVote", false)
+          this.$store.commit("session/setSecretVote", false);
+        }
+        // reset using older night order
+        if (this.session.isSecretVote) {
+          this.$store.commit("session/setUseOldOrder", false);
         }
 
         // close chat box
@@ -632,6 +646,10 @@ export default {
       if (this.grimoire.isNight) {
         this.$store.commit("session/setMarkedPlayer", -1);
       }
+    },
+    toggleUseOldOrder() {
+      this.$store.commit("session/setUseOldOrder", !this.session.isUseOldOrder);
+      console.log(this.session);
     },
     setTimer() {
       if (this.session.isSpectator || !this.session.sessionId) return;
@@ -735,8 +753,8 @@ export default {
       "toggleGrimoire",
       "toggleMenu",
       "toggleImageOptIn",
+      "toggleForwardEvilInfo",
       "toggleMuted",
-      "toggleShowVacant",
       "toggleNightOrder",
       "toggleStatic",
       "setZoom",
