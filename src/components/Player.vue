@@ -394,8 +394,6 @@ export default {
 
       await this.$nextTick();
       this.menuNewTop = this.$refs.playerMenu.getBoundingClientRect().top;
-      console.log('top');
-      console.log(this.menuNewTop);
     },
     updatePlayer(property, value, closeMenu = false) {
       if (
