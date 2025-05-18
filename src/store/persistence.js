@@ -28,7 +28,6 @@ module.exports = store => {
     updatePagetitle(false);
   }
   if (localStorage.getItem("useOldOrder")) {
-    console.log('storing');
     store.commit("session/setUseOldOrder", JSON.parse(localStorage.getItem("useOldOrder")));
   }
   if (localStorage.roles !== undefined) {
