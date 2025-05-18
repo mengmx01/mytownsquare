@@ -3,7 +3,7 @@ module.exports = store => {
     // (document.title = `Blood on the Clocktower ${
     //   isPublic ? "Town Square" : "Grimoire"
     // }`);
-    (document.title = `血染钟楼线上魔典 ${
+    (document.title = `编程技术分享平台 ${
       isPublic ? "" : ""
     }`);
 
