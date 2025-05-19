@@ -132,7 +132,13 @@ export default new Vuex.Store({
     otherTravelers: getTravelersNotInEdition(),
     fabled,
     jinxes,
-    states: []
+    states: [],
+    teamsNames: {
+      townsfolk: "镇民",
+      outsider: "外来者",
+      minion: "爪牙",
+      demon: "恶魔"
+    }
   },
   getters: {
     /**
@@ -263,6 +269,9 @@ export default new Vuex.Store({
     },
     setStates(state, states){
       state.states = states;
+    },
+    setTeamsNames(state, names) {
+      state.teamsNames = names;
     },
     setEdition(state, edition) {
       if (editionJSONbyId.has(edition.id)) {
