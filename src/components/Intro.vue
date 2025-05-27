@@ -2,8 +2,7 @@
   <div class="intro">
     <img src="static/apple-icon.png" alt="" class="logo" />
     <div>
-      欢迎来到 (非官方)
-      <b>染·钟楼谜团</b> 的线上魔典。
+      欢迎来到城镇广场。
       请点击右上角处
       <span class="button" @click="toggleMenu">
         <font-awesome-icon icon="cog" /> 菜单
@@ -20,7 +19,7 @@
       <div class="footer">
         这个项目是免费和开源的，可以在
         <a href="https://github.com/bra1n/townsquare" target="_blank">GitHub</a
-        >上找到。 本项目是非官方项目，「血染钟楼」是由Steven Medway设计，The Pandemonium Institute公司出品的桌游。
+        >上找到。 本项目是非官方项目，旨在交流分享技术：Vue和WS的构建和应用。该网站为私人项目，仅供测试及展示。
       </div>
     </div>
     <!-- <a
