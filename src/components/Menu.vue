@@ -215,6 +215,20 @@
                 <em>{{ session.sessionId }}</em>
               </li>
             </template>
+            <template>
+              <li v-if="!session.kookId" @click="requestConnectKook">
+                绑定KOOK
+                <em><font-awesome-icon icon="link"/></em>
+              </li>
+              <li v-else @click="requestDisconnectKook">
+                解绑KOOK
+                <em><font-awesome-icon icon="link"/></em>
+              </li>
+              <li v-if="session.isKookRequested && !session.isKookConnected" @click="confirmConnectKook">
+                输入验证码
+                <em><font-awesome-icon icon="lock"/></em>
+              </li>
+            </template>
           </div>
         </template>
 
@@ -439,6 +453,36 @@ export default {
       const url = window.location.href.split("#")[0];
       const link = url + "#" + this.session.sessionId;
       navigator.clipboard.writeText(link);
+    },
+    requestConnectKook() {
+      const kookId = prompt("请输入KOOK用户ID（可以右键头像复制）：");
+      console.log(!kookId);
+      console.log(!kookId.trim());
+      // console.log(!Number())
+      if (!kookId || !kookId.trim() || !Number(kookId.trim())) {
+        alert("请输入正确的ID！");
+        return
+      }
+
+      this.$store.commit("session/setIsKookRequested", true);
+      this.$store.commit("session/setKookId", kookId.trim());
+
+      this.confirmConnectKook();
+    },
+    requestDisconnectKook() {
+      console.log(this.session.kookId);
+      console.log(!!this.session.kookId);
+      if (!this.session.kookId) return;
+      if (confirm("确定要解绑KOOK用户ID吗？")) {
+        this.$store.commit("session/setKookId", null);
+        this.$store.commit("session/setIsKookRequested", false);
+        this.$store.commit("session/setIsKookConnected", false);
+      }
+      return;
+    },
+    confirmConnectKook() {
+      const key = prompt("请输入验证码：");
+      this.$store.commit("session/sendKookKey", key);
     },
     distributeAsk() {
       this.distributingBluffs = false;

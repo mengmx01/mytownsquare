@@ -112,9 +112,9 @@
       </div>
       </form>
     </div>
-    <div id="version">
-      <a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024109577号-1</a>
-    </div>
+    <!-- <div id="version">
+      <a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024109577号-2</a>
+    </div> -->
   </div>
 </template>
 

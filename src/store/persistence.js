@@ -95,6 +95,15 @@ module.exports = store => {
     store.commit("session/setSpectator", spectator);
     store.commit("session/setSessionId", sessionId);
   }
+  if (localStorage.getItem("isKookRequested")) {
+    store.commit("session/setIsKookRequested", localStorage.getItem("isKookRequested"));
+  }
+  if (localStorage.getItem("isKookConnected")) {
+    store.commit("session/setIsKookConnected", localStorage.getItem("isKookConnected"));
+  }
+  if (localStorage.getItem("kookId")) {
+    store.commit("session/setKookId", localStorage.getItem("kookId"));
+  }
   if (localStorage.getItem("votes")) {
     const votes = JSON.parse(localStorage.getItem("votes"));
     votes.forEach(voteHistory => {
@@ -315,6 +324,17 @@ module.exports = store => {
       case "session/setUseOldOrder":
         localStorage.setItem("useOldOrder", JSON.stringify(payload));
         break;
+      case "session/setKookId":
+        localStorage.setItem("kookId", payload);
+        if (payload === null) localStorage.removeItem("kookId");
+        break;
+      case "session/setIsKookRequested":
+        localStorage.setItem("isKookRequested", payload);
+        break;
+      case "session/setIsKookConnected":
+        localStorage.setItem("isKookConnected", payload);
+        break;
+
     }
   });
   // console.log(localStorage);

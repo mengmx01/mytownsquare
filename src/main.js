@@ -32,6 +32,7 @@ const faIcons = [
   "Image",
   "Keyboard",
   "Link",
+  "Lock",
   "MinusCircle",
   "Microphone",
   "MicrophoneSlash",

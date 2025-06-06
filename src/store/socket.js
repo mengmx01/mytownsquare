@@ -3,11 +3,11 @@ class LiveSession {
     // this._wss = "ws://43.139.3.156:8080/";
     // this._wss = "wss://43.139.3.156/ws/";
     // this._wss = "wss://botcgrimoire.site:443/ws/";
-    this._wss = "wss://botcgrimoire.top:443/ws/";
+    // this._wss = "wss://botcgrimoire.top:443/ws/";
     // this._wss = "wss://botcgrimoire.uk:8443/";
     // this._wss = "wss://botcgrimoire.site:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
-    // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
+    this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     // this._wss = "ws://192.168.10.3:8081/";
     this._socket = null;
     this._isSpectator = true;
@@ -1463,14 +1463,306 @@ class LiveSession {
   }
 }
 
+class LiveLobby {
+  constructor(store) {
+    // this._wss = "ws://43.139.3.156:8080/";
+    // this._wss = "wss://43.139.3.156/ws/";
+    // this._wss = "wss://botcgrimoire.site:443/ws/";
+    // this._wss = "wss://botcgrimoire.top:443/ws/";
+    // this._wss = "wss://botcgrimoire.uk:8443/";
+    // this._wss = "wss://botcgrimoire.site:8443/";
+    // this._wss = "wss://live.clocktower.online:8080/";
+    this._wss = "ws://localhost:8082/"; // uncomment if using local server with NODE_ENV=development
+    // this._wss = "ws://192.168.10.3:8081/";
+    this._socket = null;
+    this._isSpectator = true;
+    this._isAlive = true;
+    this._gamestate = [];
+    this._store = store;
+    this._pingInterval = 3 * 1000; // 30 seconds between pings
+    this._pingTimer = null;
+    this._sendInterval = 3 * 1000; // 3 seconds between unsent message cycles
+    this._sendTimer = null;
+    this._reconnectTimer = null;
+    this._players = {}; // map of players connected to a session
+    this._pings = {}; // map of player IDs to ping
+  }
+
+  /**
+   * Open a new session for the passed channel.
+   * @param channel
+   * @private
+   */
+  _open(channel) {
+    this.disconnect();
+    this._socket = new WebSocket(
+      this._wss + 
+      this._store.state.session.playerId
+    );
+    this._socket.addEventListener("message", this._handleMessage.bind(this));
+    this._socket.onopen = this._onOpen.bind(this);
+    this._socket.onclose = err => {
+      this._socket = null;
+      clearTimeout(this._pingTimer);
+      this._pingTimer = null;
+      if (err.code !== 1000) {
+        // connection interrupted, reconnect after 3 seconds
+        this._store.commit("session/setReconnecting", true);
+        this._reconnectTimer = setTimeout(
+          () => this.connect(channel),
+          3 * 1000
+        );
+      } else {
+        this._store.commit("session/setSessionId", "");
+        if (err.reason) alert(err.reason);
+      }
+    };
+  }
+
+  /**
+   * Send a message through the socket.
+   * @param command
+   * @param params
+   * @private
+   */
+  _send(command, params, feedback = false) {
+    if (this._socket && this._socket.readyState === 1) {
+      this._socket.send(JSON.stringify([command, params, feedback]));
+    }
+  }
+
+  /**
+   * Send a message directly to a single playerId, if provided.
+   * Otherwise broadcast it.
+   * @param playerId player ID or "host", optional
+   * @param command
+   * @param params
+   * @private
+   */
+  _sendDirect(playerId, command, params, feedback = false) {
+    if (playerId) {
+      this._send("direct", { [playerId]: [command, params]}, feedback);
+    } else {
+      this._send(command, params, feedback);
+    }
+  }
+  
+  /**
+   * Request some server side information.
+   * @param playerId player ID or "host"
+   * @param command
+   * @param params
+   * @private
+   */
+  _request(command, playerId, params, feedback = false) {
+    this._send("request", { [command]: [playerId, params] }, feedback);
+  }
+
+  /**
+   * Upload a file to the server (stored).
+   * Currently only supports images for avatar pictures
+   * @param playerId player ID or "host"
+   * @param command
+   * @param params
+   * @private
+   */
+  _uploadFile(command, playerId, params, feedback = false) {
+    if (playerId) {
+      this._send("uploadFile", { [command]: [playerId, params] }, feedback);
+    }
+  }
+
+  _sendQueue() {
+      if (this._store.state.session.messageQueue.length <= 0) return;
+      for (let message of this._store.state.session.messageQueue) {
+        switch (message.type) {
+          case "direct":
+            this._sendDirect(message.playerId, message.command, message.params, message.id);
+            break;
+          case "request":
+            this._request(message.command, message.playerId, message.params, message.id);
+            break;
+          case "uploadFile":
+            this._uploadFile(message.command, message.playerId, message.params, message.id);
+            break;
+          default:
+            this._send(message.command, message.params, message.id);
+        }
+      }
+  }
+
+  _startSendQueue() {
+    this._stopSendQueue();
+    this._sendQueue();
+    this._sendTimer = setInterval(() => {
+      this._sendQueue();
+    }, this._sendInterval);
+  }
+
+  _stopSendQueue() {
+    clearInterval(this._sendTimer);
+    this._sendTimer = null;
+  }
+
+  /**
+   * 
+   * @param id id for identifying and deleting the query
+   */
+  _deleteFromQueue(id) {
+    if (this._store.state.session.messageQueue.length <= 0) return;
+    for (let i=0; i<this._store.state.session.messageQueue.length; i++) {
+      if (this._store.state.session.messageQueue[i].id === id) {
+        this._checkQueue(this._store.state.session.messageQueue[i]);
+        // this._store.state.session.messageQueue.splice(i,1);
+        this._store.commit("session/deleteMessageQueue", i)
+        break;
+      }
+    }
+  }
+
+  /** 
+   * 
+   * @param message check the specific message and perform certain actions before deleting
+   */
+  _checkQueue(message) {
+    switch (message.type) {
+      case "direct": 
+        switch (message.command) {
+          case "chat": {
+            const receivingPlayerId = message.params.receivingPlayerId === "host" ? this._store.state.session.stId : message.params.receivingPlayerId;
+            this._store.commit("session/updateChatReceived", {message: message.params.message, playerId: receivingPlayerId}); // sending out to other players, receivingPlayerId is the recorded chat ID
+          }
+          break;
+        }
+        break;
+    }
+  }
+
+  /**
+   * Open event handler for socket.
+   * @private
+   */
+  _onOpen() {
+    console.log('Welcome!');
+  }
+
+  _handleMessage({ data }) {
+    let command, params;
+    try {
+      [command, params] = JSON.parse(data);
+    } catch (err) {
+      console.log("unsupported socket message", data);
+    }
+    switch (command) {
+      case "kookConnected":
+        this.kookConnected(params);
+        break;
+    }
+  }
+
+  /**
+   * Connect to a new live session, either as host or spectator.
+   * Set a unique playerId if there isn't one yet.
+   * @param channel
+   */
+  connect(channel) {
+    if (!this._store.state.session.playerId) {
+      let playerId;
+      // 禁止host、_host和player作为playerId
+      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player" || playerId === "default") {
+        playerId = Math.random().toString(36).substr(2);
+      }
+      this._store.commit(
+        "session/setPlayerId",
+        playerId
+      );
+    }
+    this._pings = {};
+    this._store.commit("session/setPlayerCount", 0);
+    this._store.commit("session/setPing", 0);
+    this._isSpectator = this._store.state.session.isSpectator;
+    if (this._store.state.session.claimedSeat >= 0) {
+      this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
+    }
+    this._open(channel);
+  }
+
+  /**
+   * Close the current session, if any.
+   */
+  disconnect() {
+    this._pings = {};
+    this._store.commit("session/setPlayerCount", 0);
+    this._store.commit("session/setPing", 0);
+    this._store.commit("session/setReconnecting", false);
+    clearTimeout(this._reconnectTimer);
+    if (this._socket) {
+      if (this._isSpectator) {
+        this._sendDirect("host", "bye", this._store.state.session.playerId);
+      }
+      this._socket.close(1000);
+      this._socket = null;
+    }
+  }
+
+  connectKook(kookId) {
+    if (!kookId) return;
+    this._request("kookConnection", this._store.state.session.playerId, 
+      {kookId, connected: this._store.state.session.isKookConnected},
+      true
+    );
+  }
+
+  confirmConnectKook(key) {
+    if (!key) return;
+    this._request("enterKookKey", this._store.state.session.playerId, key);
+  }
+
+  kookConnected(connected) {
+    if (connected === true) {
+      this._store.commit("session/setIsKookConnected", connected)
+      alert("成功绑定KOOK！");
+    }else {
+      alert("验证失败！");
+    }
+  }
+
+  connectChannel() {
+    if (!this._store.state.session.isKookConnected || !this._store.state.session.kookId) return;
+    this._request("connectChannel", this._store.state.session.playerId, this._store.state.session.kookId)
+  }
+
+  connectStChannel() {
+    if (!this._store.state.session.isKookConnected || this._store.state.session.sessionId) return;
+    this._request("connectStChannel", !this._store.state.session.playerId, this._store.state.session.kookId);
+  }
+}
+
 export default store => {
+
+  // lobby
+  const lobby = new LiveLobby(store);
+
   // setup
   const session = new LiveSession(store);
 
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
-      case"requestDuplicateHost":
+      // lobby
+      case "session/setKookId":
+        lobby.connectKook(payload);
+        break;
+      case "session/sendKookKey":
+        lobby.confirmConnectKook(payload);
+        break;
+      case "session/setIsKookConnected":
+        lobby.connectChannel();
+        lobby.connectStChannel();
+        break;
+
+      // session
+      case "requestDuplicateHost":
         if (!state.session.sessionId) {
           session.requestDuplicateHost()
         }
@@ -1591,6 +1883,8 @@ export default store => {
         break;
     }
   });
+
+  lobby.connect();
 
   // check for session Id in hash
   const sessionId = window.location.hash.substr(1);

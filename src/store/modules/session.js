@@ -42,13 +42,17 @@ const state = () => ({
   isUseOldOrder: false,
   isChatOpen: false,
   messageQueue: [],
+  lobbyQueue: [],
   chatHistory: [],
   newStMessage: [0],
   bootlegger: "",
   timer: 480,
   interval: null,
   isTalking: false,
-  listeningFrame: null
+  listeningFrame: null,
+  kookId: null,
+  isKookRequested: false,
+  isKookConnected: false
 });
 
 const getters = {};
@@ -99,6 +103,12 @@ const mutations = {
   setPlayerName(state, name){
     state.playerName = name;
   },
+  setKookId: set("kookId"),
+  setIsKookRequested: set("isKookRequested"),
+  setIsKookConnected: set("isKookConnected"),
+  sendKookKey(state, key) {
+    return key;
+  },
   nomination(
     state,
     { nomination, votes, votingSpeed, lockedVote, isVoteInProgress, nominatedPlayer = null } = {}
@@ -113,8 +123,6 @@ const mutations = {
     state.votingSpeed = votingSpeed || state.votingSpeed;
     state.lockedVote = lockedVote || 0;
     state.isVoteInProgress = isVoteInProgress || false;
-
-    state.messageQueue.push({type: "", playerId: state.playerId, command: "nomination", params: nomination, id: new Date().getTime()});
   },
   /**
    * Create an entry in the vote history log. Requires current player array because it might change later in the game.
