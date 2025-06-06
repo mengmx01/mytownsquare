@@ -57,6 +57,7 @@ const channels = {};
 const messageQueues = {}; // currently only stores direct messages
 const sendIntervals = {};
 function startSendQueue(channel, type) {
+  if (sendIntervals[channel][type] != null) clearInterval(sendIntervals[channel][type]);
   sendIntervals[channel][type] = setInterval(() => {
     if (!messageQueues[channel]) return;
     if (!messageQueues[channel][type]) return;
@@ -330,6 +331,10 @@ wss.on("connection", function connection(ws, req) {
                 messageQueues[ws.channel][type].splice(i, 1)
               }
               break;
+            }
+            if (messageQueues[ws.channel][type].length === 0) {
+              clearInterval(sendIntervals[ws.channel][type]);
+              sendIntervals[ws.channel][type] = null;
             }
         }
         break;
