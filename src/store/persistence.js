@@ -3,7 +3,7 @@ module.exports = store => {
     // (document.title = `Blood on the Clocktower ${
     //   isPublic ? "Town Square" : "Grimoire"
     // }`);
-    (document.title = `血染钟楼线上魔典 ${
+    (document.title = `编程技术分享平台 ${
       isPublic ? "" : ""
     }`);
 
@@ -27,6 +27,9 @@ module.exports = store => {
     store.commit("toggleGrimoire", false);
     updatePagetitle(false);
   }
+  if (localStorage.getItem("useOldOrder")) {
+    store.commit("session/setUseOldOrder", JSON.parse(localStorage.getItem("useOldOrder")));
+  }
   if (localStorage.roles !== undefined) {
     store.commit("setCustomRoles", JSON.parse(localStorage.roles));
     store.commit("setEdition", { id: "custom" });
@@ -43,12 +46,17 @@ module.exports = store => {
       });
     });
   }
+  if (localStorage.getItem("playerProfileImage")) {
+    localStorage.setItem("playerAvatar", localStorage.getItem("playerProfileImage"));
+    localStorage.removeItem("playerProfileImage");
+  }
   if (localStorage.fabled !== undefined) {
     store.commit("players/setFabled", {
       // fabled: JSON.parse(localStorage.fabled).map(
       //   fabled => store.state.fabled.get(fabled.id) || fabled
       // )
-      fabled: JSON.parse(localStorage.fabled)
+      fabled: JSON.parse(localStorage.fabled),
+      emptyFabled: true
     });
   }
   if (localStorage.players) {
@@ -64,11 +72,20 @@ module.exports = store => {
     );
   }
   /**** Session related data *****/
+  if (localStorage.getItem("firstHostCheck")) {
+    store.commit("session/setFirstHostCheck", JSON.parse(localStorage.getItem("firstHostCheck")));
+  }
+  if (localStorage.getItem("firstJoinCheck")) {
+    store.commit("session/setFirstJoinCheck", JSON.parse(localStorage.getItem("firstJoinCheck")));
+  }
   if (localStorage.getItem("playerId")) {
     store.commit("session/setPlayerId", localStorage.getItem("playerId"));
   }
   if (localStorage.getItem("playerName")) {
     store.commit("session/setPlayerName", localStorage.getItem("playerName"));
+  }
+  if (localStorage.getItem("stId")) {
+    store.commit("session/setStId", localStorage.getItem("stId"));
   }
   if (localStorage.getItem("claimedSeat")) {
     store.commit("session/claimSeat", Number(localStorage.getItem("claimedSeat")));
@@ -77,6 +94,18 @@ module.exports = store => {
     const [spectator, sessionId] = JSON.parse(localStorage.getItem("session"));
     store.commit("session/setSpectator", spectator);
     store.commit("session/setSessionId", sessionId);
+  }
+  if (localStorage.getItem("votes")) {
+    const votes = JSON.parse(localStorage.getItem("votes"));
+    votes.forEach(voteHistory => {
+      store.commit("session/addVotes", voteHistory);
+    })
+  }
+  if (localStorage.getItem("votesSelected")) {
+    const votesSelected = JSON.parse(localStorage.getItem("votesSelected"));
+    votesSelected.forEach(voteSelected => {
+      store.commit("session/addVoteSelected", voteSelected);
+    })
   }
   if (localStorage.getItem("customBootlegger")) {
     const customBootlegger = JSON.parse(localStorage.getItem("customBootlegger"));
@@ -91,11 +120,11 @@ module.exports = store => {
       })
     })
   }
-  if (localStorage.getItem("playerProfileImage")) {
-    store.commit("session/updatePlayerProfileImage", localStorage.getItem("playerProfileImage"));
+  if (localStorage.getItem("playerAvatar")) {
+    store.commit("session/updatePlayerAvatar", localStorage.getItem("playerAvatar"));
   }
   if (localStorage.getItem("secretVote")) {
-    store.commit("session/setSecretVote", localStorage.getItem("secretVote"));
+    store.commit("session/setSecretVote", JSON.parse(localStorage.getItem("secretVote")));
   }
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
@@ -201,6 +230,12 @@ module.exports = store => {
           localStorage.removeItem("session");
         }
         break;
+      case "session/setFirstHostCheck":
+        localStorage.setItem("firstHostCheck", JSON.stringify(payload));
+        break;
+      case "session/setFirstJoinCheck":
+        localStorage.setItem("firstJoinCheck", JSON.stringify(payload));
+        break;
       case "session/setPlayerId":
         if (payload) {
           localStorage.setItem("playerId", payload);
@@ -215,6 +250,9 @@ module.exports = store => {
           localStorage.removeItem("playerName");
         }
         break;
+      case "session/setStId":
+        localStorage.setItem("stId", payload);
+        break;
       case "session/claimSeat":
         if (payload >= 0) {
           localStorage.setItem("claimedSeat", payload);
@@ -222,6 +260,40 @@ module.exports = store => {
           localStorage.removeItem("claimedSeat");
         }
         break;
+      case "session/addVotes": {
+        if (payload.save) {
+          const votes = localStorage.getItem("votes") ? JSON.parse(localStorage.getItem("votes")) : [];
+          payload.save = false;
+          votes.push(payload);
+          localStorage.setItem("votes", JSON.stringify(votes));
+        }
+        break;
+      }
+      case "session/addVoteSelected": {
+        if (payload.save) {
+          const votesSelected = localStorage.getItem("votesSelected") ? JSON.parse(localStorage.getItem("votesSelected")) : [];
+          payload.save = false;
+          votesSelected.push(payload);
+          localStorage.setItem("votesSelected", JSON.stringify(votesSelected));
+        }
+        break;
+      }
+      case "session/clearVoteHistory": {
+        if (!localStorage.getItem("votes")) break;
+        if (!localStorage.getItem("votesSelected")) break;
+        if (!payload || payload.length === 0) {
+          localStorage.removeItem("votes");
+          localStorage.removeItem("votesSelected");
+        } else {
+          const votes = JSON.parse(localStorage.getItem("votes"));
+          const votesSelected = JSON.parse(localStorage.getItem("votesSelected"))
+          const newVotes = votes.filter((_, index) => !payload.includes(index));
+          const newVotesSelected = votesSelected.filter((_, index) => !payload.includes(index));
+          localStorage.setItem("votes", JSON.stringify(newVotes));
+          localStorage.setItem("votesSelected", JSON.stringify(newVotesSelected));
+        }
+        break;
+      }
       case "session/setBootlegger":
         localStorage.setItem("customBootlegger", JSON.stringify(payload));
         break;
@@ -234,11 +306,15 @@ module.exports = store => {
           localStorage.removeItem("chatHistory");
         }
         break;
-      case "session/updatePlayerProfileImage":
-        localStorage.setItem("playerProfileImage", payload);
+      case "session/updatePlayerAvatar":
+        localStorage.setItem("playerAvatar", payload);
         break;
       case "session/setSecretVote":
-        localStorage.setItem("secretVote", payload);
+        localStorage.setItem("secretVote", JSON.stringify(payload));
+        break;
+      case "session/setUseOldOrder":
+        localStorage.setItem("useOldOrder", JSON.stringify(payload));
+        break;
     }
   });
   // console.log(localStorage);

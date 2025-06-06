@@ -9,7 +9,7 @@
         backgroundImage: `url(${
           role.image && grimoire.isImageOptIn
             ? role.image
-            : require('../assets/icons/' + (role.imageAlt || role.id) + '.png')
+            : require('../assets/icons/' + (role.imageAlt || role.id.replace(/old1$/, '')) + '.png')
         })`
       }"
     ></span>
@@ -127,6 +127,7 @@ export default {
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center 30%;
+    border-radius: 50%;
     position: absolute;
     width: 100%;
     height: 100%;

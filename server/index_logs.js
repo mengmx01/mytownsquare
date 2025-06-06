@@ -13,10 +13,11 @@ register.setDefaultLabels({
   app: "clocktower-online"
 });
 
-const PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
+// const PLAYERS_PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
+const PLAYERS_PING_INTERVAL = 1000 * 60 * 3; // 3 minutes
+const CHANNELS_PING_INTERVAL = 1000 * 60 * 60 * 8; // 8 hours
 
 const options = {};
-console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV !== "development") {
   options.cert = fs.readFileSync("cert.pem");
   options.key = fs.readFileSync("key.pem");
@@ -51,6 +52,36 @@ function heartbeat() {
 
 // map of channels currently in use
 const channels = {};
+
+// messages to be sent to clients which need confirmation for successfully sent to client
+const messageQueues = {}; // currently only stores direct messages
+const sendIntervals = {};
+function startSendQueue(channel, type) {
+  sendIntervals[channel][type] = setInterval(() => {
+    if (!messageQueues[channel]) return;
+    if (!messageQueues[channel][type]) return;
+
+    for (let i=0; i<messageQueues[channel][type].length; i++) {
+      const key = Object.keys(messageQueues[channel][type][i])[0];
+      for (let client of channels[channel]) {
+        if ((client.playerRole === key || client.playerId === key) && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(messageQueues[channel][type][i][key]));
+          break;
+        }
+      }
+    }
+  }, 1000 * 3)
+}
+
+function stopSendQueue(channel, type) {
+  if (!sendIntervals[channel]) return;
+  if (!sendIntervals[channel][type]) return;
+  clearInterval(sendIntervals[channel][type]);
+  sendIntervals[channel][type] = null;
+}
+
+// unique messages received to avoid sending multiple times to client
+const messageUniques = {};
 
 // metrics
 const metrics = {
@@ -116,50 +147,105 @@ for (let metric in metrics) {
 
 // a new client connects
 wss.on("connection", function connection(ws, req) {
-  console.log("connection established!");
-  console.log(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-  console.log(req.headers.origin);
+  console.log(new Date(), "new connection established! ==========================");
+  console.log("requesting from IP " + (req.headers['x-forwarded-for'] || req.connection.remoteAddress));
+  console.log("requesting from origin " + req.headers.origin);
   // url pattern: clocktower.online/<channel>/<playerId|host>
   const url = req.url.toLocaleLowerCase().split("/");
   ws.playerId = url.pop();
+  if (ws.playerId === "host") {
+    ws.playerId = url.pop();
+    ws.playerRole = "host";
+  } else {
+    ws.playerRole = "player";
+  }
+  
   ws.channel = url.pop();
+  console.log("requesting for channel " + ws.channel + " from player " + ws.playerId);
+  ws.playerIp = req.connection.remoteAddress.split(", ")[0];
   // check for another host on this channel
   if (
-    ws.playerId === "host" &&
+    ws.playerRole === "host" &&
     channels[ws.channel] &&
     channels[ws.channel].some(
       client =>
         client !== ws &&
         client.readyState === WebSocket.OPEN &&
-        client.playerId === "host"
+        (client.playerRole === "host" || client.playerRole === "_host")
     )
   ) {
-    console.log(ws.channel, "duplicate host");
-    ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
-    metrics.connection_terminated_host.inc();
-    return;
+    const playerId = [];
+    const playerIdHost = [];
+    channels[ws.channel].forEach(client => {
+      if (
+        client !== ws &&
+        client.readyState === WebSocket.OPEN &&
+        (client.playerRole === "host" || client.playerRole === "_host")
+      ) {
+        playerId.push(client.playerId);
+        if (client.playerRole === "host") {
+          playerIdHost.push(client.playerId);
+        }
+      }
+    });
+    
+    // if (!playerId.includes(ws.playerId)) {
+    //   console.log(ws.channel, "duplicate host");
+    //   ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
+    //   metrics.connection_terminated_host.inc();
+    //   return;
+    // } else if (playerIdHost.includes(ws.playerId)) {
+    if (playerIdHost.includes(ws.playerId)) {
+      console.log(ws.channel, "duplicate entry");
+      ws.send(JSON.stringify(["alertPopup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
+    }
   }
-  if (ws.playerId != "host" && !channels[ws.channel]) {
-    ws.close(1000, `房间"${ws.channel}"不存在！`)
-  }
+  // if (ws.playerRole != "host" && !channels[ws.channel]) {
+  //   ws.close(1000, `房间"${ws.channel}"不存在！`)
+  //   return;
+  // }
   ws.isAlive = true;
   ws.pingStart = new Date().getTime();
   ws.counter = 0;
   // add channel to list
+  // also create message lists for the channel
   if (!channels[ws.channel]) {
     channels[ws.channel] = [];
+
+    messageQueues[ws.channel] = {direct: []}; // currently only stores direct messages
+    sendIntervals[ws.channel] = {direct: null};
+    messageUniques[ws.channel] = [];
   }
   channels[ws.channel].push(ws);
+  // 说书人重连后删除 _host 标签
+  if (ws.playerRole === 'host') {
+    channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
+  }
+  console.log("connected client player ID ---------------------------")
+  if (channels[ws.channel]) {
+    channels[ws.channel].forEach(client => {
+      console.log(client.playerId + "     " + client.playerRole);
+    });
+  }
+  console.log("end --------------------------------------------------")
   console.log(Object.keys(channels));
   // start ping pong
   ws.ping(noop);
   ws.on("pong", heartbeat);
   // handle message
   ws.on("message", function incoming(data) {
+    if (Object.keys(messageUniques[ws.channel]).includes(data)) {
+      clearTimeout(messageUniques[ws.channel][data].timeout);
+      messageUniques[ws.channel][data].timeout = setTimeout(() => {
+        if (!messageUniques[ws.channel]) return;
+        if (!messageUniques[ws.channel][data]) return;
+        delete messageUniques[ws.channel][data];
+      }, 3 * 60 * 1000);
+    };
     metrics.messages_incoming.inc();
     // check rate limit (max 5msg/second)
     ws.counter++;
-    if (ws.counter > (5 * PING_INTERVAL) / 1000) {
+    if (ws.counter > (5 * sendIntervals) / 1000) {
       console.log(ws.channel, "disconnecting user due to spam");
       ws.close(
         1000,
@@ -174,13 +260,14 @@ wss.on("connection", function connection(ws, req) {
       .split(",", 1)
       .pop();
     switch (messageType) {
-      case '"ping"':
+      case '"ping"': {
+        ws.send(JSON.stringify(["pong"]));
         // ping messages will only be sent host -> all or all -> host
         channels[ws.channel].forEach(function each(client) {
           if (
             client !== ws &&
             client.readyState === WebSocket.OPEN &&
-            (ws.playerId === "host" || client.playerId === "host")
+            (ws.playerRole === "host" || client.playerRole === "host")
           ) {
             client.send(
               data.replace(/latency/, (client.latency || 0) + (ws.latency || 0))
@@ -189,7 +276,65 @@ wss.on("connection", function connection(ws, req) {
           }
         });
         break;
-      case '"direct"':
+      }
+      case '"request"': {
+        // console.log(
+        //   new Date(),
+        //   wss.clients.size,
+        //   ws.channel,
+        //   ws.playerId,
+        //   data
+        // );
+        const feedback = JSON.parse(data).pop();
+        if (feedback) {
+          ws.send(JSON.stringify(["feedback", feedback]));
+          if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
+        }
+
+        const command = Object.keys(JSON.parse(data)[1])[0];
+        const [playerId, params] = JSON.parse(data)[1][command];
+        switch (command) {
+          case "checkDuplicateHost":
+            for (let i=0; i<channels[ws.channel].length; i++) {
+              if (
+                channels[ws.channel][i].readyState === WebSocket.OPEN &&
+                (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host") &&
+                playerId != channels[ws.channel][i].playerId
+              ) {
+                ws.send(JSON.stringify(["duplicatedHost", true]));
+                break;
+              } else if (i + 1 === channels[ws.channel].length) {
+                ws.send(JSON.stringify(["duplicatedHost", false]));
+              }
+            }
+            break;
+          case "checkExistChannel":
+            for (let i=0; i<channels[ws.channel].length; i++) {
+              if (
+                // channels[ws.channel][i].readyState === WebSocket.OPEN &&
+                (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host")
+              ) {
+                ws.send(JSON.stringify(["existingChannel", true]));
+                break;
+              } else if (i + 1 === channels[ws.channel].length) {
+                ws.send(JSON.stringify(["existingChannel", false]));
+              }
+            }
+          case "deleteMessage":
+            const type = params[0];
+            if (!messageQueues[ws.channel][type]) return;
+            if (messageQueues[ws.channel][type].length === 0) return;
+            const id = params[1];
+            for(let i=0; i<messageQueues[ws.channel][type].length; i++) {
+              if (Object.values(messageQueues[ws.channel][type][i])[0][2] === id) {//检测feedback id是否相同，后期队列扩充可能需要优化
+                messageQueues[ws.channel][type].splice(i, 1)
+              }
+              break;
+            }
+        }
+        break;
+      }
+      case '"direct"': {
         // handle "direct" messages differently
         // console.log(
         //   new Date(),
@@ -200,13 +345,29 @@ wss.on("connection", function connection(ws, req) {
         // );
         try {
           const dataToPlayer = JSON.parse(data)[1];
+          const feedback = JSON.parse(data)[2];
+          if (feedback) {
+            ws.send(JSON.stringify(["feedback", feedback]));
+            if (Object.keys(messageUniques[ws.channel]).includes(data)) return;
+            messageUniques[ws.channel][data] = {timeout: null};
+            messageUniques[ws.channel][data].timeout = setTimeout(() => {
+              if (!messageUniques[ws.channel]) return;
+              if (!messageUniques[ws.channel][data]) return;
+              delete messageUniques[ws.channel][data];
+            }, 1 * 60 * 1000) // delete duplicates after 1 minute
+            const player = Object.keys(dataToPlayer)[0];
+            dataToPlayer[player].push(feedback);
+            messageQueues[ws.channel].direct.push(dataToPlayer);
+            startSendQueue(ws.channel, 'direct');
+          }
+
           channels[ws.channel].forEach(function each(client) {
             if (
               client !== ws &&
               client.readyState === WebSocket.OPEN &&
-              dataToPlayer[client.playerId]
+              !!(dataToPlayer[client.playerId] || dataToPlayer[client.playerRole])
             ) {
-              client.send(JSON.stringify(dataToPlayer[client.playerId]));
+              client.send(JSON.stringify(dataToPlayer[client.playerRole === "host" ? "host" : client.playerId]));
               metrics.messages_outgoing.inc();
             }
           });
@@ -214,82 +375,74 @@ wss.on("connection", function connection(ws, req) {
           console.log("error parsing direct message JSON", e);
         }
         break;
-      case '"uploadfile"':
-          try {
-            const uploadData = JSON.parse(data)[1];
-            const uploadType = Object.keys(uploadData)[0];
-            const playerId = Object.values(uploadData)[0][0];
-            const uploadContent = Object.values(uploadData)[0][1];
-            
-            switch(uploadType) {
-              case "uploadProfileImage":
-                // const extension = uploadContent.split(";base64,")[0].split("/").pop();
-                const extension = 'webp';
-                const profileImageData = uploadContent.split(";base64,").pop();
-                const version = new Date().getTime();
-                // const folderPath = path.join(__dirname, "profile_images");
-                const folderPath = "/usr/share/nginx/html/dist/profile_images";
-                if (!fs.existsSync(folderPath)){
-                    fs.mkdirSync(folderPath);
-                }
-                const fileName = playerId + "." + extension;
-                const filePath = path.join(folderPath, fileName);
-                // fs.writeFile(filePath, profileImageData, { encoding: 'base64' }, (err) => {
-                //   if (err) {
-                //     console.error('Failed to save image:', err);
-                //   } else {
-                //     channels[ws.channel].forEach(function each(client) {
-                //       if (
-                //         client === ws &&
-                //         client.readyState === WebSocket.OPEN
-                //       ) {
-                //         client.send(JSON.stringify(["profileImageReceived", fileName]));
-                //         metrics.messages_outgoing.inc();
-                //       }
-                //     });
-                //   }
-                // });
-                sharp(Buffer.from(profileImageData, 'base64'))
-                  .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
-                  .toFormat('webp') // Convert to WebP format
-                  .toBuffer((err, buffer, info) => {
-                    if (err) {
-                      console.error('Failed to process image:', err);
-                      return;
-                    }
-                    // Create an empty 512x512 image to use as the base
-                    sharp({
-                      create: {
-                        width: 512,
-                        height: 512,
-                        channels: 4, // Ensure alpha channel for transparency
-                        background: { r: 0, g: 0, b: 0, alpha: 0 }
-                      }
-                    })
-                    .composite([{ input: buffer, gravity: 'center' }]) // Composite the resized image onto the center
-                    .toFormat('webp') // Convert to WebP format
-                    .toFile(filePath, (err, info) => {
-                      if (err) {
-                        console.error('Failed to save image:', err);
-                      } else {
-                        channels[ws.channel].forEach(function each(client) {
-                          const fileLink = fileName + "?v=" + version;
-                          if (client === ws && client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(["profileImageReceived", fileLink]));
-                            metrics.messages_outgoing.inc();
-                          }
-                        });
-                      }
-                    });
-                  });
-                break;
-            }
-          } catch (e) {
-            console.log("error receiving uploaded file!", e);
+      }
+      case '"uploadfile"': {
+        try {
+          const feedback = JSON.parse(data).pop();
+          if (feedback) {
+            ws.send(JSON.stringify(["feedback", feedback]));
+            if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
           }
-        // })
+
+          const uploadData = JSON.parse(data)[1];
+          const uploadType = Object.keys(uploadData)[0];
+          const playerId = Object.values(uploadData)[0][0];
+          const uploadContent = Object.values(uploadData)[0][1];
+          
+          switch(uploadType) {
+            case "uploadAvatar":
+              // const extension = uploadContent.split(";base64,")[0].split("/").pop();
+              const extension = 'webp';
+              const avatarData = uploadContent.split(";base64,").pop();
+              const version = new Date().getTime();
+              // const folderPath = path.join(__dirname, "avatars");
+              const folderPath = "/usr/share/nginx/html/dist/avatars";
+              if (!fs.existsSync(folderPath)){
+                  fs.mkdirSync(folderPath);
+              }
+              const fileName = playerId + "." + extension;
+              const filePath = path.join(folderPath, fileName);
+              sharp(Buffer.from(avatarData, 'base64'))
+                .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }) // Resize to fit within 512x512, transparent background
+                .toFormat('webp') // Convert to WebP format
+                .toBuffer((err, buffer, info) => {
+                  if (err) {
+                    console.error('Failed to process image:', err);
+                    return;
+                  }
+                  // Create an empty 512x512 image to use as the base
+                  sharp({
+                    create: {
+                      width: 512,
+                      height: 512,
+                      channels: 4, // Ensure alpha channel for transparency
+                      background: { r: 0, g: 0, b: 0, alpha: 0 }
+                    }
+                  })
+                  .composite([{ input: buffer, gravity: 'center' }]) // Composite the resized image onto the center
+                  .toFormat('webp') // Convert to WebP format
+                  .toFile(filePath, (err, info) => {
+                    if (err) {
+                      console.error('Failed to save image:', err);
+                    } else {
+                      channels[ws.channel].forEach(function each(client) {
+                        const fileLink = fileName + "?v=" + version;
+                        if (client === ws && client.readyState === WebSocket.OPEN) {
+                          client.send(JSON.stringify(["avatarReceived", fileLink]));
+                          metrics.messages_outgoing.inc();
+                        }
+                      });
+                    }
+                  });
+                });
+              break;
+          }
+        } catch (e) {
+          console.log("error receiving uploaded file!", e);
+        }
         break;
-      default:
+      }
+      default: {
         // all other messages
         // console.log(
         //   new Date(),
@@ -298,6 +451,11 @@ wss.on("connection", function connection(ws, req) {
         //   ws.playerId,
         //   data
         // );
+        const feedback = JSON.parse(data).pop();
+        if (feedback && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(["feedback", feedback]));
+          if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
+        }
         channels[ws.channel].forEach(function each(client) {
           if (client !== ws && client.readyState === WebSocket.OPEN) {
             client.send(data);
@@ -305,41 +463,100 @@ wss.on("connection", function connection(ws, req) {
           }
         });
         break;
+      }
     }
   });
+  ws.on("close", (code, reason) => {
+    // 删除房间中断线的连接，以更好处理重复的说书人
+    let close = false;
+    if (code === 1000) {
+      // 如果正常退出（解散）房间，正常删除记录
+      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
+      close = true;
+    } else if (code === 1001 || code === 1006) {
+      // 如果说书人因为刷新、关闭或者网络波动断连，加入角色为_host的伪连接以保证房间不被移除
+      console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: " + (code === 1001 ? "刷新或关闭" : "网络波动")); 
+      if (ws.playerRole === "host") {
+        let count = 0;
+        for (let client of channels[ws.channel]) {
+          if (client.playerRole === "host") count = count + 1;
+          if (count > 1) break;
+        }
+        // 只在最后一个说书人断连时加入_host
+        if (count === 1) {
+          const wsHost = JSON.parse(JSON.stringify(ws));
+          wsHost.playerRole = "_host";
+          channels[ws.channel].push(wsHost);
+        }
+      }
+      close = true;
+    }
+
+    if (close) { // 断连的同时移除连接（1000 1001 1006）
+      // 每次断连只删除一个
+      const firstConnection = channels[ws.channel].filter(client => client.playerId === ws.playerId && client.playerRole != "_host")[0];
+      const index = channels[ws.channel].indexOf(firstConnection);
+      channels[ws.channel].splice(index, 1);
+      // channels[ws.channel] = channels[ws.channel].filter(client => {
+      //   if (client.playerId === ws.playerId && !removed) {
+      //     removed = true;
+      //     return false;
+      //   }
+      //   return true;
+      // });
+    }
+
+    if (Object.keys(channels[ws.channel]).length == 0) {
+      delete channels[ws.channel];
+      Object.keys(sendIntervals[ws.channel]).forEach(type => {
+        stopSendQueue(ws.channel, type);
+      })
+      delete sendIntervals[ws.channels];
+      delete messageQueues[ws.channel];
+      Object.keys(messageUniques[ws.channel]).forEach(data => {
+        clearTimeout(messageUniques[ws.channel][data].timeout);
+      })
+      delete messageUniques[ws.channel];
+    }
+  })
 });
 
 // start ping interval timer
-const interval = setInterval(function ping() {
+const playersInterval = setInterval(function ping() {
   // ping each client
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false) {
       metrics.connection_terminated_timeout.inc();
-      return ws.terminate();
+      // return ws.terminate();
+    } else {
+      ws.send(JSON.stringify(["pong"]));
     }
     ws.isAlive = false;
     ws.pingStart = new Date().getTime();
     ws.ping(noop);
   });
+}, PLAYERS_PING_INTERVAL);
+const channelsInterval = setInterval(function ping() {
   // clean up empty channels
   for (let channel in channels) {
     if (
-      !channels[channel].length ||
-      !channels[channel].some(
-        ws =>
-          ws &&
-          (ws.readyState === WebSocket.OPEN ||
-            ws.readyState === WebSocket.CONNECTING)
-      )
+      !channels[channel].length // ||
+      // !channels[channel].some(
+      //   ws =>
+      //     ws &&
+      //     (ws.readyState === WebSocket.OPEN ||
+      //       ws.readyState === WebSocket.CONNECTING)
+      // )
     ) {
       metrics.channels_list.remove({ name: channel });
       delete channels[channel];
     }
   }
-}, PING_INTERVAL);
+}, CHANNELS_PING_INTERVAL);
 // handle server shutdown
 wss.on("close", function close() {
-  clearInterval(interval);
+  clearInterval(playersInterval);
+  clearInterval(channelsInterval)
 });
 
 // prod mode with stats API

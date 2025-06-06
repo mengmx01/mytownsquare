@@ -1,16 +1,21 @@
 class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
-    // this._wss = "wss://botcgrimoire.site:8080/";
-    this._wss = "wss://botcgrimoire.site:8443/";
+    this._wss = "wss://botcgrimoire.top:443/ws/";
+    // this._wss = "wss://botcgrimoire.uk:8443/";
+    // this._wss = "wss://botcgrimoire.top:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
+    // this._wss = "ws://192.168.10.3:8081/";
     this._socket = null;
     this._isSpectator = true;
+    this._isAlive = true;
     this._gamestate = [];
     this._store = store;
-    this._pingInterval = 3600 * 1000; // 30 seconds between pings //set to 1hr now to prevent kicking players
+    this._pingInterval = 3 * 1000; // 30 seconds between pings
     this._pingTimer = null;
+    this._sendInterval = 3 * 1000; // 3 seconds between unsent message cycles
+    this._sendTimer = null;
     this._reconnectTimer = null;
     this._players = {}; // map of players connected to a session
     this._pings = {}; // map of player IDs to ping
@@ -31,13 +36,14 @@ class LiveSession {
       this._wss +
         channel +
         "/" +
-        (this._isSpectator ? this._store.state.session.playerId : "host")
+        this._store.state.session.playerId + 
+        (!this._isSpectator ? "/host" : "")
     );
     this._socket.addEventListener("message", this._handleMessage.bind(this));
     this._socket.onopen = this._onOpen.bind(this);
     this._socket.onclose = err => {
       this._socket = null;
-      clearInterval(this._pingTimer);
+      clearTimeout(this._pingTimer);
       this._pingTimer = null;
       if (err.code !== 1000) {
         // connection interrupted, reconnect after 3 seconds
@@ -59,9 +65,9 @@ class LiveSession {
    * @param params
    * @private
    */
-  _send(command, params) {
+  _send(command, params, feedback = false) {
     if (this._socket && this._socket.readyState === 1) {
-      this._socket.send(JSON.stringify([command, params]));
+      this._socket.send(JSON.stringify([command, params, feedback]));
     }
   }
 
@@ -73,25 +79,102 @@ class LiveSession {
    * @param params
    * @private
    */
-  _sendDirect(playerId, command, params) {
+  _sendDirect(playerId, command, params, feedback = false) {
     if (playerId) {
-      this._send("direct", { [playerId]: [command, params] });
+      this._send("direct", { [playerId]: [command, params]}, feedback);
     } else {
-      this._send(command, params);
+      this._send(command, params, feedback);
     }
   }
   
   /**
-   * Upload a file to the server (stored).
-   * Currently only supports images for profile pictures
+   * Request some server side information.
    * @param playerId player ID or "host"
    * @param command
    * @param params
    * @private
    */
-  _uploadFile(command, playerId, params) {
+  _request(command, playerId, params, feedback = false) {
+    this._send("request", { [command]: [playerId, params] }, feedback);
+  }
+
+  /**
+   * Upload a file to the server (stored).
+   * Currently only supports images for avatar pictures
+   * @param playerId player ID or "host"
+   * @param command
+   * @param params
+   * @private
+   */
+  _uploadFile(command, playerId, params, feedback = false) {
     if (playerId) {
-      this._send("uploadFile", { [command]: [playerId, params] });
+      this._send("uploadFile", { [command]: [playerId, params] }, feedback);
+    }
+  }
+
+  _sendQueue() {
+      if (this._store.state.session.messageQueue.length <= 0) return;
+      for (let message of this._store.state.session.messageQueue) {
+        switch (message.type) {
+          case "direct":
+            this._sendDirect(message.playerId, message.command, message.params, message.id);
+            break;
+          case "request":
+            this._request(message.command, message.playerId, message.params, message.id);
+            break;
+          case "uploadFile":
+            this._uploadFile(message.command, message.playerId, message.params, message.id);
+            break;
+          default:
+            this._send(message.command, message.params, message.id);
+        }
+      }
+  }
+
+  _startSendQueue() {
+    this._stopSendQueue();
+    this._sendQueue();
+    this._sendTimer = setInterval(() => {
+      this._sendQueue();
+    }, this._sendInterval);
+  }
+
+  _stopSendQueue() {
+    clearInterval(this._sendTimer);
+    this._sendTimer = null;
+  }
+
+  /**
+   * 
+   * @param id id for identifying and deleting the query
+   */
+  _deleteFromQueue(id) {
+    if (this._store.state.session.messageQueue.length <= 0) return;
+    for (let i=0; i<this._store.state.session.messageQueue.length; i++) {
+      if (this._store.state.session.messageQueue[i].id === id) {
+        this._checkQueue(this._store.state.session.messageQueue[i]);
+        // this._store.state.session.messageQueue.splice(i,1);
+        this._store.commit("session/deleteMessageQueue", i)
+        break;
+      }
+    }
+  }
+
+  /** 
+   * 
+   * @param message check the specific message and perform certain actions before deleting
+   */
+  _checkQueue(message) {
+    switch (message.type) {
+      case "direct": 
+        switch (message.command) {
+          case "chat": {
+            const receivingPlayerId = message.params.receivingPlayerId === "host" ? this._store.state.session.stId : message.params.receivingPlayerId;
+            this._store.commit("session/updateChatReceived", {message: message.params.message, playerId: receivingPlayerId}); // sending out to other players, receivingPlayerId is the recorded chat ID
+          }
+          break;
+        }
+        break;
     }
   }
 
@@ -101,25 +184,38 @@ class LiveSession {
    */
   _onOpen() {
     if (this._isSpectator) {
+      if (this._store.state.session.firstJoinCheck) {
+        this.requestExistChannel();
+      }
       this._sendDirect(
         "host",
         "getGamestate",
         this._store.state.session.playerId
       );
+      this._sendDirect(
+        "host",
+        "getStId",
+        this._store.state.session.playerId
+      )
+      if (this._store.state.session.claimedSeat >= 0 && !this._store.state.session.isListening && !this._store.state.session.isTalking) {
+        this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
+      }
     } else {
+      if (this._store.state.session.firstHostCheck) {
+        this.requestDuplicateHost();
+      }
       this.sendGamestate();
     }
-    this._ping(true);
+    this._ping();
   }
 
   /**
    * Send a ping message with player ID and ST flag.
    * @private
    */
-  _ping(open_session = false) {
-    if (this._isSpectator) open_session = true;
-    this._handlePing([open_session]);
-    this._send("ping", [open_session,
+  _ping() {
+    this._handlePing();
+    this._send("ping", [
       this._isSpectator
         ? this._store.state.session.playerId
         : Object.keys(this._players).length,
@@ -127,6 +223,13 @@ class LiveSession {
     ]);
     clearTimeout(this._pingTimer);
     this._pingTimer = setTimeout(this._ping.bind(this), this._pingInterval);
+    // if (this._store.state.session.sessionId && 
+    //   !this._isAlive && !this._store.state.session.isReconnecting
+    // ) {
+    //   this._isAlive = true;
+    //   this.connect(this._store.state.session.sessionId);
+    // }
+    // this._isAlive = false;
   }
 
   /**
@@ -135,15 +238,27 @@ class LiveSession {
    * @private
    */
   _handleMessage({ data }) {
-    let command, params;
+    let command, params, feedback;
     try {
-      [command, params] = JSON.parse(data);
+      [command, params, feedback] = JSON.parse(data);
     } catch (err) {
       console.log("unsupported socket message", data);
     }
     switch (command) {
+      case "alertPopup":
+        alert(params);
+        break;
+      case "duplicatedHost":
+        this._handleDuplicateHost(params);
+        break;
+      case "existingChannel":
+        this._handleExistChannel(params);
+        break;
       case "getGamestate":
         this.sendGamestate(params);
+        break;
+      case "getStId":
+        this.sendStId(params);
         break;
       case "edition":
         this._updateEdition(params);
@@ -153,6 +268,9 @@ class LiveSession {
         break;
       case "gs":
         this._updateGamestate(params);
+        break;
+      case "stId":
+        this._updateStId(params);
         break;
       case "player":
         this._updatePlayer(params);
@@ -167,8 +285,17 @@ class LiveSession {
         this._updateSeat(params);
         this._createChatHistory(params);
         break;
+      case "leaveSeat":
+        this._updateLeaveSeat();
+        break;
       case "ping":
         this._handlePing(params);
+        break;
+      case "pong":
+        this._handlePong(params);
+        break;
+      case "feedback":
+        this._deleteFromQueue(params);
         break;
       case "nomination":
         if (!this._isSpectator) return;
@@ -178,6 +305,7 @@ class LiveSession {
             "session/addHistory",
             this._store.state.players.players
           );
+          this._store.commit("session/addVoteSelected", {selected: false, save: true});
         }
         this._store.commit("session/nomination", { nomination: params });
         break;
@@ -231,7 +359,7 @@ class LiveSession {
         this._updatePlayerPronouns(params);
         break;
       case "chat":
-        this._handleChat(params);
+        this._handleChat(params, feedback);
         break;
       case "setTimer":
         this._handleSetTimer(params);
@@ -242,8 +370,8 @@ class LiveSession {
       case "stopTimer":
         this._handleStopTimer(params);
         break;
-      case "profileImageReceived":
-        this._profileImageReceived(params);
+      case "avatarReceived":
+        this._avatarReceived(params);
         break;
       case "secretVote":
         this._handleSecretVote(params);
@@ -251,11 +379,11 @@ class LiveSession {
       case "bootlegger":
         this._handleSetBootlegger(params);
         break;
-      case "startedTalking":
-        this._handleStartTalking(params);
+      case "useOldOrder":
+        this._handleSetUseOldOrder(params);
         break;
-      case "stoppedTalking":
-        this._handleStopTalking(params);
+      case "setTalking":
+        this._handleSetTalking(params);
         break;
     }
   }
@@ -267,17 +395,23 @@ class LiveSession {
    */
   connect(channel) {
     if (!this._store.state.session.playerId) {
+      let playerId;
+      // 禁止host、_host和player作为playerId
+      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player" || playerId === "default") {
+        playerId = Math.random().toString(36).substr(2);
+      }
       this._store.commit(
         "session/setPlayerId",
-        Math.random()
-          .toString(36)
-          .substr(2)
+        playerId
       );
     }
     this._pings = {};
     this._store.commit("session/setPlayerCount", 0);
     this._store.commit("session/setPing", 0);
     this._isSpectator = this._store.state.session.isSpectator;
+    if (this._store.state.session.claimedSeat >= 0) {
+      this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
+    }
     this._open(channel);
   }
 
@@ -300,6 +434,57 @@ class LiveSession {
   }
 
   /**
+   * Alert any messages from the server
+   */
+  _alertPopup(text){
+    alert(text);
+  }
+
+  /**
+   * Send request to server to check if there are more than one host.
+   */
+  requestDuplicateHost() {
+    if (!this._store.state.session.firstHostCheck) return;
+    this._request("checkDuplicateHost", this._store.state.session.playerId);
+  }
+  
+  /**
+   * @param duplicate indicator to if there is a duplicated host
+   */
+  _handleDuplicateHost(duplicate) {
+    if (!this._store.state.session.firstHostCheck) return;
+    if (duplicate) {
+      alert(`房间"${this._store.state.session.sessionId}"已经存在说书人！`)
+      this._store.commit("session/setSessionId", "");
+      this._store.commit("players/clear");
+    } else {
+      this._store.commit("session/setFirstHostCheck", false);
+    }
+  }
+
+  /**
+   * Send request to server to check if the channel exists (has a host).
+   */
+  requestExistChannel() {
+    if (!this._store.state.session.firstJoinCheck) return;
+    this._request("checkExistChannel", this._store.state.session.playerId);
+  }
+
+  /**
+   * @param existing indicator to if there is the appointed session has a host.
+   */
+  _handleExistChannel(existing) {
+    if (!this._store.state.session.firstJoinCheck) return;
+    if (!existing) {
+      alert(`房间"${this._store.state.session.sessionId}"不存在！`);
+      this._store.commit("session/setSessionId", "");
+      this._store.commit("session/setSpectator", false);
+    } else {
+      this._store.commit("session/setFirstJoinCheck", false);
+    }
+  }
+
+  /**
    * Publish the current gamestate.
    * Optional param to reduce traffic. (send only player data)
    * @param playerId
@@ -313,6 +498,7 @@ class LiveSession {
       image: player.image,
       isDead: player.isDead,
       isVoteless: player.isVoteless,
+      isSecretVoteless: player.isSecretVoteless,
       pronouns: player.pronouns,
       ...(player.role && player.role.team === "traveler"
         ? { roleId: player.role.id }
@@ -332,6 +518,7 @@ class LiveSession {
         isNight: grimoire.isNight,
         isVoteHistoryAllowed: session.isVoteHistoryAllowed,
         isSecretVote: session.isSecretVote,
+        isUseOldOrder: session.isUseOldOrder,
         nomination: session.nomination,
         votingSpeed: session.votingSpeed,
         lockedVote: session.lockedVote,
@@ -356,6 +543,7 @@ class LiveSession {
       isNight,
       isVoteHistoryAllowed,
       isSecretVote,
+      isUseOldOrder,
       nomination,
       votingSpeed,
       votes,
@@ -380,10 +568,14 @@ class LiveSession {
       const player = players[x];
       const { roleId } = state;
       // update relevant properties
-      ["name", "id", "image", "isDead", "isVoteless", "pronouns"].forEach(property => {
+      ["name", "id", "image", "isDead", "isSecretVoteless", "isVoteless", "pronouns"].forEach(property => {
         const value = state[property];
         if (player[property] !== value) {
-          this._store.commit("players/update", { player, property, value });
+          if (property === "isVoteless") {
+            if (value || !player.isSecretVoteless) this._store.commit("players/update", { player, property, value });
+          } else {
+            this._store.commit("players/update", { player, property, value });
+          }
         }
       });
       // roles are special, because of travelers
@@ -410,16 +602,30 @@ class LiveSession {
       this._store.commit("toggleNight", !!isNight);
       this._store.commit("session/setVoteHistoryAllowed", isVoteHistoryAllowed);
       this._store.commit("session/setSecretVote", isSecretVote);
+      this._store.commit("session/setUseOldOrder", isUseOldOrder);
+      const nominatedPlayer = nomination.length ? players[nomination[1]] : null;
       this._store.commit("session/nomination", {
         nomination,
         votes,
         votingSpeed,
         lockedVote,
-        isVoteInProgress
+        isVoteInProgress,
+        nominatedPlayer
       });
-      this._store.commit("session/setMarkedPlayer", markedPlayer);
+      this._store.commit("session/setMarkedPlayer", {val: markedPlayer, force: false});
       this._store.commit("players/setFabled", {fabled});
     }
+  }
+
+  sendStId(playerId = "") {
+    if (this._isSpectator) return;
+    this._sendDirect(playerId, "stId", this._store.state.session.playerId)
+  }
+
+  _updateStId(data) {
+    if (!this._isSpectator) return;
+    // this._store.state.session.stId = data;
+    this._store.commit("session/setStId", data);
   }
 
   /**
@@ -504,13 +710,13 @@ class LiveSession {
     if (property === "role") {
       if (value.team && value.team === "traveler") {
         // update local gamestate to remember this player as a traveler
-        this._gamestate[index].roleId = value.id;
+        if (this._gamestate[index]) this._gamestate[index].roleId = value.id;
         this._send("player", {
           index,
           property,
           value: value.id
         });
-      } else if (this._gamestate[index].roleId) {
+      } else if (this._gamestate[index] && this._gamestate[index].roleId) {
         // player was previously a traveler
         delete this._gamestate[index].roleId;
         this._send("player", { index, property, value: "" });
@@ -552,10 +758,28 @@ class LiveSession {
           value: role
         });
       }
+    } else if (property === "isSecretVoteless") {
+      // if (value === true) {
+        this._store.commit("players/update", { player, property, value });
+        // 如果是玩家则同时移除投票标记
+        if (player.id === this._store.state.session.playerId && value) {
+          this._store.commit("players/update", { player, property: 'isVoteless', value });
+        }
+      // }
+    } else if (property === "isVoteless") {
+      if (!player.isSecretVoteless || value) this._store.commit("players/update", { player, property, value });
     } else {
       // just update the player otherwise
       this._store.commit("players/update", { player, property, value });
     }
+  }
+
+  emptyPlayer({id}) {
+    this._sendDirect(id, "leaveSeat")
+  }
+
+  _updateLeaveSeat() {
+    this._store.state.session.claimedSeat = -1;
   }
 
   /**
@@ -594,23 +818,23 @@ class LiveSession {
   }
 
   /**
-   * Upload profile image to the server and create a link.
+   * Upload avatar image to the server and create a link.
    * @param image
    */
-  uploadProfileImage(image) {
-    this._uploadFile("uploadProfileImage", this._store.state.session.playerId, image);
+  uploadAvatar(image) {
+    this._uploadFile("uploadAvatar", this._store.state.session.playerId, image);
   }
   
   /**
    * Confirmation on receiving the uploaded image.
    * @param image
    */
-  _profileImageReceived(link) {
+  _avatarReceived(link) {
     const playerId = this._store.state.session.playerId;
     const linkId = link.split(".")[0];
     if (playerId != linkId) return;
 
-    this._store.commit("session/updatePlayerProfileImage", link);
+    this._store.commit("session/updatePlayerAvatar", link);
     alert("上传成功！");
   }
 
@@ -620,39 +844,38 @@ class LiveSession {
    * @param latency
    * @private
    */
-  _handlePing([open_session = false, playerIdOrCount = 0, latency] = []) {
+  _handlePing([playerIdOrCount = 0, latency] = []) {
     const now = new Date().getTime();
     // if (!this._players.length) return;
     if (!this._isSpectator) {
-      // remove players that haven't sent a ping in twice the timespan
-      for (let player in this._players) {
-        if (now - this._players[player] > this._pingInterval * 2) {
-          delete this._players[player];
-          delete this._pings[player];
-        }
-      }
-      // remove claimed seats from players that are no longer connected
-      this._store.state.players.players.forEach(player => {
-        if (player.id && !this._players[player.id]) {
-          // if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
-          if (open_session) return;
-          this._store.commit("players/update", {
-            player,
-            property: "id",
-            value: ""
-          });
-          this._store.commit("players/update", {
-            player,
-            property: "name",
-            value: ""
-          });
-          this._store.commit("players/update", {
-            player,
-            property: "image",
-            value: ""
-          });
-        }
-      });
+      // // remove players that haven't sent a ping in twice the timespan
+      // for (let player in this._players) {
+      //   if (now - this._players[player] > this._pingInterval * 2) {
+      //     delete this._players[player];
+      //     delete this._pings[player];
+      //   }
+      // }
+      // // remove claimed seats from players that are no longer connected
+      // this._store.state.players.players.forEach(player => {
+      //   if (player.id && !this._players[player.id]) {
+      //     if (!Object.keys(this._players).length) return; // backup plan for ST refreshes, always leaves one player un-quitted
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "id",
+      //       value: ""
+      //     });
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "name",
+      //       value: ""
+      //     });
+      //     this._store.commit("players/update", {
+      //       player,
+      //       property: "image",
+      //       value: ""
+      //     });
+      //   }
+      // });
       // store new player data
       if (playerIdOrCount) {
         this._players[playerIdOrCount] = now;
@@ -680,6 +903,10 @@ class LiveSession {
     }
   }
 
+  _handlePong() {
+    this._isAlive = true;
+  }
+
   /**
    * Handle a player leaving the sessions. ST only
    * @param playerId
@@ -703,8 +930,8 @@ class LiveSession {
     if (!this._isSpectator) return;
     const players = this._store.state.players.players;
     if (players.length > seat && (seat < 0 || !players[seat].id)) {
-      // this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
-      this._sendDirect("host", "claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerProfileImage]);
+      // this._send("claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerAvatar]);
+      this._sendDirect("host", "claim", [seat, this._store.state.session.playerId, this._store.state.session.playerName, this._store.state.session.playerAvatar]);
     }
   }
 
@@ -755,7 +982,7 @@ class LiveSession {
       this._store.commit("players/update", { player, property: "id", value });
     }
     // update player session list as if this was a ping
-    this._handlePing([true, true, value, 0]);
+    this._handlePing([true, value, 0]);
   }
 
 
@@ -820,7 +1047,7 @@ class LiveSession {
     this._store.state.players.players.forEach(player => {
       if (player.id && player.role && player.role.team == team) {
         if (team === "demon"){
-          var lunatic = false;
+          let lunatic = false;
           player.reminders.forEach(reminder => {
             if (reminder.role === "lunatic") {
               lunatic = true;
@@ -1006,12 +1233,31 @@ class LiveSession {
       this._store.state.session.playerId === player.id ||
       !this._isSpectator
     ) {
-      // send vote only if it is your own vote or you are the storyteller
-      this._send("vote", [
-        index,
-        this._store.state.session.votes[index],
-        !this._isSpectator
-      ]);
+      if (
+        this._store.state.players.players[this._store.state.session.nomination[1]].role.team === "traveler" ||
+        !this._store.state.session.isSecretVote
+      ) { // send to everyone if exile or secret vote is off
+        // send vote only if it is your own vote or you are the storyteller
+        this._send("vote", [
+          index,
+          this._store.state.session.votes[index],
+          !this._isSpectator
+        ]);
+      } else { // otherwise only send direct messages
+        if (this._isSpectator) {
+          this._sendDirect("host", "vote", [
+            index,
+            this._store.state.session.votes[index],
+            !this._isSpectator
+          ])
+        } else {
+          this._sendDirect(player.id, "vote", [
+            index,
+            this._store.state.session.votes[index],
+            !this._isSpectator
+          ])
+        }
+      }
     }
   }
 
@@ -1019,84 +1265,51 @@ class LiveSession {
    * Send a status change to whether anonymous votes are in progress. ST to players only
    */
   setSecretVote(isSecretVote){
+    if (this._isSpectator) return;
     this._send("secretVote", isSecretVote);
   }
 
   _handleSecretVote(isSecretVote){
+    if (!this._isSpectator) return;
     this._store.state.session.isSecretVote = isSecretVote;
   }
 
   setBootlegger(content){
+    if (this._isSpectator) return;
     this._send("bootlegger", content);
   }
 
   _handleSetBootlegger(content){
+    if (!this._isSpectator) return;
     this._store.state.session.bootlegger = content;
+  }
+
+  setUseOldOrder(isUseOldOrder){
+    if (this._isSpectator) return;
+    this._send("useOldOrder", isUseOldOrder);
+  }
+
+  _handleSetUseOldOrder(isUseOldOrder){
+    if (!this._isSpectator) return;
+    this._store.state.session.isUseOldOrder = isUseOldOrder;
   }
 
   /**
    * Set talking status to true to enable glowing animation
    * Send this update to all clients in the channel
    */
-  startTalking(payload){
-    if (payload < 0) return;
-    // console.log(this._store.state.session);
-    // var isSeated = false;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (!player.isTalking) {
-    //     player.isTalking = true;
-    //     isSeated = true;
-    //   }
-    // })
-    // if (!isSeated) return;
-    // console.log('sent');
-    this._send("startedTalking", payload);
+  setTalking(payload){
+    if (payload.seatNum < 0 || payload.seatNum >= this._store.state.players.players.length) return;
+    if (!this._store.state.players.players[payload.seatNum].id || this._store.state.players.players[payload.seatNum].id != this._store.state.session.playerId) return;
+    this._send("setTalking", payload);
   }
 
   /**
    * Set talking status to true to enable glowing animation when received
    */
-  _handleStartTalking(payload){
-    if (payload < 0) return;
-    // console.log('received');
-    // console.log(this._store.state.players.players);
-    this._store.state.players.players[payload].isTalking = true;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (!player.isTalking) player.isTalking = true;
-    // })
-  }
-
-  
-  /**
-   * Set talking status to false to disable glowing animation
-   * Send this update to all clients in the channel
-   */
-  stopTalking(payload){
-    // var isSeated = false;
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (player.isTalking) {
-    //     player.isTalking = false;
-    //     isSeated = true;
-    //   }
-    // })
-    // if (!isSeated) return;
-    if (payload < 0) return;
-    this._send("stoppedTalking", payload);
-  }
-
-  /**
-   * Set talking status to false to disable glowing animation when received
-   */
-  _handleStopTalking(payload){
-    // (this._store.state.players.players).forEach(player => {
-    //   if (player.id != payload) return;
-    //   if (player.isTalking) player.isTalking = false;
-    // })
-    if (payload < 0) return;
-    this._store.state.players.players[payload].isTalking = false;
+  _handleSetTalking(payload){
+    if (payload.seatNum < 0 || payload.seatNum >= this._store.state.players.players.length) return;
+    this._store.state.players.players[payload.seatNum].isTalking = payload.isTalking;
   }
 
   /**
@@ -1108,7 +1321,10 @@ class LiveSession {
   _handleVote([index, vote, fromST]) {
     // do not reveal vote when anonymous voting is in progress, unless it's ST changing that player's vote
     const voteId = this._store.state.players.players[index].id;
-    if (this._isSpectator && this._store.state.session.isSecretVote && voteId != this._store.state.session.playerId) return;
+    if (
+      this._isSpectator && voteId != this._store.state.session.playerId && 
+      this._store.state.session.isSecretVote && this._store.state.players.players[this._store.state.session.nomination[1]].role.team != "traveler"
+    ) return;
     
     const { session, players } = this._store.state;
     const playerCount = players.players.length;
@@ -1139,14 +1355,15 @@ class LiveSession {
   _handleLock([lock, vote]) {
     if (!this._isSpectator) return;
     this._store.commit("session/lockVote", lock);
-    // do not lock vote when anonymous voting is in progress
-    if (this._isSpectator && this._store.state.session.isSecretVote) return;
+    
     if (lock > 1) {
       const { lockedVote, nomination } = this._store.state.session;
       const { players } = this._store.state.players;
       const index = (nomination[1] + lockedVote - 1) % players.length;
+      // record as not voted when anonymous voting is in progress
+      const displayVote = this._store.state.session.isSecretVote ? false : vote;
       if (this._store.state.session.votes[index] !== vote) {
-        this._store.commit("session/vote", [index, vote]);
+        this._store.commit("session/vote", [index, displayVote]);
       }
     }
   }
@@ -1177,25 +1394,18 @@ class LiveSession {
     if (this._isSpectator) return;
     this._send("remove", payload);
   }
-  
-  /**
-   * Send message to a player or ST.
-   * @param payload
-   */
-  updateChatSent(payload) {
-    this._send("chat", payload);
-  }
 
   /**
    * Update chat history when received.
    * @param payload
    */
-  _handleChat({message, playerId}){
-    if (this._isSpectator && playerId != this._store.state.session.playerId) return;
-    this._store.commit("session/updateChatReceived", {message, playerId});
+  _handleChat({message, sendingPlayerId, receivingPlayerId}, feedback){
+    if (feedback) this._request("deleteMessage", this._store.state.session.playerId, ["direct", feedback]);
+    if (this._isSpectator && receivingPlayerId != this._store.state.session.playerId) return;
+    this._store.commit("session/updateChatReceived", {message, playerId: sendingPlayerId});
     const num = 1;
     if (!this._isSpectator){
-      this._store.commit("players/setPlayerMessage", {playerId, num});
+      this._store.commit("players/setPlayerMessage", {playerId: sendingPlayerId, num});
     } else{
       this._store.commit("session/setStMessage", num);
     }
@@ -1258,6 +1468,11 @@ export default store => {
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
+      case"requestDuplicateHost":
+        if (!state.session.sessionId) {
+          session.requestDuplicateHost()
+        }
+        break;
       case "session/setSessionId":
         if (state.session.sessionId) {
           session.connect(state.session.sessionId);
@@ -1339,8 +1554,14 @@ export default store => {
           session.sendPlayer(payload);
         }
         break;
-      case "session/updateChatSent":
-        session.updateChatSent(payload);
+      case "players/empty":
+        session.emptyPlayer(payload);
+        break;
+      case "session/addMessageQueue":
+        session._startSendQueue();
+        break;
+      case "session/deleteMessageQueue":
+        if (session._store.state.session.messageQueue.length <= 0) session._stopSendQueue();
         break;
       case "session/setTimer":
         session.setTimer(payload);
@@ -1351,32 +1572,32 @@ export default store => {
       case "session/stopTimer":
         session.stopTimer(payload);
         break;
-      case "session/setPlayerProfileImage":
-        session.uploadProfileImage(payload);
+      case "session/setPlayerAvatar":
+        session.uploadAvatar(payload);
         break;
       case "session/setSecretVote":
         session.setSecretVote(payload);
         break;
+      case "session/setUseOldOrder":
+        session.setUseOldOrder(payload);
+        break;
       // case "session/setBootlegger":
       //   session.setBootlegger(payload);
       //   break;
-      case "session/startTalking":
-        session.startTalking(payload);
-        break;
-      case "session/stopTalking":
-        session.stopTalking(payload);
+      case "session/setTalking":
+        session.setTalking(payload);
         break;
     }
   });
 
-  store.commit("session/setSpectator", true);
-  store.commit("toggleGrimoire", false);
-
   // check for session Id in hash
   const sessionId = window.location.hash.substr(1);
   if (sessionId) {
+    store.commit("session/setSpectator", true);
+    store.commit("toggleGrimoire", false);
+
     if (!session._store.state.session.playerName) {
-      var name = prompt("输入玩家昵称");
+      let name = prompt("输入玩家昵称");
       if (name) {
         name = name.trim();
         while (name === "空座位" || name === "说书人"){

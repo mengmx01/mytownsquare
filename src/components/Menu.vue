@@ -1,15 +1,15 @@
 <template>
   <div id="controls">
-    <span v-if="session.sessionId">
-      <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && session.isListening"
-      @click="stopListening()"
+    <span v-if="session.sessionId & session.isSpectator">
+      <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && listeningFrame"
+      @click="stopListening(microphoneSetting)"
       />
-      <font-awesome-icon icon="microphone-slash" v-if="microphoneSetting === 'free' && !session.isListening"
-      @click="startListening()"
+      <font-awesome-icon icon="microphone-slash" v-if="microphoneSetting === 'free' && !listeningFrame"
+      @click="startListening(microphoneSetting)"
       />
       <font-awesome-icon icon="keyboard" v-if="microphoneSetting === 'keyboard'" :style="keyboardIcon"/>
       
-      <select id="microphone" v-model="microphoneSetting">
+      <select v-show="!isHandHeld" id="microphone" v-model="microphoneSetting" @change="stopListening(microphoneSetting)">
         <option value="free">自由发言</option>
         <option value="keyboard">按f2发言</option>
       </select>
@@ -72,84 +72,101 @@
         <template v-if="tab === 'grimoire'">
           <!-- Grimoire -->
           <li class="headline">魔典</li>
-          <li @click="toggleGrimoire" v-if="players.length">
-            <template v-if="!grimoire.isPublic">隐藏</template>
-            <template v-if="grimoire.isPublic">显示</template>
-            <em>[G]</em>
-          </li>
-          <li @click="toggleNight" v-if="!session.isSpectator">
-            <template v-if="!grimoire.isNight">切换至夜晚</template>
-            <template v-if="grimoire.isNight">切换至白天</template>
-            <em>[S]</em>
-          </li>
-          <li @click="toggleNightOrder" v-if="players.length">
-            夜间顺序
-            <em>
-              <font-awesome-icon
-                :icon="[
-                  'fas',
-                  grimoire.isNightOrder ? 'check-square' : 'square'
-                ]"
-              />
-            </em>
-          </li>
-          <li v-if="players.length">
-            缩放
-            <em>
-              <font-awesome-icon
-                @click="setZoom(grimoire.zoom - 1)"
-                icon="search-minus"
-              />
-              {{ Math.round(100 + grimoire.zoom * 10) }}%
-              <font-awesome-icon
-                @click="setZoom(grimoire.zoom + 1)"
-                icon="search-plus"
-              />
-            </em>
-          </li>
-          <li @click="setBackground">
-            背景图
-            <em><font-awesome-icon icon="image"/></em>
-          </li>
-          <li @click="$emit('trigger', ['uploadProfileImage'])">
-            上传头像
-            <em><font-awesome-icon icon="user"/></em>
-          </li>
-          <li @click="changeName">
-            设置昵称
-            <em><font-awesome-icon icon="user-edit"/></em>
-          </li>
-          <li v-if="!edition.isOfficial" @click="imageOptIn">
-            <small>允许自定义图标</small>
-            <em
-              ><font-awesome-icon
-                :icon="[
-                  'fas',
-                  grimoire.isImageOptIn ? 'check-square' : 'square'
-                ]"
-            /></em>
-          </li>
-          <li @click="toggleStatic">
-            关闭动画
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
-            /></em>
-          </li>
-          <li v-if="!session.isSpectator" @click="toggleShowVacant">
-            显示空座位
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isShowVacant ? 'check-square' : 'square']"
-            /></em>
-          </li>
-          <li @click="toggleMuted">
-            静音
-            <em
-              ><font-awesome-icon
-                :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
-            /></em>
-          </li>
+          <div class="options">
+            <li @click="toggleGrimoire" v-if="players.length">
+              <template v-if="!grimoire.isPublic">隐藏</template>
+              <template v-if="grimoire.isPublic">显示</template>
+              <em>[G]</em>
+            </li>
+            <li @click="toggleNight" v-if="!session.isSpectator">
+              <template v-if="!grimoire.isNight">切换至夜晚</template>
+              <template v-if="grimoire.isNight">切换至白天</template>
+              <em>[S]</em>
+            </li>
+            <li @click="toggleNightOrder" v-if="players.length">
+              夜间顺序
+              <em>
+                <font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isNightOrder ? 'check-square' : 'square'
+                  ]"
+                />
+              </em>
+            </li>
+            <li v-if="players.length">
+              缩放
+              <em>
+                <font-awesome-icon
+                  @click="setZoom(grimoire.zoom - 1)"
+                  icon="search-minus"
+                />
+                {{ Math.round(100 + grimoire.zoom * 10) }}%
+                <font-awesome-icon
+                  @click="setZoom(grimoire.zoom + 1)"
+                  icon="search-plus"
+                />
+              </em>
+            </li>
+            <li @click="setBackground">
+              背景图
+              <em><font-awesome-icon icon="image"/></em>
+            </li>
+            <li @click="$emit('trigger', ['uploadAvatar'])">
+              上传头像
+              <em><font-awesome-icon icon="user"/></em>
+            </li>
+            <li @click="changeName">
+              设置昵称
+              <em><font-awesome-icon icon="user-edit"/></em>
+            </li>
+            <li v-if="!edition.isOfficial" @click="imageOptIn">
+              <small>允许自定义图标</small>
+              <em
+                ><font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isImageOptIn ? 'check-square' : 'square'
+                  ]"
+              /></em>
+            </li>
+            <li v-if="!edition.isOfficial" @click="toggleForwardEvilInfo">
+              <small>提前邪恶互认和信息</small>
+              <em
+                ><font-awesome-icon
+                  :icon="[
+                    'fas',
+                    grimoire.isForwardEvilInfo ? 'check-square' : 'square'
+                  ]"
+              /></em>
+            </li>
+            <li @click="toggleStatic">
+              关闭动画
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', grimoire.isStatic ? 'check-square' : 'square']"
+              /></em>
+            </li>
+            <li v-if="!session.isSpectator" @click="toggleUseOldOrder">
+              使用原夜间顺序
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', session.isUseOldOrder ? 'check-square' : 'square']"
+              /></em>
+            </li>
+            <li @click="toggleMuted">
+              静音
+              <em
+                ><font-awesome-icon
+                  :icon="['fas', grimoire.isMuted ? 'volume-mute' : 'volume-up']"
+              /></em>
+            </li>
+            <li @click="clearLocalStorage">
+              清空储存
+              <em
+                ><font-awesome-icon icon="trash-alt"/></em>
+            </li>
+          </div>
         </template>
 
         <template v-if="tab === 'session'">
@@ -160,124 +177,132 @@
           <li class="headline" v-else>
             联机
           </li>
-          <template v-if="!session.sessionId">
-            <li @click="hostSession">创建房间<em>[H]</em></li>
-            <li @click="joinSession">加入房间<em>[J]</em></li>
-          </template>
-          <template v-else>
-            <li v-if="session.ping">
-              与{{ session.isSpectator ? "说书人" : "玩家" }}延迟
-              <em>{{ session.ping }}ms</em>
-            </li>
-            <li @click="copySessionUrl">
-              复制链接
-              <em><font-awesome-icon icon="copy"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeAsk">
-              发送角色
-              <em><font-awesome-icon icon="theater-masks"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
-              发送伪装身份
-              <em><font-awesome-icon icon="demon"/></em>
-            </li>
-            <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
-              发送魔典
-              <em><font-awesome-icon icon="demon"/></em>
-            </li>
-            <li
-              v-if="session.voteHistory.length || !session.isSpectator"
-              @click="toggleModal('voteHistory')"
-            >
-              投票记录<em>[V]</em>
-            </li>
-            <li @click="leaveSession">
-              <span v-if="session.isSpectator">退出房间</span>
-              <span v-if="!session.isSpectator">解散房间</span>
-              <em>{{ session.sessionId }}</em>
-            </li>
-          </template>
+          <div class="options">
+            <template v-if="!session.sessionId">
+              <li @click="hostSession">创建房间<em>[H]</em></li>
+              <li @click="joinSession">加入房间<em>[J]</em></li>
+            </template>
+            <template v-else>
+              <li v-if="session.ping">
+                与{{ session.isSpectator ? "说书人" : "玩家" }}延迟
+                <em>{{ session.ping }}ms</em>
+              </li>
+              <li @click="copySessionUrl">
+                复制链接
+                <em><font-awesome-icon icon="copy"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeAsk">
+                发送角色
+                <em><font-awesome-icon icon="theater-masks"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
+                发送伪装身份
+                <em><font-awesome-icon icon="hat-wizard"/></em>
+              </li>
+              <li v-if="!session.isSpectator" @click="distributeGrimoireAsk">
+                发送魔典
+                <em><font-awesome-icon icon="book"/></em>
+              </li>
+              <li
+                v-if="session.voteHistory.length || !session.isSpectator"
+                @click="toggleModal('voteHistory')"
+              >
+                投票记录<em>[V]</em>
+              </li>
+              <li @click="leaveSession">
+                <span v-if="session.isSpectator">退出房间</span>
+                <span v-if="!session.isSpectator">解散房间</span>
+                <em>{{ session.sessionId }}</em>
+              </li>
+            </template>
+          </div>
         </template>
 
         <template v-if="tab === 'players' && !session.isSpectator">
           <!-- Users -->
           <li class="headline">玩家</li>
-          <li @click="addPlayer" v-if="players.length < 20">添加座位<!--<em>[A]</em>--></li>
-          <li @click="randomizeSeatings" v-if="players.length > 2">
-            随机座位
-            <em><font-awesome-icon icon="dice"/></em>
-          </li>
-          <li @click="clearPlayers" v-if="players.length">
-            移除全部
-            <em><font-awesome-icon icon="trash-alt"/></em>
-          </li>
+          <div class="options">
+            <li @click="addPlayer" v-if="players.length < 20">添加座位<!--<em>[A]</em>--></li>
+            <li @click="randomizeSeatings" v-if="players.length > 2">
+              随机座位
+              <em><font-awesome-icon icon="dice"/></em>
+            </li>
+            <li @click="clearPlayers" v-if="players.length">
+              移除全部
+              <em><font-awesome-icon icon="trash-alt"/></em>
+            </li> 
+          </div>
         </template>
 
         <template v-if="tab === 'characters'">
           <!-- Characters -->
           <li class="headline">角色</li>
-          <li v-if="!session.isSpectator" @click="toggleModal('edition')">
-            选择剧本
-            <em>[E]</em>
-          </li>
-          <li
-            @click="toggleModal('roles')"
-            v-if="!session.isSpectator && players.length > 4"
-          >
-            配置角色
-            <em>[C]</em>
-          </li>
-          <li v-if="!session.isSpectator" @click="toggleModal('fabled')">
-            添加传奇角色
-            <em>[F]</em>
-          </li>
-          <li v-if="!session.isSpectator" @click="customiseBootlegger">
-            <small>
-              自定义私货商人
-            </small>
-            <em>[B]</em>
-          </li>
-          <li @click="clearRoles" v-if="players.length">
-            移除全部
-            <em><font-awesome-icon icon="trash-alt"/></em>
-          </li>
+          <div class="options">
+            <li v-if="!session.isSpectator" @click="toggleModal('edition')">
+              选择剧本
+              <em>[E]</em>
+            </li>
+            <li
+              @click="toggleModal('roles')"
+              v-if="!session.isSpectator && players.length > 4"
+            >
+              配置角色
+              <em>[C]</em>
+            </li>
+            <li v-if="!session.isSpectator" @click="toggleModal('fabled')">
+              添加传奇角色
+              <em>[F]</em>
+            </li>
+            <li v-if="!session.isSpectator" @click="customiseBootlegger">
+              <small>
+                自定义私货商人
+              </small>
+              <em>[B]</em>
+            </li>
+            <li @click="clearRoles" v-if="players.length">
+              移除全部
+              <em><font-awesome-icon icon="trash-alt"/></em>
+            </li>
+          </div>
         </template>
 
         <template v-if="tab === 'help'">
           <!-- Help -->
           <li class="headline">帮助</li>
-          <li @click="toggleModal('reference')">
-            角色技能表
-            <em>[R]</em>
-          </li>
-          <li @click="toggleModal('nightOrder')">
-            夜间顺序表
-            <em>[N]</em>
-          </li>
-          <li @click="toggleModal('gameState')">
-            游戏状态JSON
-            <em><font-awesome-icon icon="file-code"/></em>
-          </li>
-          <!-- <li>
-            <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
-              Join Discord
-            </a>
-            <em>
+          <div>
+            <li @click="toggleModal('reference')">
+              角色技能表
+              <em>[R]</em>
+            </li>
+            <li @click="toggleModal('nightOrder')">
+              夜间顺序表
+              <em>[N]</em>
+            </li>
+            <li @click="toggleModal('gameState')">
+              游戏状态JSON
+              <em><font-awesome-icon icon="file-code"/></em>
+            </li>
+            <!-- <li>
               <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
-                <font-awesome-icon :icon="['fab', 'discord']" />
+                Join Discord
               </a>
-            </em>
-          </li> -->
-          <li>
-            <a href="https://github.com/bra1n/townsquare" target="_blank">
-              源代码
-            </a>
-            <em>
+              <em>
+                <a href="https://discord.gg/Gd7ybwWbFk" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'discord']" />
+                </a>
+              </em>
+            </li> -->
+            <li>
               <a href="https://github.com/bra1n/townsquare" target="_blank">
-                <font-awesome-icon :icon="['fab', 'github']" />
+                源代码
               </a>
-            </em>
-          </li>
+              <em>
+                <a href="https://github.com/bra1n/townsquare" target="_blank">
+                  <font-awesome-icon :icon="['fab', 'github']" />
+                </a>
+              </em>
+            </li>
+          </div>
         </template>
       </ul>
     </div>
@@ -321,7 +346,7 @@ import { mapMutations, mapState } from "vuex";
 
 export default {
   computed: {
-    ...mapState(["grimoire", "session", "edition"]),
+    ...mapState(["grimoire", "session", "edition", "channels"]),
     ...mapState("players", ["players"]),
     formattedTime() {
       const minutes = Math.floor(this.session.timer / 60);
@@ -335,8 +360,14 @@ export default {
     },
     keyboardIcon() {
       return {
-        color: this.session.isListening ? 'red' : 'white'
+        color: this.listeningFrame ? 'red' : 'white'
       }
+    },
+    isHandHeld() {
+      const deviceType = navigator.userAgent.toLocaleLowerCase();
+      console.log(deviceType);
+      if (/mobile|android|touch|webos|iphone|ipod/i.test(deviceType)) return true;
+      return false;
     }
   },
   data() {
@@ -348,7 +379,13 @@ export default {
       distributingGrimoire: false,
       isSendingBluff: true,
       recognition: null,
-      microphoneSetting: "free"
+      microphoneSetting: "free",
+      // 语音检测
+      audioContext: null,
+      audioStream: null,
+      analyser: null,
+      source: null,
+      listeningFrame: null // also in session.js for global reference
     };
   },
   methods: {
@@ -360,22 +397,32 @@ export default {
     },
     changeName() {
       var name = prompt("输入玩家昵称").trim();
-      if (!name) return; //will not execute because .trim() incurs error first
+      if (!name) return; // will not execute because .trim() incurs error first
       while (name === "空座位" || name === "说书人"){
         alert("昵称非法！");
         name = prompt("输入玩家昵称").trim();
-        if (!name) return; //will not execute because .trim() incurs error first
+        if (!name) return; // will not execute because .trim() incurs error first
       }
       this.$store.commit("session/setPlayerName", name);
     },
     hostSession() {
       if (this.session.sessionId) return;
-      const sessionId = Math.round(Math.random() * 10000).toString();
+      var sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
+      if (!sessionId) return;
+      while (!Number(sessionId) || Number(sessionId) >= 10000) {
+        alert("请输入大于0小于10000的数字！");
+        sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
+        if (!sessionId) return;
+      }
+      sessionId = Number(sessionId).toString();
+      // const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
       );
       if (!Number(numPlayers)) return;
       if (numPlayers < 0) return;
+      if (!this.session.playerName) this.changeName();
+      if (!this.session.playerName) return;
       if (sessionId) {
         this.$store.commit("session/clearVoteHistory", []);
         this.$store.commit("session/setSpectator", false);
@@ -385,7 +432,7 @@ export default {
         for(let i=0; i < numPlayers; i++){
           this.addPlayer();
         }
-        // this.copySessionUrl();
+        this.copySessionUrl();
       };
     },
     copySessionUrl() {
@@ -530,12 +577,14 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
+        this.$store.commit("session/setFirstHostCheck", true);
+        this.$store.commit("session/setFirstJoinCheck", true);
         
         // clear seats and return to intro
         if (this.session.nomination) {
           this.$store.commit("session/nomination");
         }
-        this.$store.commit("players/clear");
+        this.$store.commit("players/clear", true);
 
         // clear customBootlegger
         if (this.session.bootlegger) {
@@ -544,16 +593,23 @@ export default {
 
         // reset secret vote
         if (this.session.isSecretVote) {
-          this.$store.commit("session/setSecretVote", false)
+          this.$store.commit("session/setSecretVote", false);
         }
+        // reset using older night order
+        if (this.session.isSecretVote) {
+          this.$store.commit("session/setUseOldOrder", false);
+        }
+
+        // close chat box
+        this.$store.commit("session/setChatOpen", false);
       }
     },
-    addPlayer() {
+    addPlayer(stImage = null, stName = null) {
       if (this.session.isSpectator) return;
       if (this.players.length >= 20) return;
       
       // setting name to a default value, combining with the seat number
-      this.$store.commit("players/add", "");
+      this.$store.commit("players/add", {name: "", stImage, stName});
     },
     randomizeSeatings() {
       if (this.session.isSpectator) return;
@@ -591,6 +647,9 @@ export default {
         this.$store.commit("session/setMarkedPlayer", -1);
       }
     },
+    toggleUseOldOrder() {
+      this.$store.commit("session/setUseOldOrder", !this.session.isUseOldOrder);
+    },
     setTimer() {
       if (this.session.isSpectator || !this.session.sessionId) return;
       const time = prompt("输入时间（分）");
@@ -612,44 +671,94 @@ export default {
       this.$store.commit("session/stopTimer");
       this.timing = false;
     },
-    startListening(free = true) {
-      if (this.session.isListening) return;
-      if (this.microphoneSetting === "free" && !free) return;
-      if (this.microphoneSetting === "keyboard" && free) return;
-      this.$store.commit("session/setListening", true);
-      this.recognition.start();
+    async initAudio() {
+      // Initialize audioContext and audioStream if not already done
+      if (!this.audioContext) {
+        this.audioContext = new AudioContext();
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioStream = stream;
+
+        this.source = this.audioContext.createMediaStreamSource(stream);
+        this.analyser = this.audioContext.createAnalyser();
+        this.analyser.fftSize = 256;
+        this.source.connect(this.analyser);
+      }
     },
-    stopListening(free = true) {
-      if (!this.session.isListening) return;
-      if (this.microphoneSetting === "free" && !free) return;
-      if (this.microphoneSetting === "keyboard" && free) return;
-      this.$store.commit("session/setListening", false);
-      this.recognition.stop();
+    runAudioDetection() {
+      // Web Audio API 语音检测
+      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      const SILENCE_THRESHOLD = 120; // Adjust as needed
+      const HUMAN_VOICE_RANGE = { min: 250, max: 400 }; // Adjust based on actual FFT resolution
+
+      // Check for microphone activity
+      const detectSpeechActivity = () => {
+        if (!this.analyser) return;
+        this.analyser.getByteFrequencyData(dataArray);
+
+        // Analyze frequency bins corresponding to the human voice range
+        const sampleRate = this.audioContext.sampleRate;
+        const binCount = this.analyser.frequencyBinCount;
+        const binSize = sampleRate / (2 * binCount);
+        let totalVolume = 0;
+        for (let i = 0; i < binCount; i++) {
+          const frequency = i * binSize;
+          if (frequency >= HUMAN_VOICE_RANGE.min && frequency <= HUMAN_VOICE_RANGE.max) {
+            totalVolume += dataArray[i];
+          }
+        }
+
+        if (totalVolume > SILENCE_THRESHOLD && !this.session.isTalking) {
+          if (!this.session.isTalking) {
+            this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: true});
+          }
+        } else if (totalVolume <= SILENCE_THRESHOLD && this.session.isTalking) {
+          if (this.session.isTalking) {
+            this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: false});
+          }
+        }
+
+        this.listeningFrame = requestAnimationFrame(detectSpeechActivity);
+        this.$store.commit("session/setListeningFrame", this.listeningFrame);
+      }
+
+      detectSpeechActivity();
+    },
+    startListening(mode) {
+      if (this.listeningFrame) return;
+      if (mode != this.microphoneSetting) return;
+      
+      this.initAudio().then(() => {
+        this.runAudioDetection();
+      })
+    },
+    stopListening(mode) {
+      if (!this.listeningFrame) return;
+      if (mode != this.microphoneSetting) return;
+
+      if (this.listeningFrame) {
+        cancelAnimationFrame(this.listeningFrame);
+        this.listeningFrame = null;
+        this.$store.commit("session/setListeningFrame", null);
+      }
+      this.$store.commit("session/setTalking", {seatNum:this.session.claimedSeat, isTalking: false});
+    },
+    clearLocalStorage() {
+      const clear = confirm("确定清空所有内容吗？（将清除昵称头像和聊天记录等）");
+      if (!clear) return;
+      localStorage.clear();
+      alert("清理完成，请刷新网页！");
     },
     ...mapMutations([
       "toggleGrimoire",
       "toggleMenu",
       "toggleImageOptIn",
+      "toggleForwardEvilInfo",
       "toggleMuted",
-      "toggleShowVacant",
       "toggleNightOrder",
       "toggleStatic",
       "setZoom",
       "toggleModal"
     ])
-  },
-  mounted() {
-    // 语音检测
-    this.recognition = new window.webkitSpeechRecognition;
-    this.recognition.continuous = false;
-    this.recognition.onend = () => {
-      this.$store.commit("session/stopTalking", this.session.claimedSeat);
-      if (this.session.isListening) this.recognition.start();
-    }
-    this.recognition.onspeechstart = () => {
-      if (!this.session.isListening) return;
-      this.$store.commit("session/startTalking", this.session.claimedSeat);
-    }
   }
 };
 </script>
@@ -665,6 +774,21 @@ export default {
   to {
     color: white;
   }
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgb(54, 54, 54); 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(97, 97, 97); 
 }
 
 // Controls
@@ -757,6 +881,11 @@ export default {
     box-shadow: 0 0 10px black;
     border: 3px solid black;
     border-radius: 10px 0 10px 10px;
+
+    .options {
+      overflow-y: auto;
+      max-height: calc(85vh - 100px); /* Adjust this value as needed */
+    }
 
     li {
       padding: 2px 5px;

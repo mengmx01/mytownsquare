@@ -20,11 +20,14 @@
 
       <div class="shroud" @click="toggleStatus()"></div>
       <div class="life" @click="toggleStatus()"></div>
-      <div v-if="player.id && player.image" class="profileImage">
-        <img :src="`https://botcgrimoire.site/profile_images/${player.image}`" 
+      <div v-if="player.id" class="avatar">
+        <!-- <img :src="`https://botcgrimoire.uk/avatars/${player.image}`" 
+          :class="{ on: player.role.id }"
+        > -->
+        <img :src="`https://botcgrimoire.top/avatars/${player.image}`" 
           :class="{ on: player.role.id }"
         >
-        <!-- <img :src="`http://localhost:3000/profile_images/${player.image}`" 
+        <!-- <img :src="`http://localhost:3000/avatars/${player.image}`" 
             :class="{ on: player.role.id }"
         > -->
       </div>
@@ -93,10 +96,10 @@
           @click="nominatePlayer(player)"
           title="Nominate this player"
         />
-        <div v-if="!player.id && session.isSpectator" class="sitDown">
+        <div v-if="!player.id && session.isSpectator" class="sitDown" :style=font>
           <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 坐下
         </div>
-        <div v-if="!player.id && !session.isSpectator && grimoire.isShowVacant" class="sitDown">
+        <div v-if="!player.id && !session.isSpectator && grimoire.isShowVacant" class="sitDown" :style="font">
           <font-awesome-icon icon="chair"  style="position: relative; top: 50%;"/> 空位
         </div>
           
@@ -113,9 +116,9 @@
       <!-- Ghost vote icon -->
       <font-awesome-icon
         icon="vote-yea"
-        class="has-vote"
+        :class="(session.sessionId && player.isSecretVoteless && !session.isSpectator) ? 'secret-no-vote' : 'has-vote'"
         v-if="player.isDead && !player.isVoteless"
-        @click="updatePlayer('isVoteless', true)"
+        @click="toggleVote()"
         title="Ghost vote"
       />
 
@@ -125,7 +128,7 @@
       </div>
       <div
         class="name"
-        @click="isMenuOpen = !isMenuOpen"
+        @click="checkOverTop()"
         :class="{ active: isMenuOpen }"
       >
         <span v-if="player.id">{{ player.name }}</span>
@@ -137,7 +140,7 @@
       </div>
 
       <transition name="fold">
-        <ul class="menu" v-if="isMenuOpen">
+        <ul class="menu" ref="playerMenu" v-if="isMenuOpen" :style="[playerMenuAdjustment, { '--before': (menuTop < 0 ? Math.round(menuNewTop - menuTop) + 5 : 5) + 'px' }]">
           <li
             @click="changePronouns"
             v-if="
@@ -276,6 +279,21 @@ export default {
       } else {
         return { width: 12 + this.grimoire.zoom + unit };
       }
+    },
+    font: function() {
+      const width = this.windowWidth;
+      const height = this.windowHeight;
+      const referenceWidth = 1080;
+      return "font-size: " + (this.grimoire.zoom + 20) * Math.min(width, height) / referenceWidth + "px";
+    },
+    playerMenuAdjustment() {
+      if (!this.menuTop) return null;
+      if (this.menuTop === 0) return null;
+      const position = {
+        top: '0px',
+        height: this.menuHeight + 'px'
+      }
+      return position;
     }
   },
   data() {
@@ -284,7 +302,10 @@ export default {
       isSwap: false,
       newMessages: 0,
       windowWidth: window.innerWidth,
-      windowHeight: window.innerHeight
+      windowHeight: window.innerHeight,
+      menuTop: null,
+      menuHeight: null,
+      menuNewTop: null
     };
   },
   mounted(){
@@ -335,6 +356,17 @@ export default {
         if (this.player.isVoteless) {
           this.updatePlayer("isVoteless", false);
         }
+        if (this.player.isSecretVoteless) {
+          this.updatePlayer("isSecretVoteless", false);
+          this.updatePlayer("isVoteless", false);
+        }
+      }
+    },
+    toggleVote() {
+      if (this.session.isSecretVote && !this.player.isSecretVoteless) {
+        this.updatePlayer('isSecretVoteless', true);
+      } else {
+        this.updatePlayer('isVoteless', true);
       }
     },
     changeName() {
@@ -346,6 +378,22 @@ export default {
       const reminders = [...this.player.reminders];
       reminders.splice(this.player.reminders.indexOf(reminder), 1);
       this.updatePlayer("reminders", reminders, true);
+    },
+    async checkOverTop() {
+      this.isMenuOpen = !this.isMenuOpen;
+      if (!this.isMenuOpen) {
+        this.menuTop = null;
+        this.menuHeight = null;
+        return;
+      };
+      await this.$nextTick();
+      const position = this.$refs.playerMenu.getBoundingClientRect();
+      const top = position.top < 0 ? Math.floor(position.top) : 0;
+      this.menuTop = top;
+      this.menuHeight = Math.ceil(Math.abs(position.height));
+
+      await this.$nextTick();
+      this.menuNewTop = this.$refs.playerMenu.getBoundingClientRect().top;
     },
     updatePlayer(property, value, closeMenu = false) {
       if (
@@ -364,13 +412,19 @@ export default {
       }
     },
     emptyPlayer(){
-      this.updatePlayer('id', '', true);
-      this.updatePlayer('name', '', true);
-      this.updatePlayer('image', '', true)
+      this.$store.commit("players/empty", {player: this.player, id: this.player.id});
     },
     removePlayer() {
       this.isMenuOpen = false;
-      this.$emit("trigger", ["removePlayer"]);
+      if (
+        confirm(
+          //`确定要移除玩家 ${this.players[playerIndex].name}？`
+          `确定要移除该座位吗？`
+        )
+      ) {
+        this.emptyPlayer();
+        this.$emit("trigger", ["removePlayer"]);
+      }
     },
     swapPlayer(player) {
       this.isMenuOpen = false;
@@ -494,6 +548,7 @@ export default {
 
 /****** Life token *******/
 .player {
+  z-index: 1;
   
   .life {
     border-radius: 50%;
@@ -576,27 +631,27 @@ export default {
   transform: perspective(400px) rotateY(0deg);
   backface-visibility: hidden;
 }
-.player .profileImage,.player .token {
+.player .avatar,.player .token {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
 }
 
-.player .profileImage {
+.player .avatar {
   border-radius: 50%;
   padding: 6%;
   cursor: pointer;
 }
 
-.player .profileImage img {
+.player .avatar img {
   border-radius: 50%;
   pointer-events: none;
   width: 100%;
   height: 100%;
 }
 
-.player .profileImage img.on {
+.player .avatar img.on {
   filter: blur(3px)
 }
 
@@ -626,7 +681,7 @@ export default {
     background: rgba(0, 0, 0, 0.5);
     padding: 2px 5px;
     border-radius: 10px;
-    border: 3px solid #000;
+    border: 2px solid #000;
     // margin-left: 15px;
     cursor: pointer;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
@@ -713,6 +768,24 @@ li.move:not(.from) .player .overlay svg.move {
 }
 
 .has-vote {
+  position: absolute;
+  margin-top: -15%;
+  right: 2px;
+}
+
+.player .secret-no-vote {
+  color: red;
+  filter: drop-shadow(0 0 3px black);
+  transition: opacity 250ms;
+  z-index: 2;
+
+  #townsquare.public & {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.secret-no-vote {
   position: absolute;
   margin-top: -15%;
   right: 2px;
@@ -929,7 +1002,8 @@ li.move:not(.from) .player .overlay svg.move {
     border: 10px solid transparent;
     border-right-color: black;
     right: 100%;
-    bottom: 5px;
+    bottom: var(--before);
+    // bottom: 5px;
     margin-right: 2px;
   }
 

@@ -112,7 +112,7 @@ export default new Vuex.Store({
       isStatic: false,
       isMuted: false,
       isImageOptIn: true,
-      isShowVacant: false,
+      isForwardEvilInfo: false,
       zoom: 0,
       background: ""
     },
@@ -132,7 +132,13 @@ export default new Vuex.Store({
     otherTravelers: getTravelersNotInEdition(),
     fabled,
     jinxes,
-    states: []
+    states: [],
+    teamsNames: {
+      townsfolk: "镇民",
+      outsider: "外来者",
+      minion: "爪牙",
+      demon: "恶魔"
+    }
   },
   getters: {
     /**
@@ -174,13 +180,13 @@ export default new Vuex.Store({
     setZoom: set("zoom"),
     setBackground: set("background"),
     toggleMuted: toggle("isMuted"),
-    toggleShowVacant: toggle("isShowVacant"),
     toggleMenu: toggle("isMenuOpen"),
     toggleNightOrder: toggle("isNightOrder"),
     toggleStatic: toggle("isStatic"),
     toggleNight: toggle("isNight"),
     toggleGrimoire: toggle("isPublic"),
     toggleImageOptIn: toggle("isImageOptIn"),
+    toggleForwardEvilInfo:toggle("isForwardEvilInfo"),
     toggleModal({ modals }, name) {
       if (name) {
         modals[name] = !modals[name];
@@ -264,10 +270,30 @@ export default new Vuex.Store({
     setStates(state, states){
       state.states = states;
     },
+    setTeamsNames(state, names) {
+      state.teamsNames = names;
+    },
     setEdition(state, edition) {
       if (editionJSONbyId.has(edition.id)) {
         state.edition = editionJSONbyId.get(edition.id);
         state.roles = getRolesByEdition(state.edition);
+        // 为官方剧本增加原顺序选项
+        if (state.session.isUseOldOrder) {
+          if (edition.id === 'bmr') {
+            state.roles.get('professor').otherNight = 81;
+          }
+          else if(edition.id === 'snv') {
+            state.roles.get('pithag').otherNight = 35;
+          }
+        } else {
+          // 复原顺序，map修改会修改内置数据库
+          if (edition.id === 'bmr') {
+            state.roles.get('professor').otherNight = 96;
+          }
+          else if(edition.id === 'snv') {
+            state.roles.get('pithag').otherNight = 16;
+          }
+        }
         state.otherTravelers = getTravelersNotInEdition(state.edition);
       } else {
         state.edition = edition;

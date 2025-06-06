@@ -34,7 +34,7 @@
       :class="['team', team]"
     >
       <aside>
-        <h4>{{ team }}</h4>
+        <h4>{{ teamsNames[team] }}</h4>
       </aside>
       <ul>
         <li v-for="role in teamRoles" :class="[team]" :key="role.id">
@@ -46,7 +46,7 @@
                 role.image && grimoire.isImageOptIn
                   ? role.image
                   : require('../../assets/icons/' +
-                      (role.imageAlt || role.id) +
+                      (role.imageAlt || role.id.replace(/old1$/, '')) +
                       '.png')
               })`
             }"
@@ -115,7 +115,6 @@
 <script>
 import Modal from "./Modal";
 import { mapMutations, mapState } from "vuex";
-import Vue from "vue";
 
 export default {
   components: {
@@ -155,8 +154,7 @@ export default {
         rolesGrouped[role.team].push(role);
       });
       delete rolesGrouped["traveler"];
-      const rolesCn = mapRolesCn(rolesGrouped);
-      return rolesCn;
+      return rolesGrouped;
     },
     // states: function() {
     //   var statePresent = false;
@@ -179,7 +177,7 @@ export default {
       });
       return players;
     },
-    ...mapState(["roles", "modals", "edition", "grimoire", "jinxes", "states"]),
+    ...mapState(["roles", "modals", "edition", "grimoire", "jinxes", "states", "teamsNames"]),
     ...mapState("players", ["players"])
   },
   methods: {
@@ -187,29 +185,6 @@ export default {
   }
 };
 
-
-const mapRolesCn = function(roles) { // 汉化角色类型
-  const rolesCn = {};
-  const keys = Object.keys(roles);
-  keys.forEach(key => {
-    const value = roles[key];
-    if (key == "demon"){
-      Vue.set(rolesCn, "恶魔", value);
-    }else if (key == "minion"){
-      Vue.set(rolesCn, "爪牙", value);
-    }else if (key == "outsider"){
-      Vue.set(rolesCn, "外来者", value);
-    }else if (key == "townsfolk"){
-      Vue.set(rolesCn, "镇民", value);
-    }else if (key == "traveler"){
-      Vue.set(rolesCn, "旅行者", value);
-    }else if (!["jinxed", "jinxes", "jinx", "hatred", "hate"].includes(key)){
-      // 任何冲突全部删除，将会放进后续冲突栏
-      Vue.set(rolesCn, "other", value);
-    }
-  });
-  return rolesCn;
-}
 </script>
 
 <style lang="scss" scoped>
@@ -232,7 +207,7 @@ h3 {
   }
 }
 
-.镇民 {
+.townsfolk {
   .name {
     color: $townsfolk;
   }
@@ -240,7 +215,7 @@ h3 {
     background: linear-gradient(-90deg, $townsfolk, transparent);
   }
 }
-.外来者 {
+.outsider {
   .name {
     color: $outsider;
   }
@@ -248,7 +223,7 @@ h3 {
     background: linear-gradient(-90deg, $outsider, transparent);
   }
 }
-.爪牙 {
+.minion {
   .name {
     color: $minion;
   }
@@ -256,7 +231,7 @@ h3 {
     background: linear-gradient(-90deg, $minion, transparent);
   }
 }
-.恶魔 {
+.demon {
   .name {
     color: $demon;
   }
@@ -324,9 +299,10 @@ h3 {
   h4 {
     text-transform: uppercase;
     text-align: center;
-    // transform: rotate(90deg);
+    transform: rotate(90deg);
     transform-origin: center;
     font-size: 80%;
+    white-space: nowrap;
   }
 
   &.jinxed {

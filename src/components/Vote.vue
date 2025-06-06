@@ -248,7 +248,7 @@ export default {
     finish() {
       clearInterval(this.voteTimer);
       this.$store.commit("session/addHistory", this.players);
-      this.$store.commit("session/addVoteSelected");
+      this.$store.commit("session/addVoteSelected", {selected: false, save: true});
       this.$store.commit("session/nomination");
     },
     vote(vote) {
@@ -265,10 +265,10 @@ export default {
       }
     },
     setMarked() {
-      this.$store.commit("session/setMarkedPlayer", this.session.nomination[1]);
+      this.$store.commit("session/setMarkedPlayer", {val: this.session.nomination[1], force: true});
     },
     removeMarked() {
-      this.$store.commit("session/setMarkedPlayer", -1);
+      this.$store.commit("session/setMarkedPlayer", {val: -1, force: true});
     },
     setSecretVote() {
       if (this.session.isSpectator) return;

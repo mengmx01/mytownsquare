@@ -38,7 +38,7 @@
             <font-awesome-icon
               :icon="[
                 'fas',
-                session.voteSelected.every(selected => selected === true) ? 'check-square' : 'square'
+                session.voteSelected.length > 0 && session.voteSelected.every(selected => selected === true) ? 'check-square' : 'square'
               ]"
               @click="setVoteSelected(-1)"
               class="checkbox"

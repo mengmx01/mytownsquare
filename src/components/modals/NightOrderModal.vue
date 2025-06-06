@@ -45,7 +45,7 @@
                 role.image && grimoire.isImageOptIn
                   ? role.image
                   : require('../../assets/icons/' +
-                      (role.imageAlt || role.id) +
+                      (role.imageAlt || role.id.replace(/old1$/, '')) +
                       '.png')
               })`
             }"
@@ -70,7 +70,7 @@
                 role.image && grimoire.isImageOptIn
                   ? role.image
                   : require('../../assets/icons/' +
-                      (role.imageAlt || role.id) +
+                      (role.imageAlt || role.id.replace(/old1$/, '')) +
                       '.png')
               })`
             }"
@@ -115,7 +115,7 @@ export default {
           {
             id: "evil",
             name: "爪牙信息",
-            firstNight: 12,
+            firstNight: this.grimoire.isForwardEvilInfo ? 0 : 12,
             team: "minion",
             players: this.players.filter(p => p.role.team === "minion"),
             firstNightReminder:
@@ -125,7 +125,7 @@ export default {
           {
             id: "evil",
             name: "恶魔信息与伪装身份",
-            firstNight: 18,
+            firstNight: this.grimoire.isForwardEvilInfo ? 0 : 18,
             team: "demon",
             players: this.players.filter(p => p.role.team === "demon"),
             firstNightReminder:

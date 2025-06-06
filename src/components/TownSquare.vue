@@ -90,7 +90,7 @@
     <ReminderModal :player-index="selectedPlayer"></ReminderModal>
     <RoleModal :player-index="selectedPlayer"></RoleModal>
 
-    <div v-show="isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
+    <div v-show="session.isChatOpen" :class="{chat: !isChatMin, chatMin: isChatMin}" :style="chatStyle">
       <div class="title" @click="maximiseChat()">
         <span ref="chatWith" style="cursor: text; user-select: text; pointer-events: auto;"></span> 
         <span class="newMessage" v-for="(item, position) in session.newStMessage" :key="position" v-show="session.isSpectator && item > 0">{{ item }}</span>
@@ -98,19 +98,22 @@
           <font-awesome-icon icon="times" :class="{ turnedIcon45: isChatMin}"/>
         </span>
       </div>
-      <div ref="chatContent" class="content" @scroll="checkToBottom">
-        <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.playerId) || (!session.isSpectator && player.id === chattingPlayer)">
+      <div ref="chatContent" class="content" @scroll="checkToBottom" >
+        <div v-for="(player, index) in session.chatHistory"  :key="index" v-show="(session.isSpectator && player.id === session.stId) || (!session.isSpectator && player.id === chattingPlayer)">
           <ul v-for="(content, chatIndex) in player.chat" :key="chatIndex">{{ content }}</ul>
         </div>
       </div>
       <form class="chatbox" @submit.prevent="sendChat">
-        <input type="text" id="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
+        <input type="text" id="message" ref="message" autocomplete="off" class="edit" @focus="typing" @blur="session.chatting = false" v-model="message">
         <button type="submit" class="send">发送</button>
       <div class="toBottom" v-if="false">
           移至底部
           <font-awesome-icon icon="arrow"/>
       </div>
       </form>
+    </div>
+    <div id="version">
+      <a href="https://beian.miit.gov.cn/" target="_blank">浙ICP备2024109577号-2</a>
     </div>
   </div>
 </template>
@@ -147,7 +150,7 @@ export default {
       if (this.isChatMin) return;
       const ratio = this.windowWidth / this.windowHeight;
       if (ratio < 1) return 'width: 300px; height: 400px;';
-      return 'width: 30%; height: 40%;';
+      return 'width: 25%; height: 40%;';
     }
   },
   data() {
@@ -160,13 +163,21 @@ export default {
       isBluffsOpen: true,
       isFabledOpen: true,
       isChatMin: false,
-      isChatOpen: false,
       minimising: false,
       chattingPlayer: "",
       message: "",
       windowWidth: window.innerWidth,
       windowHeight: window.innerHeight
     };
+  },
+  watch: {
+    "session.chatHistory": {
+      handler() {
+        if (this.$refs.chatContent.scrollTop >= -20 && this.isChatOpen && !this.isChatMin) {
+          this.scrollToBottom();
+        }
+      }
+    }
   },
   mounted(){
     window.addEventListener("resize", this.handleResize);
@@ -206,7 +217,7 @@ export default {
         this.$store.commit("session/claimSeat", -1);
       } else {
         this.$store.commit("session/claimSeat", playerIndex);
-        this.$store.commit("session/createChatHistory", this.session.playerId);
+        this.$store.commit("session/createChatHistory", this.session.stId);
       }
     },
     openReminderModal(playerIndex) {
@@ -222,30 +233,23 @@ export default {
     },
     removePlayer(playerIndex) {
       if (this.session.isSpectator || this.session.lockedVote) return;
-      if (
-        confirm(
-          //`确定要移除玩家 ${this.players[playerIndex].name}？`
-          `确定要移除该座位吗？`
-        )
-      ) {
-        const { nomination } = this.session;
-        if (nomination) {
-          if (nomination.includes(playerIndex)) {
-            // abort vote if removed player is either nominator or nominee
-            this.$store.commit("session/nomination");
-          } else if (
-            nomination[0] > playerIndex ||
-            nomination[1] > playerIndex
-          ) {
-            // update nomination array if removed player has lower index
-            this.$store.commit("session/setNomination", [
-              nomination[0] > playerIndex ? nomination[0] - 1 : nomination[0],
-              nomination[1] > playerIndex ? nomination[1] - 1 : nomination[1]
-            ]);
-          }
+      const { nomination } = this.session;
+      if (nomination) {
+        if (nomination.includes(playerIndex)) {
+          // abort vote if removed player is either nominator or nominee
+          this.$store.commit("session/nomination");
+        } else if (
+          nomination[0] > playerIndex ||
+          nomination[1] > playerIndex
+        ) {
+          // update nomination array if removed player has lower index
+          this.$store.commit("session/setNomination", [
+            nomination[0] > playerIndex ? nomination[0] - 1 : nomination[0],
+            nomination[1] > playerIndex ? nomination[1] - 1 : nomination[1]
+          ]);
         }
-        this.$store.commit("players/remove", playerIndex);
       }
+      this.$store.commit("players/remove", playerIndex);
     },
     swapPlayer(from, to) {
       if (this.session.isSpectator || this.session.lockedVote) return;
@@ -344,11 +348,11 @@ export default {
       
       // display player name or ST in the chat title
       if(this.session.isSpectator){
-        this.$refs.chatWith.innerText = "说书人";
+        const name = this.fabled[0].name; //if fabled is messed up this may cause issues
+        this.$refs.chatWith.innerText = name;
         this.$store.commit("session/setStMessage", 0);
       }else{
         const name = this.players[playerIndex].name;
-        // name = name.split(". ")[1];
         this.$refs.chatWith.innerText = name;
         this.chattingPlayer = this.players[playerIndex].id;
         this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0})
@@ -368,8 +372,12 @@ export default {
         this.minimising = false;
         return;
       }
-      this.isChatOpen = true;
+      this.$store.commit("session/setChatOpen", true);
       this.isChatMin = false;
+
+      this.$nextTick(() => {
+        this.$refs.message.focus();
+      });
     },
     minimiseChat(){
       this.isChatMin = true;
@@ -377,20 +385,32 @@ export default {
     },
     sendChat(){
       if (this.message === "") return;
-      const sender = this.session.isSpectator ? this.session.playerName : "说书人";
-      const playerId = this.session.isSpectator ? this.session.playerId : this.chattingPlayer;
+      if (this.session.isSpectator && this.session.claimedSeat < 0) return;
+      if (!this.session.isSpectator) {
+        let seated = false;
+        this.players.forEach(player => {
+          if (player.id === this.chattingPlayer) seated = true;
+        });
+        if (!seated) return;
+      }
+      const sender = this.session.playerName;
+      const sendingPlayerId = this.session.playerId;
+      const receivingPlayerId = this.session.isSpectator ? "host" : this.chattingPlayer;
       const message = sender.concat(": ", this.message);
-      this.$store.commit("session/updateChatSent", {message, playerId});
+      this.$store.commit("session/updateChatSent", {message, sendingPlayerId, receivingPlayerId});
       this.message = "";
 
       this.scrollToBottom();
     },
     scrollToBottom(){
-      this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
+      this.$nextTick(() => {
+        this.$refs.chatContent.scrollTop = this.$refs.chatContent.scrollHeight;
+      });
+      this.checkToBottom();
     },
     checkToBottom() {
-      if (this.$refs.chatContent.scrollTop === 0){
-        // scrolled to bottom
+      if (this.$refs.chatContent.scrollTop >= -20){
+        // 划至最底则删除红点
         if (!this.session.isSpectator) {
           this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
         } else{
@@ -400,10 +420,12 @@ export default {
     },
     typing(){
       this.session.chatting = true;
-      if (!this.session.isSpectator) {
-        this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
-      } else{
-        this.$store.commit("session/setStMessage", 0);
+      if (this.$refs.chatContent.scrollTop >= -20){
+        if (!this.session.isSpectator) {
+          this.$store.commit("players/setPlayerMessage", {playerId: this.chattingPlayer, num: 0});
+        } else{
+          this.$store.commit("session/setStMessage", 0);
+        }
       }
     }
   }
@@ -907,7 +929,6 @@ export default {
 }
 
 .chat.alert .title::after {
-    content: '看私信！！！';
     font-size: 70%;
     font-weight: bold;
     position: absolute;
@@ -975,4 +996,19 @@ export default {
 #townsquare:not(.spectator) .fabled ul li:hover .token:before {
   opacity: 1;
 }
+
+#version {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    background-color: transparent;
+    color: white;
+    padding: 0px;
+}
+
+#version a {
+    color: white;
+    text-decoration: none;
+}
+
 </style>

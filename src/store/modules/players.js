@@ -5,6 +5,7 @@ const NEWPLAYER = {
   role: {},
   reminders: [],
   isVoteless: false,
+  isSecretVoteless: false,
   isDead: false,
   pronouns: "",
   newMessages: 0,
@@ -98,11 +99,11 @@ const actions = {
 };
 
 const mutations = {
-  clear(state) {
+  clear(state, emptyFabled = false) {
     state.players = [];
     state.bluffs = [];
-    this.commit("players/setFabled", { fabled: [] });
-    state.fabled = [];
+    this.commit("players/setFabled", { fabled: [], emptyFabled });
+    // state.fabled = [];
   },
   set(state, players = []) {
     state.players = players;
@@ -121,26 +122,34 @@ const mutations = {
       state.players[index][property] = value;
     }
   },
-  add(state, name) {
+  add(state, {name}) {
     state.players.push({
       ...NEWPLAYER,
       name
     });
     if (state.fabled.length === 0) {
-      state.fabled.push({
-        "id": "storyteller",
-        "firstNightReminder": "",
-        "otherNightReminder": "",
-        "reminders": [],
-        "setup": false,
-        "name": "说书人",
-        "team": "fabled",
-        "ability": "点击和说书人私聊。"
-      });
+      this.commit("players/setFabled", {fabled: []})
     }
   },
   remove(state, index) {
     state.players.splice(index, 1);
+  },
+  empty(state, {player}) {
+    this.commit("players/update", {
+      player,
+      property: 'id',
+      value: ''
+    });
+    this.commit("players/update", {
+      player,
+      property: 'name',
+      value: ''
+    });
+    this.commit("players/update", {
+      player,
+      property: 'image',
+      value: ''
+    });
   },
   swap(state, [from, to]) {
 
@@ -164,7 +173,9 @@ const mutations = {
   updateBluff(state, bluffs) {
     state.bluffs = bluffs;
   },
-  setFabled(state, { index, fabled } = {}) {
+  setFabled(state, { index, fabled, stImage, stName, emptyFabled = false} = {}) {
+    if (!stImage) stImage = this.state.session.playerAvatar === "default.webp" ? "default_storyteller.webp" : this.state.session.playerAvatar;
+    if (!stName) stName = this.state.session.playerName;
     if (index !== undefined) {
       if (index == 0) return; // do not ever remove the first fabled i.e. storyteller
 
@@ -178,11 +189,12 @@ const mutations = {
     } else if (fabled) {
       const fabledStoryteller = {
         "id": "storyteller",
+        "image": ("https://botcgrimoire.top/avatars/" + stImage),
         "firstNightReminder": "",
         "otherNightReminder": "",
         "reminders": [],
         "setup": false,
-        "name": "说书人",
+        "name": stName,
         "team": "fabled",
         "ability": "点击和说书人私聊。"
       };
@@ -204,10 +216,11 @@ const mutations = {
 
       // add storyteller fabled to allow direct messages
       if (!Array.isArray(fabled)) {
+        // if (fabled.length === 0 && fabled.id != "storyteller") state.fabled.push(fabledStoryteller);
         state.fabled.push(fabled);
       } else {
         // add in Story Teller if there isn't already one
-        if (fabled.length === 0 || fabled[0].id != "storyteller"){
+        if (!emptyFabled && (fabled.length > 0 && fabled[0].id != "storyteller" || fabled.length === 0)){
           fabled.unshift(fabledStoryteller)
         }
         state.fabled = fabled;
@@ -231,7 +244,10 @@ const mutations = {
     state.image = image;
   },
   setIsTalking(state, {seatNum, isTalking}) {
-    state.players[seatNum].isTalking = isTalking;
+    if (seatNum >= state.players.length) return;
+    if (!state.players[seatNum].id || state.players[seatNum].id != this.state.session.playerId) return;
+    const player = state.players[seatNum];
+    player.isTalking = isTalking;
   }
 };
 

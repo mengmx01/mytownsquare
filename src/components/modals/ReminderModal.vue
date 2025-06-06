@@ -19,7 +19,7 @@
               reminder.image && grimoire.isImageOptIn
                 ? reminder.image
                 : require('../../assets/icons/' +
-                    (reminder.imageAlt || reminder.role) +
+                    (reminder.imageAlt || reminder.role.replace(/old1$/, '')) +
                     '.png')
             })`
           }"

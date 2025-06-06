@@ -8,7 +8,7 @@
     "name": "洗衣妇",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两名玩家和一个镇民角色：这两名玩家之一是该角色。",
-    "firstNight": 54,
+    "firstNight": 56,
     "otherNight": 0,
     "edition": "tb"
   },
@@ -21,7 +21,7 @@
     "name": "图书管理员",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两名玩家和一个外来者角色：这两名玩家之一是该角色（或者你会得知没有外来者在场）。",
-    "firstNight": 55,
+    "firstNight": 57,
     "otherNight": 0,
     "edition": "tb"
   },
@@ -34,7 +34,7 @@
     "name": "调查员",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两名玩家和一个爪牙角色：这两名玩家之一是该角色（或者你会得知没有爪牙在场）。",
-    "firstNight": 56,
+    "firstNight": 58,
     "otherNight": 0,
     "edition": "tb"
   },
@@ -47,7 +47,7 @@
     "name": "厨师",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知场上邻座的邪恶玩家有多少对。",
-    "firstNight": 57,
+    "firstNight": 59,
     "otherNight": 0,
     "edition": "tb"
   },
@@ -61,8 +61,8 @@
     "name": "共情者",
     "team": "townsfolk",
     "ability": "每个夜晚，你会得知与你邻近的两名存活的玩家中邪恶玩家的数量。",
-    "firstNight": 58,
-    "otherNight": 97,
+    "firstNight": 60,
+    "otherNight": 98,
     "edition": "tb"
   },
   {
@@ -75,8 +75,8 @@
     "name": "占卜师",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择两名玩家：你会得知他们之中是否有恶魔。会有一名善良玩家始终被你的能力当作恶魔。",
-    "firstNight": 59,
-    "otherNight": 98,
+    "firstNight": 61,
+    "otherNight": 99,
     "edition": "tb"
   },
   {
@@ -89,7 +89,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你会得知今天白天死于处决的玩家的角色。",
     "firstNight": 0,
-    "otherNight": 100,
+    "otherNight": 101,
     "edition": "tb"
   },
   {
@@ -102,7 +102,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择除你以外的一名玩家：当晚恶魔的负面能力对他无效。",
     "firstNight": 0,
-    "otherNight": 24,
+    "otherNight": 29,
     "edition": "tb"
   },
   {
@@ -115,7 +115,7 @@
     "team": "townsfolk",
     "ability": "如果你在夜晚死亡，你会被唤醒，然后你要选择一名玩家：你会得知他的角色。",
     "firstNight": 0,
-    "otherNight": 88,
+    "otherNight": 89,
     "edition": "tb"
   },
   {
@@ -176,8 +176,8 @@
     "name": "管家",
     "team": "outsider",
     "ability": "每个夜晚，你要选择除你以外的一名玩家：明天白天，只有他投票时你才能投票。",
-    "firstNight": 60,
-    "otherNight": 99,
+    "firstNight": 62,
+    "otherNight": 100,
     "edition": "tb"
   },
   {
@@ -226,8 +226,8 @@
     "name": "投毒者",
     "team": "minion",
     "ability": "每个夜晚，你要选择一名玩家：他在当晚和明天白天中毒。",
-    "firstNight": 30,
-    "otherNight": 17,
+    "firstNight": 33,
+    "otherNight": 18,
     "edition": "tb"
   },
   {
@@ -240,8 +240,8 @@
     "name": "间谍",
     "team": "minion",
     "ability": "每个夜晚，你能查看魔典。你可能会被当作善良阵营、镇民角色或外来者角色，即使你已死亡。",
-    "firstNight": 79,
-    "otherNight": 120,
+    "firstNight": 81,
+    "otherNight": 119,
     "edition": "tb"
   },
   {
@@ -254,7 +254,7 @@
     "team": "minion",
     "ability": "如果大于等于五名玩家存活时（旅行者不计算在内）恶魔死亡，你变成那个恶魔。",
     "firstNight": 0,
-    "otherNight": 37,
+    "otherNight": 40,
     "edition": "tb"
   },
   {
@@ -279,7 +279,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。如果你以这种方式自杀，一名爪牙会变成小恶魔。",
     "firstNight": 0,
-    "otherNight": 45,
+    "otherNight": 48,
     "edition": "tb"
   },
   {
@@ -356,8 +356,8 @@
     "name": "祖母",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一名善良玩家和他的角色。如果恶魔杀死了他，你也会死亡。",
-    "firstNight": 62,
-    "otherNight": 85,
+    "firstNight": 64,
+    "otherNight": 86,
     "edition": "bmr"
   },
   {
@@ -370,7 +370,7 @@
     "name": "水手",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择一名存活的玩家：你或他之一会醉酒直到下个黄昏。你不会死亡。",
-    "firstNight": 24,
+    "firstNight": 25,
     "otherNight": 12,
     "edition": "bmr"
   },
@@ -384,7 +384,7 @@
     "name": "侍女",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择除你以外的两名存活的玩家：你会得知他们中有几人在当晚因其自身能力而被唤醒。",
-    "firstNight": 87,
+    "firstNight": 89,
     "otherNight": 124,
     "edition": "bmr"
   },
@@ -398,7 +398,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择一名玩家（与上个夜晚不同）：如果你选中了恶魔，他会得知你是驱魔人，但他当晚不会因其自身能力而被唤醒。",
     "firstNight": 0,
-    "otherNight": 41,
+    "otherNight": 44,
     "edition": "bmr"
   },
   {
@@ -411,7 +411,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择两名玩家：他们当晚不会死亡，但其中一人会醉酒到下个黄昏。",
     "firstNight": 0,
-    "otherNight": 20,
+    "otherNight": 21,
     "edition": "bmr"
   },
   {
@@ -424,7 +424,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择一名玩家并猜测该玩家的角色：如果你猜错了，你会死亡。",
     "firstNight": 0,
-    "otherNight": 22,
+    "otherNight": 26,
     "edition": "bmr"
   },
   {
@@ -437,7 +437,7 @@
     "team": "townsfolk",
     "ability": "每个白天，你可以公开发表一个声明。如果该声明正确，在当晚会有一名玩家死亡。",
     "firstNight": 0,
-    "otherNight": 81,
+    "otherNight": 82,
     "edition": "bmr"
   },
   {
@@ -450,8 +450,8 @@
     "name": "侍臣",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择一个角色：如果该角色在场，该角色之一从当晚开始醉酒三天三夜。",
-    "firstNight": 34,
-    "otherNight": 21,
+    "firstNight": 37,
+    "otherNight": 22,
     "edition": "bmr"
   },
   {
@@ -464,7 +464,7 @@
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时*，你可以选择一名死亡的玩家：如果他是镇民，你会将他起死回生。",
     "firstNight": 0,
-    "otherNight": 95,
+    "otherNight": 96,
     "edition": "bmr"
   },
   {
@@ -525,7 +525,7 @@
     "team": "outsider",
     "ability": "你随时可能死亡。",
     "firstNight": 0,
-    "otherNight": 82,
+    "otherNight": 83,
     "edition": "bmr"
   },
   {
@@ -538,7 +538,7 @@
     "team": "outsider",
     "ability": "当你得知你死亡时，你要公开选择一名存活的玩家。如果他是善良的，在当晚他会死亡。",
     "firstNight": 0,
-    "otherNight": 83,
+    "otherNight": 84,
     "edition": "bmr"
   },
   {
@@ -557,14 +557,14 @@
     "id": "lunatic",
     "firstNightReminder": "在首个夜晚，唤醒疯子，如同他是恶魔一般进行行动。向疯子展示“他们是你的爪牙”信息标记并指向若干名玩家，数量等同于在场的爪牙数量。（可以指向任何玩家，无论他们是不是爪牙。）向疯子展示任意三个善良角色标记作为他的“伪装”。（这些角色标记甚至可以是在场的角色。）在首个夜晚，唤醒恶魔。向恶魔展示“你是”信息标记，然后是他的恶魔角色标记。（这会告知他才是真正的恶魔。）向恶魔展示“这名玩家是”信息标记，然后是疯子角色标记，然后指向疯子玩家。",
     "otherNightReminder": "每个夜晚，在恶魔被唤醒发动攻击前，唤醒疯子，如同他是恶魔一般进行行动。将“被选择”提示标记放置到疯子选择的每个角色标记旁，然后让疯子重新入睡。唤醒真正的恶魔，指向疯子玩家，向真正的恶魔展示疯子标记，然后指向疯子选择的玩家。接下来恶魔如常进行行动。",
-    "reminders": ["被选择"],
-    "remindersGlobal": ["是疯子"],
+    "reminders": [],
+    "remindersGlobal": ["是疯子", "被选择"],
     "setup": true,
     "name": "疯子",
     "team": "outsider",
     "ability": "你以为你是一个恶魔，但其实你不是。恶魔知道你是疯子以及你在每个夜晚选择了哪些玩家。",
-    "firstNight": 17,
-    "otherNight": 40,
+    "firstNight": 18,
+    "otherNight": 43,
     "edition": "bmr"
   },
   {
@@ -577,8 +577,8 @@
     "name": "教父",
     "team": "minion",
     "ability": "在你的首个夜晚，你会得知有哪些外来者角色在场。如果有外来者在白天死亡，你会在当晚被唤醒并且你要选择一名玩家：他死亡。[-1或+1外来者]",
-    "firstNight": 36,
-    "otherNight": 73,
+    "firstNight": 39,
+    "otherNight": 76,
     "edition": "bmr"
   },
   {
@@ -591,8 +591,8 @@
     "name": "魔鬼代言人",
     "team": "minion",
     "ability": "每个夜晚，你要选择一名存活的玩家（与上个夜晚不同）：如果明天白天他被处决，他不会死亡。",
-    "firstNight": 37,
-    "otherNight": 29,
+    "firstNight": 41,
+    "otherNight": 32,
     "edition": "bmr"
   },
   {
@@ -605,7 +605,7 @@
     "team": "minion",
     "ability": "每局游戏限一次，在夜晚时*，你可以选择一名玩家：他死亡，即使因为任何原因让他不会死亡。",
     "firstNight": 0,
-    "otherNight": 72,
+    "otherNight": 75,
     "edition": "bmr"
   },
   {
@@ -630,7 +630,7 @@
     "team": "demon",
     "ability": "每个夜晚*，如果今天白天没有人死亡，你会被唤醒并要选择一名玩家：他死亡。当你首次死亡后，你仍存活，但会被当作死亡。",
     "firstNight": 0,
-    "otherNight": 46,
+    "otherNight": 49,
     "edition": "bmr"
   },
   {
@@ -643,8 +643,8 @@
     "name": "普卡",
     "team": "demon",
     "ability": "每个夜晚，你要选择一名玩家：他中毒。上个因你的能力中毒的玩家会死亡并恢复健康。",
-    "firstNight": 46,
-    "otherNight": 47,
+    "firstNight": 49,
+    "otherNight": 50,
     "edition": "bmr"
   },
   {
@@ -657,7 +657,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择两名玩家：他们死亡。你上个夜晚选择过且当前死亡的玩家之一可能会被你反刍。",
     "firstNight": 0,
-    "otherNight": 48,
+    "otherNight": 51,
     "edition": "bmr"
   },
   {
@@ -670,7 +670,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你可以选择一名玩家：他死亡。如果你上次选择时没有选择任何玩家，当晚你要选择三名玩家：他们死亡。",
     "firstNight": 0,
-    "otherNight": 49,
+    "otherNight": 52,
     "edition": "bmr"
   },
   {
@@ -743,7 +743,7 @@
     "name": "钟表匠",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知恶魔与爪牙之间最近的距离。（邻座的玩家距离为1）",
-    "firstNight": 63,
+    "firstNight": 65,
     "otherNight": 0,
     "edition": "snv"
   },
@@ -757,8 +757,8 @@
     "name": "筑梦师",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择除你及旅行者以外的一名玩家：你会得知一个善良角色和一个邪恶角色，该玩家是其中一个角色。",
-    "firstNight": 64,
-    "otherNight": 102,
+    "firstNight": 66,
+    "otherNight": 103,
     "edition": "snv"
   },
   {
@@ -771,8 +771,8 @@
     "name": "舞蛇人",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择一名存活的玩家：如果你选中了恶魔，你和他交换角色和阵营，然后他中毒。",
-    "firstNight": 35,
-    "otherNight": 23,
+    "firstNight": 38,
+    "otherNight": 28,
     "edition": "snv"
   },
   {
@@ -785,8 +785,8 @@
     "name": "数学家",
     "team": "townsfolk",
     "ability": "每个夜晚，你会得知有多少名玩家的能力因为其他角色的能力而未正常生效。（从上个黎明到你被唤醒时）",
-    "firstNight": 88,
-    "otherNight": 125,
+    "firstNight": 91,
+    "otherNight": 126,
     "edition": "snv"
   },
   {
@@ -799,7 +799,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你会得知在今天白天时是否有恶魔投过票。",
     "firstNight": 0,
-    "otherNight": 103,
+    "otherNight": 104,
     "edition": "snv"
   },
   {
@@ -812,7 +812,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你会得知在今天白天时是否有爪牙发起过提名。",
     "firstNight": 0,
-    "otherNight": 104,
+    "otherNight": 105,
     "edition": "snv"
   },
   {
@@ -825,7 +825,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你会得知有多少名死亡的玩家是邪恶的。",
     "firstNight": 0,
-    "otherNight": 105,
+    "otherNight": 106,
     "edition": "snv"
   },
   {
@@ -850,21 +850,21 @@
     "name": "女裁缝",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择除你以外的两名玩家：你会得知他们是否为同一阵营。",
-    "firstNight": 65,
-    "otherNight": 106,
+    "firstNight": 67,
+    "otherNight": 107,
     "edition": "snv"
   },
   {
     "id": "philosopher",
     "firstNightReminder": "每个夜晚，唤醒哲学家。他要么摇头不使用能力，要么指向角色列表上一个镇民或外来者图标。让哲学家重新入睡。如果他指向的是不在场的角色，将哲学家角色标记更换为他所选的角色标记，并放置“是哲学家”提示标记。如果他指向的是一个已在场的角色，该角色醉酒，在角色标记旁放置“醉酒”提示标记。（现在，你可以把被选择角色的相关提示标记给哲学家使用了。）如果哲学家死亡，醉酒的玩家将恢复清醒，此时需要移除“醉酒”提示标记。",
     "otherNightReminder": "每个夜晚，唤醒哲学家。他要么摇头不使用能力，要么指向角色列表上一个镇民或外来者图标。让哲学家重新入睡。如果他指向的是不在场的角色，将哲学家角色标记更换为他所选的角色标记，并放置“是哲学家”提示标记。如果他指向的是一个已在场的角色，该角色醉酒，在角色标记旁放置“醉酒”提示标记。（现在，你可以把被选择角色的相关提示标记给哲学家使用了。）如果哲学家死亡，醉酒的玩家将恢复清醒，此时需要移除“醉酒”提示标记。",
-    "reminders": ["醉酒"],
-    "remindersGlobal": ["是哲学家"],
+    "reminders": [],
+    "remindersGlobal": ["是哲学家", "醉酒"],
     "setup": false,
     "name": "哲学家",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择一个善良角色：你获得该角色的能力。如果这个角色在场，他醉酒。",
-    "firstNight": 7,
+    "firstNight": 8,
     "otherNight": 8,
     "edition": "snv"
   },
@@ -890,7 +890,7 @@
     "team": "townsfolk",
     "ability": "在你的首个白天，你可以公开猜测任意玩家的角色最多五次。在当晚，你会得知猜测正确的角色数量。",
     "firstNight": 0,
-    "otherNight": 107,
+    "otherNight": 108,
     "edition": "snv"
   },
   {
@@ -903,7 +903,7 @@
     "team": "townsfolk",
     "ability": "如果恶魔杀死了你，在当晚你会被唤醒并得知两名玩家，其中一名是杀死你的那个恶魔。",
     "firstNight": 0,
-    "otherNight": 89,
+    "otherNight": 90,
     "edition": "snv"
   },
   {
@@ -920,6 +920,7 @@
   },
   {
     "id": "sweetheart",
+    "otherNightReminder": "如果心上人死亡，你选择任一玩家醉酒，为他放置“醉酒”提示标记。心上人在死亡时不会失去该能力。",
     "reminders": ["醉酒"],
     "remindersGlobal": [],
     "setup": false,
@@ -927,7 +928,7 @@
     "team": "outsider",
     "ability": "当你死亡时，会有一名玩家开始醉酒。",
     "firstNight": 0,
-    "otherNight": 87,
+    "otherNight": 88,
     "edition": "snv"
   },
   {
@@ -940,7 +941,7 @@
     "team": "outsider",
     "ability": "如果你死亡，在当晚恶魔可以选择两名玩家（不能选择其他恶魔）交换角色。",
     "firstNight": 0,
-    "otherNight": 86,
+    "otherNight": 87,
     "edition": "snv"
   },
   {
@@ -964,7 +965,7 @@
     "name": "镜像双子",
     "team": "minion",
     "ability": "你与一名对立阵营的玩家互相知道对方是什么角色。如果其中善良玩家被处决，邪恶阵营获胜。如果你们都存活，善良阵营无法获胜。",
-    "firstNight": 38,
+    "firstNight": 42,
     "otherNight": 0,
     "edition": "snv"
   },
@@ -978,8 +979,8 @@
     "name": "女巫",
     "team": "minion",
     "ability": "每个夜晚，你要选择一名玩家：如果他明天白天发起提名，他死亡。如果只有三名存活的玩家，你失去此能力。",
-    "firstNight": 39,
-    "otherNight": 30,
+    "firstNight": 43,
+    "otherNight": 33,
     "edition": "snv"
   },
   {
@@ -992,8 +993,8 @@
     "name": "洗脑师",
     "team": "minion",
     "ability": "每个夜晚，你要选择一名玩家和一个善良角色。他明天白天和夜晚需要“疯狂”地证明自己是这个角色，不然他可能被处决。",
-    "firstNight": 40,
-    "otherNight": 31,
+    "firstNight": 44,
+    "otherNight": 34,
     "edition": "snv"
   },
   {
@@ -1019,7 +1020,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。被该能力杀死的外来者改为变成邪恶的方古且你代替他死亡，但每局游戏仅能成功转化一次。[+1外来者]",
     "firstNight": 0,
-    "otherNight": 50,
+    "otherNight": 53,
     "edition": "snv"
   },
   {
@@ -1032,7 +1033,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。被你杀死的爪牙保留他的能力，且与他邻近的两名镇民之一中毒。[-1外来者]",
     "firstNight": 0,
-    "otherNight": 55,
+    "otherNight": 58,
     "edition": "snv"
   },
   {
@@ -1045,7 +1046,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。与你邻近的两名镇民中毒。",
     "firstNight": 0,
-    "otherNight": 51,
+    "otherNight": 54,
     "edition": "snv"
   },
   {
@@ -1058,7 +1059,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。镇民玩家的能力都会产生错误信息。如果白天没人被处决，邪恶阵营获胜。",
     "firstNight": 0,
-    "otherNight": 52,
+    "otherNight": 55,
     "edition": "snv"
   },
   {
@@ -1135,7 +1136,7 @@
     "name": "失忆者",
     "team": "townsfolk",
     "ability": "你不知道你的能力是什么。每个白天你可以找说书人猜测一次，你会得知你的猜测有多准确。",
-    "firstNight": 6,
+    "firstNight": 7,
     "otherNight": 7
   },
   {
@@ -1147,7 +1148,7 @@
     "name": "小精灵",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一个在场的镇民角色。如果你“疯狂”地证明你是该角色，当他死亡时你获得该角色的能力。",
-    "firstNight": 50,
+    "firstNight": 53,
     "otherNight": 0
   },
   {
@@ -1159,7 +1160,7 @@
     "name": "事务官",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一名善良玩家。",
-    "firstNight": 66,
+    "firstNight": 68,
     "otherNight": 0
   },
   {
@@ -1171,7 +1172,7 @@
     "name": "骑士",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两名非恶魔玩家。",
-    "firstNight": 67,
+    "firstNight": 69,
     "otherNight": 0
   },
   {
@@ -1183,7 +1184,7 @@
     "name": "贵族",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知三名玩家：其中有且只有一名玩家是邪恶的。",
-    "firstNight": 68,
+    "firstNight": 70,
     "otherNight": 0
   },
   {
@@ -1195,7 +1196,7 @@
     "name": "修行者",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知距离最近的邪恶玩家位于你的顺时针还是逆时针方向。如果两侧的邪恶玩家与你距离相等，你得知的信息由说书人决定。",
-    "firstNight": 83,
+    "firstNight": 85,
     "otherNight": 0
   },
   {
@@ -1208,21 +1209,34 @@
     "name": "传教士",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择一名玩家：如果选中了爪牙，他会得知被传教士选中。所有被你选中的爪牙失去能力。",
-    "firstNight": 27,
+    "firstNight": 28,
     "otherNight": 15
   },
   {
-    "id": "balloonist",
+    "id": "balloonistold1",
     "firstNightReminder": "每个夜晚，唤醒气球驾驶员，并指向一名玩家（存活或死亡皆可），并将“得知镇民/外来者/爪牙/恶魔”提示标记放置在对应的那名玩家的角色标记旁，以确保不会让气球驾驶员重复得知同一角色类型的玩家。（一旦放置了提示标记之后，就不要将其移除。）不要对气球驾驶员展示该玩家的角色标记或告诉他该玩家的具体角色类型，只需要让他得知对应的玩家即可。",
     "otherNightReminder": "每个夜晚，唤醒气球驾驶员，并指向一名玩家（存活或死亡皆可），并将“得知镇民/外来者/爪牙/恶魔”提示标记放置在对应的那名玩家的角色标记旁，以确保不会让气球驾驶员重复得知同一角色类型的玩家。（一旦放置了提示标记之后，就不要将其移除。）不要对气球驾驶员展示该玩家的角色标记或告诉他该玩家的具体角色类型，只需要让他得知对应的玩家即可。",
     "reminders": ["得知镇民", "得知外来者", "得知爪牙", "得知恶魔", "得知旅行者"],
+    "remindersGlobal": null,
+    "setup": true,
+    "name": "气球驾驶员（旧）",
+    "team": "townsfolk",
+    "ability": "每个夜晚，你会得知一名不同角色类型的玩家，直到场上所有的角色类型你都得知过一次。[+1 外来者]",
+    "firstNight": 71,
+    "otherNight": 109
+  },
+  {
+    "id": "balloonist",
+    "firstNightReminder": "每个夜晚，唤醒气球驾驶员，并指向一名玩家（存活或死亡皆可），并将“得知”提示标记放置在对应的那名玩家的角色标记旁，以确保不会让气球驾驶员得知与上一晚同一角色类型的玩家。",
+    "otherNightReminder": "每个夜晚，唤醒气球驾驶员，并指向一名玩家（存活或死亡皆可），并将“得知”提示标记放置在对应的那名玩家的角色标记旁，以确保不会让气球驾驶员得知与上一晚同一角色类型的玩家。",
+    "reminders": ["得知"],
     "remindersGlobal": [],
     "setup": true,
     "name": "气球驾驶员",
     "team": "townsfolk",
-    "ability": "每个夜晚，你会得知一名不同角色类型的玩家，直到场上所有的角色类型你都得知过一次。[+1 外来者]",
-    "firstNight": 69,
-    "otherNight": 108
+    "ability": "每个夜晚，你会得知一名与上个夜晚得知的玩家角色类型不同的玩家。[+0~1外来者]",
+    "firstNight": 71,
+    "otherNight": 109
   },
   {
     "id": "villageidiot",
@@ -1234,8 +1248,8 @@
     "name": "村夫",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择一名玩家：你会得知他的阵营。[+0~2村夫，复数村夫中有一人醉酒]",
-    "firstNight": 75,
-    "otherNight": 113
+    "firstNight": 77,
+    "otherNight": 114
   },
   {
     "id": "bountyhunter",
@@ -1247,7 +1261,7 @@
     "name": "赏金猎人",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一名邪恶玩家。每当你得知的玩家死亡，你会在当晚得知另一名邪恶玩家。[会有一名镇民转变为邪恶阵营]",
-    "firstNight": 76,
+    "firstNight": 78,
     "otherNight": 116
   },
   {
@@ -1260,8 +1274,8 @@
     "name": "女祭司",
     "team": "townsfolk",
     "ability": "每个夜晚，你会得知一名说书人认为你最应该与其交流的玩家。",
-    "firstNight": 82,
-    "otherNight": 121
+    "firstNight": 84,
+    "otherNight": 120
   },
   {
     "id": "general",
@@ -1273,20 +1287,20 @@
     "name": "将军",
     "team": "townsfolk",
     "ability": "每个夜晚，你会得知说书人认为哪个阵营当前更有优势（善良/邪恶/均势）。",
-    "firstNight": 86,
-    "otherNight": 123
+    "firstNight": 87,
+    "otherNight": 121
   },
   {
     "id": "lycanthrope",
-    "otherNightReminder": "除首个夜晚之外的每个夜晚，唤醒半兽人。让他指向任意一名存活的玩家。让半兽人重新入睡。如果被选择的玩家是善良的，那名玩家死亡——使用半兽人的“死亡”提示标记标记那名玩家。当晚任何其他将要死亡的玩家会仍然存活。",
-    "reminders": ["死亡"],
+    "otherNightReminder": "除首个夜晚之外的每个夜晚，唤醒半兽人。让他指向任意一名存活的玩家。让半兽人重新入睡。如果被选择的玩家是善良的，那名玩家死亡——使用半兽人的“死亡”提示标记标记那名玩家。当晚，和平常一样唤醒恶魔进行选择，但是恶魔无法造成死亡。",
+    "reminders": ["死亡", "失足"],
     "remindersGlobal": [],
     "setup": false,
     "name": "半兽人",
     "team": "townsfolk",
-    "ability": "每个夜晚*，你要选择一名存活的玩家：如果他是善良的，他死亡，并且当晚不会再有其他玩家死亡。",
+    "ability": "每个夜晚*，你要选择一名存活玩家：如果他是善良的，他死亡，并且当晚恶魔不会造成死亡。会有一名善良玩家始终被当作邪恶阵营。",
     "firstNight": 0,
-    "otherNight": 42
+    "otherNight": 46
   },
   {
     "id": "nightwatchman",
@@ -1298,7 +1312,7 @@
     "name": "守夜人",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择一名玩家：他会得知你是守夜人。",
-    "firstNight": 77,
+    "firstNight": 79,
     "otherNight": 117
   },
   {
@@ -1322,7 +1336,7 @@
     "name": "异教领袖",
     "team": "townsfolk",
     "ability": "每个夜晚，你会转变为与你邻近的一名存活的玩家的阵营。每个白天，你可以提议所有玩家加入你的教派，如果所有善良玩家同意加入，你的阵营获胜。",
-    "firstNight": 78,
+    "firstNight": 80,
     "otherNight": 118
   },
   {
@@ -1333,8 +1347,8 @@
     "setup": false,
     "name": "炼金术士",
     "team": "townsfolk",
-    "ability": "你拥有一个不在场的爪牙角色的能力。",
-    "firstNight": 9,
+    "ability": "你拥有一个爪牙角色的能力。当你使用能力时，说书人可能会要求你更换选择。",
+    "firstNight": 10,
     "otherNight": 0
   },
   {
@@ -1347,7 +1361,7 @@
     "name": "工程师",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择让恶魔变成你选择的恶魔角色，或让所有爪牙变成你选择的爪牙角色。",
-    "firstNight": 26,
+    "firstNight": 27,
     "otherNight": 14
   },
   {
@@ -1360,8 +1374,8 @@
     "name": "巡山人",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时，你可以选择一名存活的玩家：如果你选中了落难少女，她会变成一个不在场的镇民角色。[+落难少女]",
-    "firstNight": 51,
-    "otherNight": 96
+    "firstNight": 54,
+    "otherNight": 97
   },
   {
     "id": "king",
@@ -1373,8 +1387,8 @@
     "name": "国王",
     "team": "townsfolk",
     "ability": "每个夜晚，如果死亡的玩家数量大于或等于存活的玩家数量，你会得知一个存活的角色。恶魔知道你是国王。",
-    "firstNight": 20,
-    "otherNight": 114
+    "firstNight": 21,
+    "otherNight": 115
   },
   {
     "id": "choirboy",
@@ -1386,7 +1400,7 @@
     "team": "townsfolk",
     "ability": "如果恶魔杀死了国王，你会得知哪名玩家是恶魔。[+国王]",
     "firstNight": 0,
-    "otherNight": 91
+    "otherNight": 92
   },
   {
     "id": "farmer",
@@ -1396,9 +1410,9 @@
     "setup": false,
     "name": "农夫",
     "team": "townsfolk",
-    "ability": "如果你在夜晚死亡，一名存活的善良玩家会变成农夫。",
+    "ability": "当你在夜晚死亡时，一名存活的善良玩家会变成农夫。",
     "firstNight": 0,
-    "otherNight": 92
+    "otherNight": 93
   },
   {
     "id": "poppygrower",
@@ -1410,7 +1424,7 @@
     "name": "罂粟种植者",
     "team": "townsfolk",
     "ability": "爪牙和恶魔互相不认识。如果你死亡，当晚他们会互相认识。",
-    "firstNight": 10,
+    "firstNight": 11,
     "otherNight": 11
   },
   {
@@ -1433,7 +1447,7 @@
     "name": "魔术师",
     "team": "townsfolk",
     "ability": "恶魔会以为你是爪牙。爪牙会以为你是恶魔。",
-    "firstNight": 12,
+    "firstNight": 13,
     "otherNight": 0
   },
   {
@@ -1457,7 +1471,7 @@
     "name": "正牙医生",
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚，你可以选择一个图标上有嘴的角色：你获得该角色的能力。",
-    "firstNight": 8,
+    "firstNight": 9,
     "otherNight": 9
   },
   {
@@ -1470,7 +1484,7 @@
     "team": "townsfolk",
     "ability": "如果恶魔杀死了你，所有玩家都会得知此事。从现在开始，你每天可以发起两次提名，每次投票时可以投两票。",
     "firstNight": 0,
-    "otherNight": 94
+    "otherNight": 95
   },
   {
     "id": "alsaahir",
@@ -1479,9 +1493,21 @@
     "setup": false,
     "name": "戏法师",
     "team": "townsfolk",
-    "ability": "每个白天限一次，你可以公开猜测谁是爪牙，谁是恶魔。如果你猜对，善良阵营获胜。",
+    "ability": "每个白天，你可以公开进行一次谁是爪牙，谁是恶魔的猜测。如果你猜对，善良阵营获胜。",
     "firstNight": 0,
     "otherNight": 0
+  },
+  {
+    "id": "acrobat",
+    "otherNightReminder": "唤醒杂技演员，让杂技演员指向一名玩家。将“被选择”提示标记放置到所选玩家的角色标记旁。让杂技演员重新入睡。 如果被选择的玩家在当晚任何时刻醉酒或中毒，杂技演员死亡。",
+    "reminders": ["被选择", "死亡"],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "杂技演员",
+    "team": "townsfolk",
+    "ability": "每个夜晚*，你要选择一名玩家：如果当晚他醉酒或中毒，你死亡。",
+    "firstNight": 0,
+    "otherNight": 27
   },
   {
     "id": "snitch",
@@ -1492,7 +1518,7 @@
     "name": "告密者",
     "team": "outsider",
     "ability": "爪牙会在其首个夜晚得知三个不在场的善良角色。",
-    "firstNight": 14,
+    "firstNight": 15,
     "otherNight": 0
   },
   {
@@ -1504,31 +1530,20 @@
     "name": "落难少女",
     "team": "outsider",
     "ability": "所有爪牙都知道落难少女在场。每局游戏限一次，任意爪牙可以公开猜测你是落难少女，如果猜对，你的阵营落败。",
-    "firstNight": 15,
+    "firstNight": 16,
     "otherNight": 0
   },
   {
-    "id": "acrobat",
-    "otherNightReminder": "每个夜晚，检查与杂技演员邻近的两名存活善良玩家。一旦其中一位醉酒或中毒，杂技演员死亡：将杂技演员的“死亡”标记放置在杂技演员角色标记旁，并在其角色标记上添加帷幕标记。在黎明时，宣布该玩家死亡，但不要说明原因。",
-    "reminders": ["死亡"],
-    "remindersGlobal": [],
-    "setup": false,
-    "name": "杂技演员",
-    "team": "outsider",
-    "ability": "每个夜晚*，如果与你邻近的存活善良玩家之一醉酒或中毒，你死亡。",
-    "firstNight": 0,
-    "otherNight": 78
-  },
-  {
     "id": "plaguedoctor",
+    "otherNightReminder": "当瘟疫医生死亡时，将一个不在场的爪牙角色标记放置在魔典左侧的正中位置，并用瘟疫医生的“说书人能力”标记标记该爪牙角色；或直接用该标记标记一个在场的爪牙角色。如可能，在夜晚顺序表旁添加相应的夜晚标记用以提示。",
     "reminders": ["说书人能力"],
     "remindersGlobal": [],
     "setup": false,
     "name": "瘟疫医生",
     "team": "outsider",
-    "ability": "如果你死亡，说书人获得一个不在场的爪牙能力。",
+    "ability": "当你死亡时，说书人会获得一个爪牙能力。",
     "firstNight": 0,
-    "otherNight": 90
+    "otherNight": 91
   },
   {
     "id": "hatter",
@@ -1552,6 +1567,18 @@
     "ability": "一名玩家醉酒，即使你已死亡。每局游戏限一次，你可以猜测谁是那个醉酒的玩家，如果猜对了，你会得知谁是恶魔，但如果猜错了，你会得知错误的“谁是恶魔”信息。",
     "firstNight": 0,
     "otherNight": 0
+  },
+  {
+    "id": "acrobatold1",
+    "otherNightReminder": "每个夜晚，检查与杂技演员邻近的两名存活善良玩家。一旦其中一位醉酒或中毒，杂技演员死亡：将杂技演员的“死亡”标记放置在杂技演员角色标记旁，并在其角色标记上添加帷幕标记。在黎明时，宣布该玩家死亡，但不要说明原因。",
+    "reminders": ["死亡"],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "杂技演员（旧）",
+    "team": "outsider",
+    "ability": "每个夜晚*，如果与你邻近的存活善良玩家之一醉酒或中毒，你死亡。",
+    "firstNight": 0,
+    "otherNight": 78
   },
   {
     "id": "golem",
@@ -1595,7 +1622,7 @@
     "name": "食人魔",
     "team": "outsider",
     "ability": "在你的首个夜晚，你要选择除你以外的一名玩家：你转变为他的阵营，即使你已醉酒或中毒，但你不知道你转变后的阵营。",
-    "firstNight": 81,
+    "firstNight": 83,
     "otherNight": 0
   },
   {
@@ -1618,7 +1645,7 @@
     "name": "寡妇",
     "team": "minion",
     "ability": "在你的首个夜晚，你能查看魔典并选择一名玩家：他中毒。随后，始终会有一名善良玩家知道寡妇在场。",
-    "firstNight": 31,
+    "firstNight": 34,
     "otherNight": 0
   },
   {
@@ -1631,8 +1658,8 @@
     "name": "灵言师",
     "team": "minion",
     "ability": "在你的首个夜晚，你会得知一个关键词。首个说出该关键词的善良玩家会在当晚转变为邪恶阵营。",
-    "firstNight": 43,
-    "otherNight": 34
+    "firstNight": 47,
+    "otherNight": 37
   },
   {
     "id": "fearmonger",
@@ -1644,8 +1671,8 @@
     "name": "恐惧之灵",
     "team": "minion",
     "ability": "每个夜晚，你要选择一名玩家：如果你提名他且他被处决，他的阵营落败。当你首次选择或更换目标时，所有玩家都会得知你选择了新的玩家。",
-    "firstNight": 41,
-    "otherNight": 32
+    "firstNight": 45,
+    "otherNight": 35
   },
   {
     "id": "harpy",
@@ -1657,8 +1684,8 @@
     "name": "鹰身女妖",
     "team": "minion",
     "ability": "每个夜晚，你要选择两名玩家：明天第一名玩家需要“疯狂”地证明第二名玩家是邪恶的，否则他们之中可能会有人死亡。",
-    "firstNight": 42,
-    "otherNight": 33
+    "firstNight": 46,
+    "otherNight": 36
   },
   {
     "id": "marionette",
@@ -1669,7 +1696,7 @@
     "name": "提线木偶",
     "team": "minion",
     "ability": "你以为你是一个善良角色，但其实你不是。恶魔会知道你是提线木偶。[提线木偶会与恶魔邻座]",
-    "firstNight": 21,
+    "firstNight": 22,
     "otherNight": 0
   },
   {
@@ -1701,20 +1728,22 @@
     "setup": false,
     "name": "炸弹人",
     "team": "minion",
-    "ability": "如果你被处决，除三名玩家以外的其他所有玩家均会死亡。一分钟之后，被最多玩家手指指着的玩家死亡。",
+    "ability": "如果你被处决，除三名玩家以外的其他所有玩家均会死亡。倒数十声后，被最多玩家手指指着的玩家死亡。",
     "firstNight": 0,
     "otherNight": 0
   },
   {
     "id": "organgrinder",
-    "reminders": ["即将被处决"],
+    "firstNightReminder": "唤醒街头风琴手点头或摇头。街头风琴手如果点头：放置“醉酒”提示标记；如果摇头：不放置“醉酒”提示标记。让街头风琴手重新入睡。",
+    "otherNightReminder": "唤醒街头风琴手点头或摇头。街头风琴手如果点头：放置“醉酒”提示标记；如果摇头：不放置“醉酒”提示标记。让街头风琴手重新入睡。",
+    "reminders": ["醉酒"],
     "remindersGlobal": [],
     "setup": false,
     "name": "街头风琴手",
     "team": "minion",
-    "ability": "所有玩家在投票时闭眼，且票数会秘密统计。对你的提名只在你投票时才会统计票数。",
-    "firstNight": 0,
-    "otherNight": 0
+    "ability": "所有玩家在投票时闭眼，且票数会秘密统计。每个夜晚，你要选择自己是否醉酒直到下个黄昏。",
+    "firstNight": 40,
+    "otherNight": 31
   },
   {
     "id": "vizier",
@@ -1725,7 +1754,7 @@
     "name": "维齐尔",
     "team": "minion",
     "ability": "所有玩家都知道你是维齐尔。你在白天时不会死亡。如果一次提名中有善良玩家投票，你可以让被提名者立即被处决。",
-    "firstNight": 90,
+    "firstNight": 93,
     "otherNight": 0
   },
   {
@@ -1738,8 +1767,44 @@
     "name": "召唤师",
     "team": "minion",
     "ability": "在首个夜晚，你会得知三个伪装。在第三个夜晚，你要选择一名玩家：他变成由你选择的邪恶恶魔。[无恶魔在场]",
-    "firstNight": 16,
-    "otherNight": 38
+    "firstNight": 17,
+    "otherNight": 41
+  },
+  {
+    "id": "boffin",
+    "firstNightReminder": "在首个夜晚，唤醒科学怪人和恶魔。对他们展示“该角色的能力对你生效”信息标记，然后是科学怪人的角色标记，再是恶魔获得能力的那个善良角色标记。在展示后将这个善良角色标记放回到恶魔的角色标记旁。",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "科学怪人",
+    "team": "minion",
+    "ability": "恶魔拥有一个不在场的善良角色的能力，即使他醉酒或中毒。你和他都知道他获得了什么能力。",
+    "firstNight": 6,
+    "otherNight": 0
+  },
+  {
+    "id": "xaan",
+    "firstNightReminder": "在和初始外来者数量等同的那个夜晚，把“大限将至”提示标记放置在魔典中央，并在下个黄昏移除。当“大限将至”提示标记被放置时，所有镇民玩家中毒。",
+    "otherNightReminder": "在和初始外来者数量等同的那个夜晚，把“大限将至”提示标记放置在魔典中央，并在下个黄昏移除。当“大限将至”提示标记被放置时，所有镇民玩家中毒。",
+    "reminders": ["第一晚", "第二晚", "第三晚", "大限将至"],
+    "remindersGlobal": [],
+    "setup": true,
+    "name": "限",
+    "team": "minion",
+    "ability": "在等同于初始外来者数量的夜晚，所有镇民玩家中毒直到下个黄昏。[外来者数量任意]",
+    "firstNight": 32,
+    "otherNight": 17
+  },
+  {
+    "id": "wizard",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "巫师",
+    "team": "minion",
+    "ability": "每局游戏限一次，你可以向说书人许愿。如果愿望被实现，可能会伴随着代价和线索。",
+    "firstNight": 0,
+    "otherNight": 0
   },
   {
     "id": "legion",
@@ -1751,7 +1816,7 @@
     "team": "demon",
     "ability": "每个夜晚*，可能有一名玩家死亡。如果一项提名只有邪恶玩家投票，投票无效。你也会被当作是爪牙。[半数以上玩家为军团]",
     "firstNight": 0,
-    "otherNight": 54
+    "otherNight": 57
   },
   {
     "id": "ojo",
@@ -1763,7 +1828,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一个角色：他死亡。如果该角色不在场，则由说书人来决定谁会被你杀死。",
     "firstNight": 0,
-    "otherNight": 56
+    "otherNight": 59
   },
   {
     "id": "alhadikhia",
@@ -1773,9 +1838,9 @@
     "setup": false,
     "name": "哈迪寂亚",
     "team": "demon",
-    "ability": "每个夜晚*，你要选择三名玩家（所有玩家都会得知你选了谁）：他们分别秘密决定自己的生死，然后如果他们都存活则都死亡。",
+    "ability": "每个夜晚*，你可以选择三名玩家（所有玩家都会得知你选了谁）：他们分别秘密决定自己的生死，然后如果他们都存活则都死亡。",
     "firstNight": 0,
-    "otherNight": 57
+    "otherNight": 60
   },
   {
     "id": "lleech",
@@ -1786,9 +1851,9 @@
     "setup": false,
     "name": "痢蛭",
     "team": "demon",
-    "ability": "每个夜晚*，你要选择一名玩家：他死亡。在你的首个夜晚，你要选择一名存活的玩家：他中毒，只有他死亡时你才会一同死亡。",
-    "firstNight": 29,
-    "otherNight": 58
+    "ability": "每个夜晚*，你要选择一名玩家：他死亡。在你的首个夜晚，你要选择一名存活的玩家：他中毒，只有当他处于死亡状态时你才会立即死亡。",
+    "firstNight": 30,
+    "otherNight": 61
   },
   {
     "id": "lilmonsta",
@@ -1800,8 +1865,8 @@
     "name": "小怪宝",
     "team": "demon",
     "ability": "每个夜晚，所有爪牙要秘密决定由哪名玩家来照看小怪宝并且“是恶魔”。每个夜晚*，可能会有一名玩家死亡。[+1爪牙]",
-    "firstNight": 28,
-    "otherNight": 59
+    "firstNight": 29,
+    "otherNight": 62
   },
   {
     "id": "kazali",
@@ -1813,17 +1878,17 @@
     "name": "卡扎力",
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。[由你决定谁是什么爪牙，-或+任意数量外来者]",
-    "firstNight": 11,
-    "otherNight": 61
+    "firstNight": 12,
+    "otherNight": 64
   },
   {
     "id": "riot",
-    "reminders": [],
+    "reminders": ["第一天", "第二天", "第三天"],
     "remindersGlobal": [],
-    "setup": true,
+    "setup": false,
     "name": "暴乱",
     "team": "demon",
-    "ability": "被提名的玩家死亡，但他可以立刻再次发起提名（第三天白天他必须这么做）。在第三个白天结束时，邪恶阵营获胜。[所有爪牙都是暴乱]",
+    "ability": "在第三个白天，所有爪牙会变成暴乱，当天被提名的玩家会立即死亡且必须再次提名一名存活的玩家。",
     "firstNight": 0,
     "otherNight": 0
   },
@@ -1837,8 +1902,8 @@
     "name": "利维坦",
     "team": "demon",
     "ability": "如果多于一名善良玩家被处决，邪恶阵营获胜。所有玩家都知道利维坦在场。在第五个白天结束时，邪恶阵营获胜。",
-    "firstNight": 89,
-    "otherNight": 126
+    "firstNight": 92,
+    "otherNight": 127
   },
   {
     "id": "yaggababble",
@@ -1849,8 +1914,8 @@
     "name": "牙噶巴卜",
     "team": "demon",
     "ability": "在你的首个夜晚，你会得知一段秘密短语。每次你在白天公开说出这段短语，当天便可能会有一名玩家在这之后死亡。",
-    "firstNight": 47,
-    "otherNight": 60
+    "firstNight": 50,
+    "otherNight": 63
   },
   {
     "id": "lordoftyphon",
@@ -1863,7 +1928,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。[邪恶玩家全部邻座，你靠近正中，+1爪牙，-或+任意数量外来者]",
     "firstNight": 5,
-    "otherNight": 53
+    "otherNight": 56
   },
   {
     "id": "gangster",
@@ -1873,6 +1938,17 @@
     "name": "黑帮",
     "team": "traveler",
     "ability": "每个白天限一次，你可以杀死与你邻近的两名存活的玩家中的一名，但需要另一边那个存活的玩家同意。",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
+    "id": "gnome",
+    "reminders": ["同伴"],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "侏儒",
+    "team": "traveler",
+    "ability": "当你加入游戏时，所有玩家会得知一名与你阵营相同的玩家。每当他被提名时，你可以杀死提名者。",
     "firstNight": 0,
     "otherNight": 0
   },
@@ -1896,7 +1972,7 @@
     "setup": false,
     "name": "变脸师",
     "team": "townsfolk",
-    "ability": "每个白天，如果你“疯狂”地证明自己是一个善良角色（与之前不同），你会在当晚获得那个角色的能力，直到下个黄昏。",
+    "ability": "每个白天，如果你“疯狂”地证明自己是一个善良角色（与之前不同），你可能会在当晚获得那个角色的能力，直到下个黄昏。",
     "firstNight": 0,
     "otherNight": 0,
     "edition": "hdcs"
@@ -1911,7 +1987,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要猜测今晚首个死亡的玩家与你的距离。如果你猜测正确，则除你以外的所有玩家今晚不会死亡，但你可能会死亡。",
     "firstNight": 0,
-    "otherNight": 25,
+    "otherNight": 23,
     "edition": "hdcs"
   },
   {
@@ -1923,7 +1999,7 @@
     "name": "店小二",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两名善良玩家。他们之中会有一人醉酒，即使你已死亡。",
-    "firstNight": 72,
+    "firstNight": 74,
     "otherNight": 0,
     "edition": "hdcs"
   },
@@ -1937,7 +2013,7 @@
     "team": "townsfolk",
     "ability": "每局游戏限一次，在白天时，你可以提议所有玩家观看你的演出，并从同意参加的玩家中选择你的观众。如果恶魔成为了观众，你会在当晚死亡。",
     "firstNight": 0,
-    "otherNight": 80,
+    "otherNight": 81,
     "edition": "hdcs"
   },
   {
@@ -1962,21 +2038,21 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择一名玩家：如果他在下个黄昏前死亡，你代替他死亡。",
     "firstNight": 0,
-    "otherNight": 26,
+    "otherNight": 24,
     "edition": "hdcs"
   },
   {
     "id": "langzhong",
-    "firstNightReminder": "每个夜晚，唤醒郎中。让他指向任意一名玩家。将该玩家的能力相关的一个词语以纸条或电子设备等形式告知给郎中。然后让郎中重新入睡。",
-    "otherNightReminder": "每个夜晚，唤醒郎中。让他指向任意一名玩家。将该玩家的能力相关的一个词语以纸条或电子设备等形式告知给郎中。然后让郎中重新入睡。",
+    "firstNightReminder": "每个夜晚，唤醒郎中。让他指向任意一名除自己以外的玩家。将该玩家的能力相关的一个词语以纸条或电子设备等形式告知给郎中。然后让郎中重新入睡。",
+    "otherNightReminder": "每个夜晚，唤醒郎中。让他指向任意一名除自己以外的玩家。将该玩家的能力相关的一个词语以纸条或电子设备等形式告知给郎中。然后让郎中重新入睡。",
     "reminders": [],
     "remindersGlobal": [],
     "setup": false,
     "name": "郎中",
     "team": "townsfolk",
-    "ability": "每个夜晚，你要选择一名玩家：你会得知一个与他能力相关的词语。",
-    "firstNight": 71,
-    "otherNight": 109,
+    "ability": "每个夜晚，你要选择除你以外的一名玩家：你会得知一个与他能力相关的词语。",
+    "firstNight": 73,
+    "otherNight": 110,
     "edition": "hdcs"
   },
   {
@@ -1988,7 +2064,7 @@
     "name": "钦天监",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知离你最近的邪恶玩家位于你的哪一侧（左/右/相同）。如果与你邻近的玩家中有邪恶阵营，你会得知错误信息作为替代。",
-    "firstNight": 84,
+    "firstNight": 86,
     "otherNight": 0,
     "edition": "hdcs"
   },
@@ -2012,7 +2088,7 @@
     "name": "戏子",
     "team": "townsfolk",
     "ability": "所有戏子互相认识。不论在场的戏子数量多少或存活与否，胜负结果会被对调。[所有善良玩家都是戏子]",
-    "firstNight": 23,
+    "firstNight": 24,
     "otherNight": 0,
     "edition": "hdcs"
   },
@@ -2026,8 +2102,8 @@
     "name": "熊孩子",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择一个镇民角色：他的能力会产生错误信息，直到下个黄昏。",
-    "firstNight": 49,
-    "otherNight": 27,
+    "firstNight": 52,
+    "otherNight": 30,
     "edition": "hdcs"
   },
   {
@@ -2039,7 +2115,7 @@
     "name": "阴阳师",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知两个善良角色和两个邪恶角色，其中有且只有两个角色在场。",
-    "firstNight": 70,
+    "firstNight": 72,
     "otherNight": 0,
     "edition": "hdcs"
   },
@@ -2051,13 +2127,14 @@
     "setup": false,
     "name": "逆臣",
     "team": "outsider",
-    "ability": "在你的首个夜晚，你要选择除你以外的一名玩家：如果他先死于处决，你转变为邪恶；如果你先死于处决，他转变为邪恶。",
-    "firstNight": 61,
-    "otherNight": 36,
+    "ability": "在你的首个夜晚，你要选择除你以外的一名玩家：如果他先死于处决，你会在当晚转变为邪恶；如果你先死于处决，他会在当晚转变为邪恶。",
+    "firstNight": 63,
+    "otherNight": 39,
     "edition": "hdcs"
   },
   {
     "id": "shaxing",
+    "otherNightReminder": "如果煞星死亡，决定是否触发煞星的能力。如果煞星的能力被触发，则在当晚，额外选择一名玩家，并用“死亡”提示标记标记这名玩家。",
     "reminders": ["死亡"],
     "remindersGlobal": [],
     "setup": false,
@@ -2065,7 +2142,7 @@
     "team": "outsider",
     "ability": "如果你死亡，当晚与你邻近的存活玩家之一可能会死亡。",
     "firstNight": 0,
-    "otherNight": 84,
+    "otherNight": 85,
     "edition": "hdcs"
   },
   {
@@ -2089,9 +2166,9 @@
     "setup": false,
     "name": "书生",
     "team": "outsider",
-    "ability": "恶魔知道你在场。每局游戏限一次，恶魔可以拜访说书人并猜测谁是书生。如果恶魔猜测正确，即使你已死亡，当晚该恶魔可以选择一名玩家：他死亡。",
-    "firstNight": 22,
-    "otherNight": 71,
+    "ability": "恶魔知道书生在场。每局游戏限一次，恶魔可以拜访说书人并猜测你是书生。如果恶魔猜测正确，即使你已死亡，当晚该恶魔可以选择一名玩家：他死亡。",
+    "firstNight": 23,
+    "otherNight": 74,
     "edition": "hdcs"
   },
   {
@@ -2116,8 +2193,8 @@
     "name": "狐媚娘",
     "team": "minion",
     "ability": "在你的首个夜晚，你要选择一名玩家：他会知道狐媚娘在场。如果你死于处决，当晚他转变为邪恶阵营。",
-    "firstNight": 44,
-    "otherNight": 35,
+    "firstNight": 48,
+    "otherNight": 38,
     "edition": "hdcs"
   },
   {
@@ -2134,6 +2211,7 @@
   },
   {
     "id": "yangguren",
+    "otherNightReminder": "如果养蛊人能够成功杀死被标记了“蛊”的玩家，则在那名玩家的角色标记上放置帷幕标记。否则，移除“蛊”。",
     "reminders": ["蛊"],
     "remindersGlobal": [],
     "setup": false,
@@ -2141,7 +2219,7 @@
     "team": "minion",
     "ability": "在你存活时提名你的玩家会在当晚死亡，即使你已死亡。",
     "firstNight": 0,
-    "otherNight": 74,
+    "otherNight": 77,
     "edition": "hdcs"
   },
   {
@@ -2152,9 +2230,9 @@
     "setup": false,
     "name": "混沌",
     "team": "demon",
-    "ability": "每个夜晚*，你要选择一名玩家：他死亡。如果你以这种方式杀死了一名与你邻近的镇民玩家，所有善良玩家会中毒直到下个黄昏。",
+    "ability": "每个夜晚*，你要选择一名玩家：他死亡。如果你以这种方式杀死了一名与你邻近的镇民玩家，除旅行者外的所有善良玩家会中毒直到下个黄昏。",
     "firstNight": 0,
-    "otherNight": 62,
+    "otherNight": 65,
     "edition": "hdcs"
   },
   {
@@ -2167,7 +2245,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。如果今天白天有外来者死亡，当晚改为你要选择一名玩家：他死亡，但被当作仍然存活，随后会有一名其他玩家死亡。[+1外来者]",
     "firstNight": 0,
-    "otherNight": 63,
+    "otherNight": 66,
     "edition": "hdcs"
   },
   {
@@ -2180,7 +2258,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择任意数量的非旅行者玩家或一名旅行者玩家：如果他们的角色类型均不相同，他们死亡。[+1外来者]",
     "firstNight": 0,
-    "otherNight": 64,
+    "otherNight": 67,
     "edition": "hdcs"
   },
   {
@@ -2193,8 +2271,8 @@
     "name": "梼杌",
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。当你将要死亡时，改为一名存活且具有能力的爪牙失去能力。你不会得知恶魔信息。",
-    "firstNight": 18,
-    "otherNight": 65,
+    "firstNight": 19,
+    "otherNight": 68,
     "edition": "hdcs"
   },
   {
@@ -2219,7 +2297,7 @@
     "team": "townsfolk",
     "ability": "如果你在白天死亡，当晚你会得知一名善良玩家。如果你在夜晚死亡，当晚你会得知一名邪恶玩家。",
     "firstNight": 0,
-    "otherNight": 93,
+    "otherNight": 94,
     "edition": "syyl"
   },
   {
@@ -2243,7 +2321,7 @@
     "name": "刀客",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一个在场的爪牙角色。每局游戏限一次，你可以在白天公开选择一名玩家：如果他是你得知的角色，他死亡。",
-    "firstNight": 73,
+    "firstNight": 75,
     "otherNight": 0,
     "edition": "syyl"
   },
@@ -2257,7 +2335,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择一名玩家：如果你选中了恶魔，你死亡，然后他醉酒直到下个黎明。",
     "firstNight": 0,
-    "otherNight": 43,
+    "otherNight": 45,
     "edition": "syyl"
   },
   {
@@ -2270,8 +2348,8 @@
     "name": "方士",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你要选择一个数字。在该数字对应的那一个夜晚，你会得知对应数量的在场角色。",
-    "firstNight": 52,
-    "otherNight": 119,
+    "firstNight": 88,
+    "otherNight": 122,
     "edition": "syyl"
   },
   {
@@ -2284,8 +2362,8 @@
     "name": "风水师",
     "team": "townsfolk",
     "ability": "在你的首个夜晚，你会得知一名玩家的角色类型。每个夜晚*，你会从他的顺时针方向得知下一名非旅行者玩家的角色类型。",
-    "firstNight": 74,
-    "otherNight": 112,
+    "firstNight": 76,
+    "otherNight": 113,
     "edition": "syyl"
   },
   {
@@ -2298,7 +2376,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择一名除你及旅行者以外的玩家：如果恶魔在今晚杀死了他，你和他交换角色，然后你醉酒。",
     "firstNight": 0,
-    "otherNight": 28,
+    "otherNight": 25,
     "edition": "syyl"
   },
   {
@@ -2311,7 +2389,7 @@
     "name": "掮客",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择两名存活玩家：如果他们阵营相同，今晚任何玩家使用自身能力选择他们之一作为目标时，改为选中另一名玩家。",
-    "firstNight": 25,
+    "firstNight": 26,
     "otherNight": 13,
     "edition": "syyl"
   },
@@ -2337,7 +2415,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，如果今天白天有玩家死于处决，你会得知存活镇民的数量。",
     "firstNight": 0,
-    "otherNight": 115,
+    "otherNight": 123,
     "edition": "syyl"
   },
   {
@@ -2350,7 +2428,7 @@
     "team": "townsfolk",
     "ability": "在你首次提名玩家后，你会在当晚得知他的角色。外来者会被你的能力当作爪牙或恶魔角色。",
     "firstNight": 0,
-    "otherNight": 101,
+    "otherNight": 102,
     "edition": "syyl"
   },
   {
@@ -2363,7 +2441,7 @@
     "team": "townsfolk",
     "ability": "每个夜晚*，你要选择除你以外的两个善良角色：如果他们都存活，他们当晚不会死亡。",
     "firstNight": 0,
-    "otherNight": 44,
+    "otherNight": 47,
     "edition": "syyl"
   },
   {
@@ -2388,7 +2466,7 @@
     "team": "townsfolk",
     "ability": "每个白天，你可以公开声明一个角色。在当晚，你会得知该角色是否在场。如果你因此得知了否，你失去此能力。",
     "firstNight": 0,
-    "otherNight": 110,
+    "otherNight": 111,
     "edition": "syyl"
   },
   {
@@ -2401,8 +2479,8 @@
     "name": "引路人",
     "team": "townsfolk",
     "ability": "每个夜晚，你要选择至多三名玩家：你会得知今晚是否有邪恶玩家的能力选择或影响了他们之中的玩家。",
-    "firstNight": 85,
-    "otherNight": 122,
+    "firstNight": 90,
+    "otherNight": 125,
     "edition": "syyl"
   },
   {
@@ -2427,20 +2505,20 @@
     "team": "townsfolk",
     "ability": "每局游戏限一次，在夜晚时*，你可以选择一个镇民角色：如果他在场，他醉酒并死亡。",
     "firstNight": 0,
-    "otherNight": 77,
+    "otherNight": 79,
     "edition": "syyl"
   },
   {
     "id": "zhifu",
-    "otherNightReminder": "如果在白天以及夜晚，只有镇民玩家死亡，对司民摇头表示“否”，否则点头表示“是”。",
-    "reminders": ["死于今日"],
+    "otherNightReminder": "如果当天有非镇民且非旅行者的玩家死亡，对知府点头表示“是”。否则，摇头表示“否”。让知府重新入睡。",
+    "reminders": ["客死他乡"],
     "remindersGlobal": [],
     "setup": false,
     "name": "知府",
     "team": "townsfolk",
     "ability": "每个夜晚*，你会得知今天是否有非镇民且非旅行者的玩家死亡。",
     "firstNight": 0,
-    "otherNight": 111,
+    "otherNight": 112,
     "edition": "syyl"
   },
   {
@@ -2465,7 +2543,7 @@
     "team": "outsider",
     "ability": "如果你提名了恶魔且他死于这次处决，你会变成邪恶的恶魔。当剩余存活玩家小于等于四人时（旅行者除外），你失去能力。",
     "firstNight": 0,
-    "otherNight": 39,
+    "otherNight": 42,
     "edition": "syyl"
   },
   {
@@ -2478,8 +2556,8 @@
     "name": "书童",
     "team": "outsider",
     "ability": "在你的首个夜晚，你要选择除你以外的一名玩家：除首个夜晚以外，当他被邪恶玩家的能力选择或影响时，你会在当晚死亡。",
-    "firstNight": 53,
-    "otherNight": 79,
+    "firstNight": 55,
+    "otherNight": 80,
     "edition": "syyl"
   },
   {
@@ -2492,8 +2570,8 @@
     "name": "蛊雕",
     "team": "minion",
     "ability": "每个夜晚，你要选择左或右：你得知该方向上的下一名存活善良玩家的角色，他中毒且其他善良玩家以为他是邪恶的蛊雕，直到下个黄昏。",
-    "firstNight": 32,
-    "otherNight": 18,
+    "firstNight": 35,
+    "otherNight": 19,
     "edition": "syyl"
   },
   {
@@ -2506,8 +2584,8 @@
     "name": "画皮",
     "team": "minion",
     "ability": "在你的首个夜晚，你要选择一名存活玩家：他死亡但会被当作存活。当他下一次死亡时，他重生，随后你重获能力。",
-    "firstNight": 45,
-    "otherNight": 75,
+    "firstNight": 31,
+    "otherNight": 0,
     "edition": "syyl"
   },
   {
@@ -2520,7 +2598,7 @@
     "team": "minion",
     "ability": "每个夜晚*，你要选择一名玩家：如果他存活，那么他要选择让自己失去能力，或死亡并保留能力直到下个黄昏。",
     "firstNight": 0,
-    "otherNight": 76,
+    "otherNight": 78,
     "edition": "syyl"
   },
   {
@@ -2533,8 +2611,8 @@
     "name": "酿酒师",
     "team": "minion",
     "ability": "每个夜晚，你要选择一个镇民角色：当他下一次通过自身能力获取信息时，改为得知你给出的信息。",
-    "firstNight": 33,
-    "otherNight": 19,
+    "firstNight": 36,
+    "otherNight": 20,
     "edition": "syyl"
   },
   {
@@ -2547,7 +2625,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你可以选择至多两名玩家：他们死亡。你选择的玩家数量不能与上个夜晚死亡的玩家数量相同（超过二人时算作二人）。",
     "firstNight": 0,
-    "otherNight": 69,
+    "otherNight": 72,
     "edition": "syyl"
   },
   {
@@ -2560,8 +2638,8 @@
     "name": "典狱长",
     "team": "demon",
     "ability": "每个夜晚，你要选择至多三名玩家：如果明天白天他们之一死于处决，上次被你选择的其他玩家会在当晚死亡。否则，当晚他们之中会有一名玩家死亡。",
-    "firstNight": 48,
-    "otherNight": 66,
+    "firstNight": 51,
+    "otherNight": 69,
     "edition": "syyl"
   },
   {
@@ -2574,7 +2652,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。你可能会拥有上一个死于处决的爪牙的能力。",
     "firstNight": 0,
-    "otherNight": 70,
+    "otherNight": 73,
     "edition": "syyl"
   },
   {
@@ -2587,7 +2665,7 @@
     "team": "demon",
     "ability": "每个夜晚*，你要选择一名玩家：他死亡。如果你今天白天没有投票，今晚你可以行动两次。",
     "firstNight": 0,
-    "otherNight": 67,
+    "otherNight": 70,
     "edition": "syyl"
   },
   {
@@ -2600,8 +2678,8 @@
     "name": "阎罗",
     "team": "demon",
     "ability": "在你的首个夜晚，你能查看魔典并选择一名玩家：他在第三个夜晚死亡，即使因为任何原因让他不会死亡。每个夜晚，你要选择一名玩家：上个夜晚被你选择的玩家死亡。",
-    "firstNight": 80,
-    "otherNight": 68,
+    "firstNight": 82,
+    "otherNight": 71,
     "edition": "syyl"
   },
   {

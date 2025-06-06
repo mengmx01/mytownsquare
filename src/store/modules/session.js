@@ -16,13 +16,15 @@ const handleVote = (state, [index, vote]) => {
 
 const state = () => ({
   sessionId: "",
+  firstHostCheck: true,
+  firstJoinCheck: true,
   isSpectator: false,
   isReconnecting: false,
   playerCount: 0,
   ping: 0,
   playerId: "",
   playerName:"",
-  playerProfileImage: null,
+  playerAvatar: "default.webp",
   claimedSeat: -1,
   nomination: false,
   votes: [],
@@ -37,13 +39,16 @@ const state = () => ({
   isRolesDistributed: false,
   isBluffsDistributed: false,
   isGrimoireDistributed: false,
+  isUseOldOrder: false,
+  isChatOpen: false,
+  messageQueue: [],
   chatHistory: [],
   newStMessage: [0],
   bootlegger: "",
   timer: 480,
   interval: null,
   isTalking: false,
-  isListening: false
+  listeningFrame: null
 });
 
 const getters = {};
@@ -56,20 +61,27 @@ const set = key => (state, val) => {
 };
 
 const mutations = {
+  setFirstHostCheck: set("firstHostCheck"),
+  setFirstJoinCheck: set("firstJoinCheck"),
   setPlayerId: set("playerId"),
+  setStId: set("stId"),
   setSpectator: set("isSpectator"),
   setReconnecting: set("isReconnecting"),
   setPlayerCount: set("playerCount"),
   setPing: set("ping"),
   setVotingSpeed: set("votingSpeed"),
   setVoteInProgress: set("isVoteInProgress"),
-  setMarkedPlayer: set("markedPlayer"),
+  setMarkedPlayer(state, {val, force}) {
+    if (!force && state.isSecretVote && val >= 0) return;
+    state.markedPlayer = val;
+  },
   setNomination: set("nomination"),
   setVoteHistoryAllowed: set("isVoteHistoryAllowed"),
-  setTalking: set("isTalking"),
-  setListening: set("isListening"),
+  setListeningFrame: set("listeningFrame"),
+  setChatOpen: set("isChatOpen"),
   setSecretVote: set("isSecretVote"),
   setBootlegger: set("bootlegger"),
+  setUseOldOrder: set("isUseOldOrder"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
   distributeBluffs(state, {val}){
@@ -89,13 +101,19 @@ const mutations = {
   },
   nomination(
     state,
-    { nomination, votes, votingSpeed, lockedVote, isVoteInProgress } = {}
+    { nomination, votes, votingSpeed, lockedVote, isVoteInProgress, nominatedPlayer = null } = {}
   ) {
     state.nomination = nomination || false;
+    if (!!nomination && !!nominatedPlayer && state.isSecretVote && nominatedPlayer.role.team != 'traveler') {
+      for(let i=0; i<votes.length; i++) {
+        if (i != state.claimedSeat) {votes[i] = false}
+      }
+    }
     state.votes = votes || [];
     state.votingSpeed = votingSpeed || state.votingSpeed;
     state.lockedVote = lockedVote || 0;
     state.isVoteInProgress = isVoteInProgress || false;
+    
   },
   /**
    * Create an entry in the vote history log. Requires current player array because it might change later in the game.
@@ -111,36 +129,44 @@ const mutations = {
     votedPlayers.forEach(player => {
       player.seat = players.indexOf(player) + 1;
     });
-    state.voteHistory.push({
+    this.commit("session/addVotes", {
       timestamp: new Date(),
-      nominator: (state.nomination[0] + 1).toString() + ". " + players[state.nomination[0]].name,
-      nominee: (state.nomination[1] + 1).toString() + ". " + players[state.nomination[1]].name,
+      nominator: (state.nomination[0] + 1).toString() + ". " + (players[state.nomination[0]].id ? players[state.nomination[0]].name : ""),
+      nominee: (state.nomination[1] + 1).toString() + ". " + (players[state.nomination[1]].id ? players[state.nomination[1]].name : ""),
       type: isExile ? "流放" : "处决",
       mode: state.isSecretVote ? "闭眼" : "睁眼",
       majority: Math.ceil(
         players.filter(player => !player.isDead || isExile).length / 2
       ),
       votes: votedPlayers
-        // .filter((player, index) => state.votes[index])
-        .map(({ seat, name }) => (seat + ". " + name))
+        .map(({ seat, name }) => (seat + ". " + name)),
+      save: true
+    })
+  },
+  addVotes(state, {timestamp, nominator, nominee, type, mode, majority, votes, save}) {
+    // 重写时间
+    const newTime = save ? timestamp : new Date(timestamp);
+    state.voteHistory.push({
+      timestamp: newTime,
+      nominator,
+      nominee,
+      type,
+      mode,
+      majority,
+      votes
     });
   },
-  addVoteSelected(state) {
-    state.voteSelected.push(false);
+  addVoteSelected(state, {selected}) {
+    state.voteSelected.push(selected);
   },
   setVoteSelected(state, {index, value}) {
     Vue.set(state.voteSelected, index, value);
   },
   clearVoteHistory(state, voteIndex = null) {
-    if (voteIndex == null) {
+    if (voteIndex == null || voteIndex.length === 0) {
       state.voteHistory = [];
       state.voteSelected = [];
       return;
-    }
-    const length = voteIndex.length;
-    if (length === 0) {
-      state.voteHistory = [];
-      state.voteSelected = [];
     }
     else {
       state.voteHistory = state.voteHistory.filter((_, index) => !voteIndex.includes(index));
@@ -163,15 +189,22 @@ const mutations = {
     if (chatIndex(state, playerId) >= 0) return; // do nothing if it already exists
     Vue.set(state.chatHistory, state.chatHistory.length, {id: playerId, chat: []});
   },
-  updateChatSent(state, {message, playerId}){
-    if (state.isSpectator && playerId != state.playerId) return;
-    state.chatHistory[chatIndex(state, playerId)]["chat"].push(message);
+  updateChatSent(state, chatContent){
+    if (state.isSpectator && chatContent.sendingPlayerId != state.playerId) return;
+    this.commit("session/addMessageQueue", {type: "direct", playerId:chatContent.receivingPlayerId, command: "chat", params:chatContent, id: new Date().getTime()})
   },
   updateChatReceived(state, {message, playerId}){
-    if (state.isSpectator && playerId != state.playerId) return;
+    if (state.isSpectator && playerId != state.stId) return;
     const playerIndex = chatIndex(state, playerId);
     const oldMessages = state.chatHistory[playerIndex]["chat"];
     Vue.set(state.chatHistory, playerIndex, {id: playerId, chat: [...oldMessages, message]})
+  },
+  addMessageQueue(state, {type, playerId, command, params, id}) {
+    state.messageQueue.push({type, playerId, command, params, id});
+  },
+  deleteMessageQueue(state, index) {
+    if (state.messageQueue.length  === 0) return;
+    state.messageQueue.splice(index, 1);
   },
   setStMessage(state, num) {
     if (num > 0){
@@ -182,11 +215,11 @@ const mutations = {
       Vue.set(state.newStMessage, 0, newNum);
     }
   },
-  setPlayerProfileImage(state){
-    state.playerProfileImage = "";
+  setPlayerAvatar(state){
+    state.playerAvatar = "";
   },
-  updatePlayerProfileImage(state, link){
-    state.playerProfileImage = link;
+  updatePlayerAvatar(state, link){
+    state.playerAvatar = link;
   },
   startTimer(state, time){
     if (time) state.timer = time;
@@ -199,13 +232,11 @@ const mutations = {
   stopTimer(state){
     clearInterval(state.interval);
   },
-  startTalking(state, seatNum){
-    if (seatNum < 0) return;
-    this.commit("players/setIsTalking", {seatNum, isTalking: true});
-  },
-  stopTalking(state, seatNum){
-    if (seatNum < 0) return;
-    this.commit("players/setIsTalking", {seatNum, isTalking: false});
+  setTalking(state, {seatNum, isTalking}){
+    if (seatNum < 0 || seatNum >= this.state.players.players.length ) return;
+    if (!this.state.players.players[seatNum].id || this.state.players.players[seatNum].id != state.playerId) return;
+    state.isTalking = isTalking;
+    this.commit("players/setIsTalking", {seatNum, isTalking});
   }
 };
 

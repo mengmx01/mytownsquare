@@ -210,6 +210,7 @@ export default {
       if (metaIndex > -1) {
         meta = roles.splice(metaIndex, 1).pop();
       }
+      //状态
       const states = [];
       if (meta.state){
         meta.state.forEach(state => {
@@ -221,6 +222,14 @@ export default {
         })
       }
       this.$store.commit("setStates", states);
+      // 角色类型名字
+      const names = {
+        townsfolk: meta.townsfolksName ? meta.townsfolksName : "镇民",
+        outsider: meta.outsidersName ? meta.outsidersName : "外来者",
+        minion: meta.minionsName ? meta.minionsName : "爪牙",
+        demon: meta.demonsName ? meta.demonsName : "恶魔"
+      }
+      this.$store.commit("setTeamsNames", names);
     },
     setHomeEdition(edition) {
       if (["tb", "bmr", "snv", "luf"].includes(edition.id)) this.$store.commit("setStates", []);
