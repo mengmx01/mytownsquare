@@ -1400,7 +1400,11 @@ class LiveSession {
    * @param payload
    */
   _handleChat({message, sendingPlayerId, receivingPlayerId}, feedback){
-    if (feedback) this._request("deleteMessage", this._store.state.session.playerId, ["direct", feedback]);
+    if (feedback) {
+      this._request("deleteMessage", this._store.state.session.playerId, ["direct", feedback]);
+      if (this._store.state.session.messageUniqueQueue[feedback]) return;
+      this._store.commit("session/checkUniqueMessage", feedback);
+    }
     if (this._isSpectator && receivingPlayerId != this._store.state.session.playerId) return;
     this._store.commit("session/updateChatReceived", {message, playerId: sendingPlayerId});
     const num = 1;

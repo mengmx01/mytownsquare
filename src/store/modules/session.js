@@ -42,6 +42,7 @@ const state = () => ({
   isUseOldOrder: false,
   isChatOpen: false,
   messageQueue: [],
+  messageUniqueQueue: [],
   chatHistory: [],
   newStMessage: [0],
   bootlegger: "",
@@ -205,6 +206,12 @@ const mutations = {
   deleteMessageQueue(state, index) {
     if (state.messageQueue.length  === 0) return;
     state.messageQueue.splice(index, 1);
+  },
+  checkUniqueMessage(state, feedback) {
+    if (state.messageUniqueQueue[feedback]) clearTimeout(state.messageUniqueQueue[feedback].timer);
+    state.messageUniqueQueue[feedback] = setTimeout(() => {
+      delete state.messageUniqueQueue[feedback];
+    }, 1000 * 60)
   },
   setStMessage(state, num) {
     if (num > 0){
