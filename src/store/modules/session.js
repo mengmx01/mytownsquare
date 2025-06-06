@@ -113,8 +113,7 @@ const mutations = {
     state.votingSpeed = votingSpeed || state.votingSpeed;
     state.lockedVote = lockedVote || 0;
     state.isVoteInProgress = isVoteInProgress || false;
-
-    state.messageQueue.push({type: "", playerId: state.playerId, command: "nomination", params: nomination, id: new Date().getTime()});
+    
   },
   /**
    * Create an entry in the vote history log. Requires current player array because it might change later in the game.

@@ -1,9 +1,9 @@
 class LiveSession {
   constructor(store) {
     // this._wss = "ws://43.139.3.156:8080/";
-    this._wss = "wss://botcgrimoire.site:443/ws/";
+    this._wss = "wss://botcgrimoire.top:443/ws/";
     // this._wss = "wss://botcgrimoire.uk:8443/";
-    // this._wss = "wss://botcgrimoire.site:8443/";
+    // this._wss = "wss://botcgrimoire.top:8443/";
     // this._wss = "wss://live.clocktower.online:8080/";
     // this._wss = "ws://localhost:8081/"; // uncomment if using local server with NODE_ENV=development
     // this._wss = "ws://192.168.10.3:8081/";

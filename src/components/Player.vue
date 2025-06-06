@@ -24,7 +24,7 @@
         <!-- <img :src="`https://botcgrimoire.uk/avatars/${player.image}`" 
           :class="{ on: player.role.id }"
         > -->
-        <img :src="`https://botcgrimoire.site/avatars/${player.image}`" 
+        <img :src="`https://botcgrimoire.top/avatars/${player.image}`" 
           :class="{ on: player.role.id }"
         >
         <!-- <img :src="`http://localhost:3000/avatars/${player.image}`" 
