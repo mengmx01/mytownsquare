@@ -649,7 +649,6 @@ export default {
     },
     toggleUseOldOrder() {
       this.$store.commit("session/setUseOldOrder", !this.session.isUseOldOrder);
-      console.log(this.session);
     },
     setTimer() {
       if (this.session.isSpectator || !this.session.sessionId) return;
