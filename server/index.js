@@ -325,6 +325,7 @@ wss.on("connection", function connection(ws, req) {
               clearInterval(sendIntervals[ws.channel][type]);
               sendIntervals[ws.channel][type] = null;
             }
+            break;
         }
         break;
       }

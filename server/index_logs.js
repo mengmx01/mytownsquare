@@ -321,6 +321,7 @@ wss.on("connection", function connection(ws, req) {
                 ws.send(JSON.stringify(["existingChannel", false]));
               }
             }
+            break;
           case "deleteMessage":
             const type = params[0];
             if (!messageQueues[ws.channel][type]) return;
@@ -336,6 +337,7 @@ wss.on("connection", function connection(ws, req) {
               clearInterval(sendIntervals[ws.channel][type]);
               sendIntervals[ws.channel][type] = null;
             }
+            break;
         }
         break;
       }
