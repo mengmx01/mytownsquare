@@ -82,8 +82,9 @@ export default {
           });
         }
         if (fabled && !this.session.isSpectator) {
+          const fabledNoSt = fabled.filter(role => role.id != "storyteller");
           this.$store.commit("players/setFabled", {
-            fabled: fabled.map(
+            fabled: fabledNoSt.map(
               f =>
                 this.$store.state.fabled.get(f) ||
                 this.$store.state.fabled.get(f.id) ||
@@ -139,8 +140,9 @@ export default {
           });
         }
         if (fabled) {
+          const fabledNoSt = fabled.filter(role => role.id != "storyteller");
           this.$store.commit("players/setFabled", {
-            fabled: fabled.map(
+            fabled: fabledNoSt.map(
               f =>
                 this.$store.state.fabled.get(f) ||
                 this.$store.state.fabled.get(f.id) ||

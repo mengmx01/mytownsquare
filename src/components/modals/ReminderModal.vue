@@ -8,8 +8,8 @@
       <li
         v-for="reminder in availableReminders"
         class="reminder"
-        :class="[reminder.role]"
-        :key="reminder.role + ' ' + reminder.name"
+        :class="[reminder.role.replace(/old1$/, '')]"
+        :key="reminder.role.replace(/old1$/, '') + ' ' + reminder.name"
         @click="addReminder(reminder)"
       >
         <span
