@@ -57,7 +57,7 @@ let connection = null;
 class LiveSession {
   constructor() {
     // this._wss = "wss://botcgrimoire.top:443/ws/lobby";
-    this._wss = "ws://localhost:8081/lobby"; // uncomment if using local server with NODE_ENV=development
+    this._wss = "wss://localhost:8081/lobby"; // uncomment if using local server with NODE_ENV=development
     this._socket = null;
     this._isAlive = true;
     this._pingInterval = 3 * 1000; // 30 seconds between pings
