@@ -407,7 +407,11 @@ export default {
     },
     hostSession() {
       if (this.session.sessionId) return;
-      var sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
+      if (this.session.rooms === null) {
+        alert("网络连接不稳定，请稍等！");
+        return;
+      }
+      let sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
       if (!sessionId) return;
       while (!Number(sessionId) || Number(sessionId) >= 10000) {
         alert("请输入大于0小于10000的数字！");
@@ -415,6 +419,10 @@ export default {
         if (!sessionId) return;
       }
       sessionId = Number(sessionId).toString();
+      if (this.session.rooms.includes(sessionId)) {
+        alert(`房间"${sessionId}"已经存在说书人！`)
+        return;
+      }
       // const sessionId = Math.round(Math.random() * 10000).toString();
       var numPlayers = prompt(
         ("正在创建房间" + sessionId + "，请输入玩家人数"), 12
@@ -547,6 +555,10 @@ export default {
     },
     joinSession() {
       if (this.session.sessionId) return this.leaveSession();
+      if (this.session.rooms === null) {
+        alert("网络连接不稳定，请稍等！");
+        return;
+      }
       let sessionId = prompt(
         "输入房间号/链接"
       );
@@ -555,6 +567,10 @@ export default {
       if (!this.session.playerName) return;
       if (sessionId.match(/^https?:\/\//i)) {
         sessionId = sessionId.split("#").pop();
+      }
+      if (!this.session.rooms.includes(sessionId)) {
+        alert(`房间"${sessionId}"不存在！`)
+        return;
       }
       if (sessionId) {
         this.$store.commit("session/clearVoteHistory");
@@ -577,8 +593,8 @@ export default {
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");
-        this.$store.commit("session/setFirstHostCheck", true);
-        this.$store.commit("session/setFirstJoinCheck", true);
+        this.$store.commit("session/setIsHostAllowed", null);
+        this.$store.commit("session/setIsJoinAllowed", null);
         
         // clear seats and return to intro
         if (this.session.nomination) {

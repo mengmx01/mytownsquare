@@ -184,9 +184,6 @@ class LiveSession {
    */
   _onOpen() {
     if (this._isSpectator) {
-      if (this._store.state.session.firstJoinCheck) {
-        this.requestExistChannel();
-      }
       this._sendDirect(
         "host",
         "getGamestate",
@@ -197,14 +194,16 @@ class LiveSession {
         "getStId",
         this._store.state.session.playerId
       )
+      this.checkAllowJoin();
       if (this._store.state.session.claimedSeat >= 0 && !this._store.state.session.isListening && !this._store.state.session.isTalking) {
         this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
       }
     } else {
-      if (this._store.state.session.firstHostCheck) {
-        this.requestDuplicateHost();
+      if (this._store.state.session.isHostAllowed === true) {
+        this.sendGamestate();
+      } else {
+        this.checkAllowHost();
       }
-      this.sendGamestate();
     }
     this._ping();
   }
@@ -248,11 +247,11 @@ class LiveSession {
       case "alertPopup":
         alert(params);
         break;
-      case "duplicatedHost":
-        this._handleDuplicateHost(params);
+      case "allowHost":
+        this._handleAllowHost(params);
         break;
-      case "existingChannel":
-        this._handleExistChannel(params);
+      case "allowJoin":
+        this._handleAllowJoin(params);
         break;
       case "getGamestate":
         this.sendGamestate(params);
@@ -441,47 +440,86 @@ class LiveSession {
   }
 
   /**
-   * Send request to server to check if there are more than one host.
+   * Send request to server to check if hosting channel is allowed (no existing hosts).
    */
-  requestDuplicateHost() {
-    if (!this._store.state.session.firstHostCheck) return;
-    this._request("checkDuplicateHost", this._store.state.session.playerId);
+  checkAllowHost() {
+    if (this._store.state.session.isHostAllowed === true) return;
+    this._request("checkAllowHost", this._store.state.session.playerId);
+    const waiting = setTimeout(() => {
+      if (this._store.state.session.isHostAllowed === null) {
+        alert("连接失败，请重新进入房间！")
+        this._store.commit("session/setSessionId", "");
+        this._store.commit("session/setSpectator", false);
+      }
+      clearInterval(refreshing);
+    }, 1000);
+    const refreshing = setInterval(() => {
+      if (this._store.state.session.isHostAllowed === true) {
+        clearTimeout(waiting);
+        this.sendGamestate();
+        clearInterval(refreshing);
+      } else if (this._store.state.session.isHostAllowed === false) {
+        clearTimeout(waiting);
+        alert(`房间"${this._store.state.session.sessionId}"已经存在说书人！`)
+        this._store.commit("session/setSessionId", "");
+        this._store.commit("session/setSpectator", false);
+        clearInterval(refreshing);
+      }
+    }, 100);
   }
   
   /**
-   * @param duplicate indicator to if there is a duplicated host
+   * @param allow indicator to if hosting the channel is allowed
    */
-  _handleDuplicateHost(duplicate) {
-    if (!this._store.state.session.firstHostCheck) return;
-    if (duplicate) {
-      alert(`房间"${this._store.state.session.sessionId}"已经存在说书人！`)
-      this._store.commit("session/setSessionId", "");
-      this._store.commit("players/clear");
-    } else {
-      this._store.commit("session/setFirstHostCheck", false);
-    }
+  _handleAllowHost(allow) {
+    if (this._store.state.session.isHostAllowed === true) return;
+    this._store.commit("session/setIsHostAllowed", allow);
   }
 
   /**
-   * Send request to server to check if the channel exists (has a host).
+   * Send request to server to check if joining the channel is allowed (has a host).
    */
-  requestExistChannel() {
-    if (!this._store.state.session.firstJoinCheck) return;
-    this._request("checkExistChannel", this._store.state.session.playerId);
+  checkAllowJoin() {
+    if (this._store.state.session.isJoinAllowed === true) return;
+    this._request("checkAllowJoin", this._store.state.session.playerId);
+    const waiting = setTimeout(() => {
+      if (this._store.state.session.isJoinAllowed === null) {
+        alert("连接失败，请重新进入房间！")
+        this._store.commit("session/setSessionId", "");
+        this._store.commit("session/setSpectator", false);
+      }
+      clearInterval(refreshing);
+    }, 1000);
+    const refreshing = setInterval(() => {
+      if (this._store.state.session.isJoinAllowed === true) {
+        clearTimeout(waiting);
+        this._sendDirect(
+          "host",
+          "getGamestate",
+          this._store.state.session.playerId
+        );
+        this._sendDirect(
+          "host",
+          "getStId",
+          this._store.state.session.playerId
+        );
+        clearInterval(refreshing);
+      } else if (this._store.state.session.isJoinAllowed === false) {
+        clearTimeout(waiting);
+        alert(`房间"${this._store.state.session.sessionId}"不存在！`);
+        this._store.commit("session/setSessionId", "");
+        this._store.commit("session/setSpectator", false);
+        clearInterval(refreshing);
+      }
+    }, 100);
   }
 
   /**
-   * @param existing indicator to if there is the appointed session has a host.
+   * @param allow indicator to if joining the session is allowed
    */
-  _handleExistChannel(existing) {
-    if (!this._store.state.session.firstJoinCheck) return;
-    if (!existing) {
-      alert(`房间"${this._store.state.session.sessionId}"不存在！`);
-      this._store.commit("session/setSessionId", "");
-      this._store.commit("session/setSpectator", false);
-    } else {
-      this._store.commit("session/setFirstJoinCheck", false);
-    }
+  _handleAllowJoin(allow) {
+    if (this._store.state.session.isJoinAllowed === true) return;
+    this._store.commit("session/setIsJoinAllowed", allow);
   }
 
   /**
@@ -1465,18 +1503,190 @@ class LiveSession {
   }
 }
 
+class LiveLobby {
+  constructor(store) {
+    this._wss = "wss://botcgrimoire.top:443/lobby/";
+    // this._wss = "ws://localhost:8082/"; // uncomment if using local server with NODE_ENV=development
+    this._socket = null;
+    this._isSpectator = true;
+    this._isAlive = true;
+    this._store = store;
+    this._pingInterval = 3 * 1000; // 30 seconds between pings
+    this._pingTimer = null;
+    this._reconnectTimer = null;
+    this._pings = {}; // map of player IDs to ping
+  }
+
+  /**
+   * Open a new session for lobby.
+   * @private
+   */
+  _open() {
+    this.disconnect();
+    this._socket = new WebSocket(
+      this._wss + 
+      this._store.state.session.playerId
+    );
+    this._socket.addEventListener("message", this._handleMessage.bind(this));
+    this._socket.onopen = this._onOpen.bind(this);
+    this._socket.onclose = err => {
+      this._socket = null;
+      clearTimeout(this._pingTimer);
+      this._pingTimer = null;
+      if (err.code !== 1000) {
+        // connection interrupted, reconnect after 3 seconds
+        this._store.commit("session/setReconnecting", true);
+        this._reconnectTimer = setTimeout(
+          () => this.connect(),
+          3 * 1000
+        );
+      } else {
+        this._store.commit("session/setSessionId", "");
+        if (err.reason) alert(err.reason);
+      }
+    };
+  }
+
+  /**
+   * Send a message through the socket.
+   * @param command
+   * @param params
+   * @private
+   */
+  _send(command, params, feedback = false) {
+    if (this._socket && this._socket.readyState === 1) {
+      this._socket.send(JSON.stringify([command, params, feedback]));
+    }
+  }
+
+  /**
+   * Send a message directly to a single playerId, if provided.
+   * Otherwise broadcast it.
+   * @param playerId player ID or "host", optional
+   * @param command
+   * @param params
+   * @private
+   */
+  _sendDirect(playerId, command, params, feedback = false) {
+    if (playerId) {
+      this._send("direct", { [playerId]: [command, params]}, feedback);
+    } else {
+      this._send(command, params, feedback);
+    }
+  }
+
+  _onOpen() {
+    console.log('Welcome!');
+  }
+
+  _handleMessage({ data }) {
+    let command, params;
+    try {
+      [command, params] = JSON.parse(data);
+    } catch (err) {
+      console.log("unsupported socket message", data);
+    }
+    switch (command) {
+      case "setRooms":
+        this.setRooms(params);
+        break;
+      case "addRoom":
+        this.addRoom(params);
+        break;
+      case "removeRoom":
+        this.removeRoom(params);
+        break;
+    }
+  }
+
+  /**
+   * Connect to a new live session to the lobby to receive information about available rooms.
+   * Set a unique playerId if there isn't one yet.
+   */
+  connect() {
+    if (!this._store.state.session.playerId) {
+      let playerId;
+      // 禁止host、_host、lobby、player和default作为playerId
+      while (!playerId || playerId === "host" || playerId === "_host" || playerId === "player" || playerId === "default") {
+        playerId = Math.random().toString(36).substr(2);
+      }
+      this._store.commit(
+        "session/setPlayerId",
+        playerId
+      );
+    }
+    this._pings = {};
+    this._store.commit("session/setPlayerCount", 0);
+    this._store.commit("session/setPing", 0);
+    this._isSpectator = this._store.state.session.isSpectator;
+    if (this._store.state.session.claimedSeat >= 0) {
+      this._store.commit("session/setTalking", {seatNum: this._store.state.session.claimedSeat, isTalking: false});
+    }
+    this._open();
+  }
+
+  /**
+   * Close the current session, if any.
+   */
+  disconnect() {
+    this._pings = {};
+    this._store.commit("session/setPlayerCount", 0);
+    this._store.commit("session/setPing", 0);
+    this._store.commit("session/setReconnecting", false);
+    clearTimeout(this._reconnectTimer);
+    if (this._socket) {
+      if (this._isSpectator) {
+        this._sendDirect("host", "bye", this._store.state.session.playerId);
+      }
+      this._socket.close(1000);
+      this._socket = null;
+    }
+  }
+
+  /**
+   * Set the full list of available rooms
+   * @param params full list of all existing channels
+   * @private
+   */
+  setRooms(params) {
+    if (!Array.isArray(params)) return;
+    this._store.state.session.rooms = params;
+  }
+
+  /**
+   * Add rooms to the existing list
+   * @param params full list of all existing channels
+   * @private
+   */
+  addRoom(params) {
+    if (typeof params != "string") return;
+    if (this._store.state.session.rooms.includes(params)) return;
+    this._store.state.session.rooms.push(params);
+  }
+
+  /**
+   * Remove rooms from the existing list
+   * @param params full list of all existing channels
+   * @private
+   */
+  removeRoom(params) {
+    if (typeof params != "string") return;
+    this._store.state.session.rooms = this._store.state.session.rooms.filter(room => room != params);
+  }
+}
+
 export default store => {
+
+  // lobby
+  const lobby = new LiveLobby(store);
+  lobby.connect();
+
   // setup
   const session = new LiveSession(store);
 
   // listen to mutations
   store.subscribe(({ type, payload }, state) => {
     switch (type) {
-      case"requestDuplicateHost":
-        if (!state.session.sessionId) {
-          session.requestDuplicateHost()
-        }
-        break;
       case "session/setSessionId":
         if (state.session.sessionId) {
           session.connect(state.session.sessionId);

@@ -72,11 +72,11 @@ module.exports = store => {
     );
   }
   /**** Session related data *****/
-  if (localStorage.getItem("firstHostCheck")) {
-    store.commit("session/setFirstHostCheck", JSON.parse(localStorage.getItem("firstHostCheck")));
+  if (localStorage.getItem("isJoinAllowed")) {
+    store.commit("session/setIsJoinAllowed", JSON.parse(localStorage.getItem("isJoinAllowed")));
   }
-  if (localStorage.getItem("firstJoinCheck")) {
-    store.commit("session/setFirstJoinCheck", JSON.parse(localStorage.getItem("firstJoinCheck")));
+  if (localStorage.getItem("isHostAllowed")) {
+    store.commit("session/setIsHostAllowed", JSON.parse(localStorage.getItem("isHostAllowed")));
   }
   if (localStorage.getItem("playerId")) {
     store.commit("session/setPlayerId", localStorage.getItem("playerId"));
@@ -230,11 +230,19 @@ module.exports = store => {
           localStorage.removeItem("session");
         }
         break;
-      case "session/setFirstHostCheck":
-        localStorage.setItem("firstHostCheck", JSON.stringify(payload));
+      case "session/setIsHostAllowed":
+        if (payload === null) {
+          localStorage.removeItem("isHostAllowed");
+        } else {
+          localStorage.setItem("isHostAllowed", JSON.stringify(payload));
+        }
         break;
-      case "session/setFirstJoinCheck":
-        localStorage.setItem("firstJoinCheck", JSON.stringify(payload));
+      case "session/setIsJoinAllowed":
+        if (payload === null) {
+          localStorage.removeItem("isHostAllowed");
+        } else {
+          localStorage.setItem("isHostAllowed", JSON.stringify(payload));
+        }
         break;
       case "session/setPlayerId":
         if (payload) {

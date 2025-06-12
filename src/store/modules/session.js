@@ -16,8 +16,10 @@ const handleVote = (state, [index, vote]) => {
 
 const state = () => ({
   sessionId: "",
-  firstHostCheck: true,
-  firstJoinCheck: true,
+  StId: null,
+  rooms: null,
+  isHostAllowed: null,
+  isJoinAllowed: null,
   isSpectator: false,
   isReconnecting: false,
   playerCount: 0,
@@ -62,8 +64,8 @@ const set = key => (state, val) => {
 };
 
 const mutations = {
-  setFirstHostCheck: set("firstHostCheck"),
-  setFirstJoinCheck: set("firstJoinCheck"),
+  setIsJoinAllowed: set("isJoinAllowed"),
+  setIsHostAllowed: set("isHostAllowed"),
   setPlayerId: set("playerId"),
   setStId: set("stId"),
   setSpectator: set("isSpectator"),

@@ -53,6 +53,8 @@ function heartbeat() {
 // map of channels currently in use
 const channels = {};
 
+const lobby = [];
+
 // messages to be sent to clients which need confirmation for successfully sent to client
 const messageQueues = {}; // currently only stores direct messages
 const sendIntervals = {};
@@ -151,77 +153,93 @@ wss.on("connection", function connection(ws, req) {
   console.log(new Date(), "new connection established! ==========================");
   console.log("requesting from IP " + (req.headers['x-forwarded-for'] || req.connection.remoteAddress));
   console.log("requesting from origin " + req.headers.origin);
-  // url pattern: clocktower.online/<channel>/<playerId|host>
+  // url pattern: botcgrimoire.top/ws/<channel>/<playerId>(/<host>)
+  // or: botcgrimoire.top/ws/lobby
   const url = req.url.toLocaleLowerCase().split("/");
   ws.playerId = url.pop();
-  if (ws.playerId === "host") {
-    ws.playerId = url.pop();
-    ws.playerRole = "host";
+
+  if (ws.playerId === "lobby") {
+    if (lobby.length > 0) {
+      ws.send(JSON.stringify("connectionFailed", ("lobby已被占用！")));
+      return ws.terminate();
+    } else {
+      ws.send(JSON.stringify(["setRooms", Object.keys(channels)]));
+      ws.playerRole = "lobby";
+      lobby.push(ws);
+    }
   } else {
-    ws.playerRole = "player";
-  }
-  
-  ws.channel = url.pop();
-  console.log("requesting for channel " + ws.channel + " from player " + ws.playerId);
-  ws.playerIp = req.connection.remoteAddress.split(", ")[0];
-  // check for another host on this channel
-  if (
-    ws.playerRole === "host" &&
-    channels[ws.channel] &&
-    channels[ws.channel].some(
-      client =>
-        client !== ws &&
-        client.readyState === WebSocket.OPEN &&
-        (client.playerRole === "host" || client.playerRole === "_host")
-    )
-  ) {
-    const playerId = [];
-    const playerIdHost = [];
-    channels[ws.channel].forEach(client => {
-      if (
-        client !== ws &&
-        client.readyState === WebSocket.OPEN &&
-        (client.playerRole === "host" || client.playerRole === "_host")
-      ) {
-        playerId.push(client.playerId);
-        if (client.playerRole === "host") {
-          playerIdHost.push(client.playerId);
-        }
-      }
-    });
+    // handle if not lobby
+    if (ws.playerId === "host") {
+      ws.playerId = url.pop();
+      ws.playerRole = "host";
+    } else {
+      ws.playerRole = "player";
+    }
     
-    // if (!playerId.includes(ws.playerId)) {
-    //   console.log(ws.channel, "duplicate host");
-    //   ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
-    //   metrics.connection_terminated_host.inc();
+    ws.channel = url.pop();
+    console.log("requesting for channel " + ws.channel + " from player " + ws.playerId);
+    ws.playerIp = req.connection.remoteAddress.split(", ")[0];
+    // check for another host on this channel
+    if (
+      ws.playerRole === "host" &&
+      channels[ws.channel] &&
+      channels[ws.channel].some(
+        client =>
+          client !== ws &&
+          client.readyState === WebSocket.OPEN &&
+          (client.playerRole === "host" || client.playerRole === "_host")
+      )
+    ) {
+      const playerId = [];
+      const playerIdHost = [];
+      channels[ws.channel].forEach(client => {
+        if (
+          client !== ws &&
+          client.readyState === WebSocket.OPEN &&
+          (client.playerRole === "host" || client.playerRole === "_host")
+        ) {
+          playerId.push(client.playerId);
+          if (client.playerRole === "host") {
+            playerIdHost.push(client.playerId);
+          }
+        }
+      });
+      
+      // if (!playerId.includes(ws.playerId)) {
+      //   console.log(ws.channel, "duplicate host");
+      //   ws.close(1000, `房间"${ws.channel}"已经存在说书人！`);
+      //   metrics.connection_terminated_host.inc();
+      //   return;
+      // } else if (playerIdHost.includes(ws.playerId)) {
+      if (playerIdHost.includes(ws.playerId)) {
+        console.log(ws.channel, "duplicate entry");
+        ws.send(JSON.stringify(["alertPopup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
+      }
+    }
+    // if (ws.playerRole != "host" && !channels[ws.channel]) {
+    //   ws.close(1000, `房间"${ws.channel}"不存在！`)
     //   return;
-    // } else if (playerIdHost.includes(ws.playerId)) {
-    if (playerIdHost.includes(ws.playerId)) {
-      console.log(ws.channel, "duplicate entry");
-      ws.send(JSON.stringify(["alertPopup", "检测到多个说书人网页，请检查并关闭多余的页面！"]));
+    // }
+    // add channel to list
+    // also create message lists for the channel
+    if (ws.channel != "" && !channels[ws.channel]) {
+      channels[ws.channel] = [];
+      if (lobby.length > 0) lobby[0].send(JSON.stringify(["addRoom", ws.channel]));
+
+      messageQueues[ws.channel] = {direct: []}; // currently only stores direct messages
+      sendIntervals[ws.channel] = {direct: null};
+      messageUniques[ws.channel] = [];
+    }
+    channels[ws.channel].push(ws);
+    // 说书人重连后删除 _host 标签
+    if (ws.playerRole === 'host') {
+      channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
     }
   }
-  // if (ws.playerRole != "host" && !channels[ws.channel]) {
-  //   ws.close(1000, `房间"${ws.channel}"不存在！`)
-  //   return;
-  // }
+  
   ws.isAlive = true;
   ws.pingStart = new Date().getTime();
   ws.counter = 0;
-  // add channel to list
-  // also create message lists for the channel
-  if (!channels[ws.channel]) {
-    channels[ws.channel] = [];
-
-    messageQueues[ws.channel] = {direct: []}; // currently only stores direct messages
-    sendIntervals[ws.channel] = {direct: null};
-    messageUniques[ws.channel] = [];
-  }
-  channels[ws.channel].push(ws);
-  // 说书人重连后删除 _host 标签
-  if (ws.playerRole === 'host') {
-    channels[ws.channel] = channels[ws.channel].filter(session => session.playerRole != "_host");
-  }
   console.log("connected client player ID ---------------------------")
   if (channels[ws.channel]) {
     channels[ws.channel].forEach(client => {
@@ -235,7 +253,7 @@ wss.on("connection", function connection(ws, req) {
   ws.on("pong", heartbeat);
   // handle message
   ws.on("message", function incoming(data) {
-    if (Object.keys(messageUniques[ws.channel]).includes(data)) {
+    if (ws.playerRole != "lobby" && Object.keys(messageUniques[ws.channel]).includes(data)) {
       clearTimeout(messageUniques[ws.channel][data].timeout);
       messageUniques[ws.channel][data].timeout = setTimeout(() => {
         if (!messageUniques[ws.channel]) return;
@@ -289,36 +307,35 @@ wss.on("connection", function connection(ws, req) {
         const feedback = JSON.parse(data).pop();
         if (feedback) {
           ws.send(JSON.stringify(["feedback", feedback]));
-          if (!messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
+          if (ws.playerRole != "lobby" && !messageUniques[ws.channel].includes(data)) messageUniques[ws.channel].push(data);
         }
 
         const command = Object.keys(JSON.parse(data)[1])[0];
         const [playerId, params] = JSON.parse(data)[1][command];
         switch (command) {
-          case "checkDuplicateHost":
+          case "checkAllowHost":
             for (let i=0; i<channels[ws.channel].length; i++) {
               if (
-                channels[ws.channel][i].readyState === WebSocket.OPEN &&
                 (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host") &&
                 playerId != channels[ws.channel][i].playerId
               ) {
-                ws.send(JSON.stringify(["duplicatedHost", true]));
+                ws.send(JSON.stringify(["allowHost", false]));
                 break;
               } else if (i + 1 === channels[ws.channel].length) {
-                ws.send(JSON.stringify(["duplicatedHost", false]));
+                ws.send(JSON.stringify(["allowHost", true]));
               }
             }
             break;
-          case "checkExistChannel":
+          case "checkAllowJoin":
             for (let i=0; i<channels[ws.channel].length; i++) {
               if (
                 // channels[ws.channel][i].readyState === WebSocket.OPEN &&
                 (channels[ws.channel][i].playerRole === "host" || channels[ws.channel][i].playerRole === "_host")
               ) {
-                ws.send(JSON.stringify(["existingChannel", true]));
+                ws.send(JSON.stringify(["allowJoin", true]));
                 break;
               } else if (i + 1 === channels[ws.channel].length) {
-                ws.send(JSON.stringify(["existingChannel", false]));
+                ws.send(JSON.stringify(["allowJoin", false]));
               }
             }
             break;
@@ -476,6 +493,7 @@ wss.on("connection", function connection(ws, req) {
   ws.on("close", (code, reason) => {
     // 删除房间中断线的连接，以更好处理重复的说书人
     let close = false;
+    let isLobby = false;
     if (code === 1000) {
       // 如果正常退出（解散）房间，正常删除记录
       console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
@@ -495,36 +513,43 @@ wss.on("connection", function connection(ws, req) {
           wsHost.playerRole = "_host";
           channels[ws.channel].push(wsHost);
         }
+      } else if (ws.playerRole === "lobby") {
+        isLobby = true;
       }
       close = true;
     }
+    if (isLobby) {
+      lobby.splice(0, 1);
+    } else {
+      if (close) { // 断连的同时移除连接（1000 1001 1006）
+        // 每次断连只删除一个
+        const firstConnection = channels[ws.channel].filter(client => client.playerId === ws.playerId && client.playerRole != "_host")[0];
+        const index = channels[ws.channel].indexOf(firstConnection);
+        channels[ws.channel].splice(index, 1);
+        // channels[ws.channel] = channels[ws.channel].filter(client => {
+        //   if (client.playerId === ws.playerId && !removed) {
+        //     removed = true;
+        //     return false;
+        //   }
+        //   return true;
+        // });
+      }
 
-    if (close) { // 断连的同时移除连接（1000 1001 1006）
-      // 每次断连只删除一个
-      const firstConnection = channels[ws.channel].filter(client => client.playerId === ws.playerId && client.playerRole != "_host")[0];
-      const index = channels[ws.channel].indexOf(firstConnection);
-      channels[ws.channel].splice(index, 1);
-      // channels[ws.channel] = channels[ws.channel].filter(client => {
-      //   if (client.playerId === ws.playerId && !removed) {
-      //     removed = true;
-      //     return false;
-      //   }
-      //   return true;
-      // });
+      if (Object.keys(channels[ws.channel]).length == 0) {
+        delete channels[ws.channel];
+        if (lobby.length > 0) lobby[0].send(JSON.stringify(["removeRoom", ws.channel]))
+        Object.keys(sendIntervals[ws.channel]).forEach(type => {
+          stopSendQueue(ws.channel, type);
+        })
+        delete sendIntervals[ws.channels];
+        delete messageQueues[ws.channel];
+        Object.keys(messageUniques[ws.channel]).forEach(data => {
+          clearTimeout(messageUniques[ws.channel][data].timeout);
+        })
+        delete messageUniques[ws.channel];
+      }
     }
-
-    if (Object.keys(channels[ws.channel]).length == 0) {
-      delete channels[ws.channel];
-      Object.keys(sendIntervals[ws.channel]).forEach(type => {
-        stopSendQueue(ws.channel, type);
-      })
-      delete sendIntervals[ws.channels];
-      delete messageQueues[ws.channel];
-      Object.keys(messageUniques[ws.channel]).forEach(data => {
-        clearTimeout(messageUniques[ws.channel][data].timeout);
-      })
-      delete messageUniques[ws.channel];
-    }
+    
   })
 });
 
