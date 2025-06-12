@@ -262,6 +262,12 @@ class LiveSession {
       case "edition":
         this._updateEdition(params);
         break;
+      case "states":
+        this._updateStates(params);
+        break;
+      case "teamsNames":
+        this._updateTeamsNames(params);
+        break;
       case "fabled":
         this._updateFabled(params);
         break;
@@ -710,6 +716,49 @@ class LiveSession {
         this._store.commit("toggleModal", "edition");
       }
     }
+  }
+
+  /**
+   * Publish a states update. ST only
+   * @param playerId
+   */
+  sendStates(playerId = "") {
+    if (this._isSpectator) return;
+    const { states } = this._store.state;
+    this._sendDirect(playerId, "states", states);
+  }
+
+
+  /**
+   * Update states for custom editions.
+   * @param states
+   * @private
+   */
+  _updateStates(states) {
+    if (!this._isSpectator) return;
+    this._store.commit("setStates", states);
+  }
+
+
+  /**
+   * Publish a teams alias update. ST only
+   * @param playerId
+   */
+  sendTeamsNames(playerId = "") {
+    if (this._isSpectator) return;
+    const { teamsNames } = this._store.state;
+    this._sendDirect(playerId, "teamsNames", teamsNames);
+  }
+
+
+  /**
+   * Update teamsNames for custom editions.
+   * @param teamsNames
+   * @private
+   */
+  _updateTeamsNames(teamsNames) {
+    if (!this._isSpectator) return;
+    this._store.commit("setTeamsNames", teamsNames);
   }
 
   /**
@@ -1740,6 +1789,12 @@ export default store => {
         break;
       case "setEdition":
         session.sendEdition();
+        break;
+      case "setStates":
+        session.sendStates();
+        break;
+      case "setTeamsNames":
+        session.sendTeamsNames();
         break;
       case "players/setFabled":
         session.sendFabled();

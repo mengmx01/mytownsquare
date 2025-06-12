@@ -154,6 +154,11 @@ export default {
         rolesGrouped[role.team].push(role);
       });
       delete rolesGrouped["traveler"];
+      delete rolesGrouped["jinxed"];
+      delete rolesGrouped["jinxes"];
+      delete rolesGrouped["jinx"];
+      delete rolesGrouped["hatred"];
+      delete rolesGrouped["hate"];
       return rolesGrouped;
     },
     // states: function() {

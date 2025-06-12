@@ -34,6 +34,12 @@ module.exports = store => {
     store.commit("setCustomRoles", JSON.parse(localStorage.roles));
     store.commit("setEdition", { id: "custom" });
   }
+  if (localStorage.getItem("states")) {
+    store.commit("setStates", JSON.parse(localStorage.states));
+  }
+  if (localStorage.getItem("teamsNames")) {
+    store.commit("setTeamsNames", JSON.parse(localStorage.teamsNames))
+  }
   if (localStorage.edition !== undefined) {
     // this will initialize state.roles for official editions
     store.commit("setEdition", JSON.parse(localStorage.edition));
@@ -184,6 +190,12 @@ module.exports = store => {
         } else {
           localStorage.setItem("roles", JSON.stringify(payload));
         }
+        break;
+      case "setStates":
+        localStorage.setItem("states", JSON.stringify(payload));
+        break;
+      case "setTeamsNames":
+        localStorage.setItem("teamsNames", JSON.stringify(payload));
         break;
       case "players/setBluff":
       case "players/updateBluff":
