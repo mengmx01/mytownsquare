@@ -161,7 +161,8 @@ wss.on("connection", function connection(ws, req) {
   if (ws.playerId === "lobby") {
     if (lobby.length > 0) {
       ws.send(JSON.stringify("connectionFailed", ("lobby已被占用！")));
-      return ws.terminate();
+      ws.close(1000);
+      return;
     } else {
       ws.send(JSON.stringify(["setRooms", Object.keys(channels)]));
       ws.playerRole = "lobby";
@@ -498,6 +499,11 @@ wss.on("connection", function connection(ws, req) {
       // 如果正常退出（解散）房间，正常删除记录
       console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: 正常" + (ws.playerRole === "host" ? "解散" : "退出") + reason); 
       close = true;
+      if (ws.playerRole === "host") {
+        channels[ws.channel].forEach(client => {
+          client.close(1000, `房间${ws.channel}已解散！`)
+        })
+      }
     } else if (code === 1001 || code === 1006) {
       // 如果说书人因为刷新、关闭或者网络波动断连，加入角色为_host的伪连接以保证房间不被移除
       console.log("client " + ws.playerId + "(" + ws.playerRole + ") is disconnecting from channel " + ws.channel + " ! Code: " + code + " Reason: " + (code === 1001 ? "刷新或关闭" : "网络波动")); 
