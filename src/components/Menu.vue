@@ -411,11 +411,19 @@ export default {
         alert("网络连接不稳定，请稍等！");
         return;
       }
-      let sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
+      let sessionPlaceholder = Math.round(Math.random() * 10000);
+      while (this.session.rooms.includes(sessionPlaceholder)) {
+        sessionPlaceholder = Math.round(Math.random() * 10000);
+      }
+      let sessionId = prompt("请输入房间号", sessionPlaceholder);
       if (!sessionId) return;
       while (!Number(sessionId) || Number(sessionId) >= 10000) {
         alert("请输入大于0小于10000的数字！");
-        sessionId = prompt("请输入房间号", Math.round(Math.random() * 10000));
+        let sessionPlaceholder = Math.round(Math.random() * 10000);
+        while (this.session.rooms.includes(sessionPlaceholder)) {
+          sessionPlaceholder = Math.round(Math.random() * 10000);
+        }
+        sessionId = prompt("请输入房间号", sessionPlaceholder);
         if (!sessionId) return;
       }
       sessionId = Number(sessionId).toString();
