@@ -123,7 +123,7 @@ export default {
       ]
     };
   },
-  computed: mapState(["modals"]),
+  computed: mapState(["modals", "selectedEditions"]),
   methods: {
     closeEdition(){
       this.toggleModal('edition');
@@ -233,7 +233,7 @@ export default {
     },
     setHomeEdition(edition) {
       if (["tb", "bmr", "snv", "luf"].includes(edition.id)) this.$store.commit("setStates", []);
-      this.setEdition(edition);
+      this.setEdition(edition, this.selectedEditions);
     },
     ...mapMutations(["toggleModal", "setEdition"])
   }

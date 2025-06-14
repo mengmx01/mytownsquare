@@ -30,6 +30,9 @@ module.exports = store => {
   if (localStorage.getItem("useOldOrder")) {
     store.commit("session/setUseOldOrder", JSON.parse(localStorage.getItem("useOldOrder")));
   }
+  if (localStorage.getItem("selectedEditions")) {
+    store.commit("setSelectedEditions", JSON.parse(localStorage.getItem("selectedEditions")));
+  }
   if (localStorage.roles !== undefined) {
     store.commit("setCustomRoles", JSON.parse(localStorage.roles));
     store.commit("setEdition", { id: "custom" });
@@ -177,6 +180,9 @@ module.exports = store => {
         } else {
           localStorage.removeItem("zoom");
         }
+        break;
+      case "setSelectedEditions":
+        localStorage.setItem("selectedEditions", JSON.stringify(payload));
         break;
       case "setEdition":
         localStorage.setItem("edition", JSON.stringify(payload));

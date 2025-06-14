@@ -128,6 +128,14 @@ export default new Vuex.Store({
       voteHistory: false
     },
     edition: editionJSONbyId.get("tb"),
+    selectedEditions: {
+      tb: true,
+      bmr: true,
+      snv: true,
+      exp: true,
+      hdcs: true,
+      syyl: true
+    },
     roles: getRolesByEdition(),
     otherTravelers: getTravelersNotInEdition(),
     fabled,
@@ -267,6 +275,9 @@ export default new Vuex.Store({
           .map(role => [role.id, role])
       );
     },
+    setSelectedEditions(state, selectedEditions){
+      state.selectedEditions = {...selectedEditions};
+    },
     setStates(state, states){
       state.states = states;
     },
@@ -277,6 +288,14 @@ export default new Vuex.Store({
       if (editionJSONbyId.has(edition.id)) {
         state.edition = editionJSONbyId.get(edition.id);
         state.roles = getRolesByEdition(state.edition);
+        if (state.edition.id === 'all') { //只加载勾选了的剧本
+          state.roles = new Map(
+            Array.from(state.roles.entries()).filter((role) => {
+              const value = role[1]; //value of the role
+              return state.selectedEditions[value.edition];
+            })
+          )
+        }
         // 为官方剧本增加原顺序选项
         if (state.session.isUseOldOrder) {
           if (edition.id === 'bmr') {

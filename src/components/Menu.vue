@@ -242,6 +242,12 @@
               选择剧本
               <em>[E]</em>
             </li>
+            <li v-if="!session.isSpectator" @click="selectEditionsAsk()">
+              <small>
+                选择全角色合集范围
+              </small>
+              <em>[B]</em>
+            </li>
             <li
               @click="toggleModal('roles')"
               v-if="!session.isSpectator && players.length > 4"
@@ -310,7 +316,7 @@
     <div v-if="distributing" class="dialog">
       <span>
         <label>是否同时给恶魔（疯子）发送伪装身份？</label>
-        <input type="checkbox" v-model="isSendingBluff" class="bluffCheckbox"/>
+        <input type="checkbox" v-model="isSendingBluff" class="checkbox"/>
       </span>
       <div>
         <button @click="distributeRoles(true)">确定</button>
@@ -338,6 +344,46 @@
         <button @click="distributeGrimoire('')">取消</button>
       </div>
     </div>
+    <div v-if="selectingEditions" class="dialog">
+      <span>
+        <b>请选择全角色合集的剧本范围（目前只对说书人生效，请公开通知玩家）</b>
+      </span>
+      <br>
+      <span>
+        <label>暗流涌动</label>
+        <input type="checkbox" v-model="pendingEditions.tb" class="checkbox"/>
+      </span>
+      &emsp;
+      <span>
+        <label>暗月初生</label>
+        <input type="checkbox" v-model="pendingEditions.bmr" class="checkbox"/>
+      </span>
+      &emsp;
+      <span>
+        <label>梦殒春宵</label>
+        <input type="checkbox" v-model="pendingEditions.snv" class="checkbox"/>
+      </span>
+      &emsp;
+      <span>
+        <label>实验性角色</label>
+        <input type="checkbox" v-model="pendingEditions.exp" class="checkbox"/>
+      </span>
+      &emsp;
+      <span>
+        <label>华灯初上</label>
+        <input type="checkbox" v-model="pendingEditions.hdcs" class="checkbox"/>
+      </span>
+      &emsp;
+      <span>
+        <label>山雨欲来</label>
+        <input type="checkbox" v-model="pendingEditions.syyl" class="checkbox"/>
+      </span>
+      &emsp;
+      <div>
+        <button @click="selectEditions(true)">确定</button>
+        <button @click="selectEditions(false)">取消</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -346,7 +392,7 @@ import { mapMutations, mapState } from "vuex";
 
 export default {
   computed: {
-    ...mapState(["grimoire", "session", "edition", "channels"]),
+    ...mapState(["grimoire", "session", "edition", "channels", "selectedEditions"]),
     ...mapState("players", ["players"]),
     formattedTime() {
       const minutes = Math.floor(this.session.timer / 60);
@@ -378,6 +424,15 @@ export default {
       distributingBluffs: false,
       distributingGrimoire: false,
       isSendingBluff: true,
+      selectingEditions: false,
+      pendingEditions: {
+        tb: true,
+        bmr: true,
+        snv: true,
+        exp: true,
+        hdcs: true,
+        syyl: true
+      },
       recognition: null,
       microphoneSetting: "free",
       // 语音检测
@@ -553,6 +608,15 @@ export default {
         );
         this.distributingGrimoire = false;
       }
+    },
+    selectEditionsAsk() {
+      this.pendingEditions = {...this.selectedEditions};
+      this.selectingEditions = true;
+    },
+    selectEditions(update = false) {
+      this.selectingEditions = false;
+      if (!update) return;
+      this.$store.commit("setSelectedEditions", this.pendingEditions);
     },
     imageOptIn() {
       const popup =
@@ -1002,10 +1066,11 @@ export default {
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  text-align: center;
 }
 
-.dialog .bluffCheckbox {
-  width: 25px;
-  height: 25px;
+.dialog .checkbox {
+  width: 20px;
+  height: 20px;
 }
 </style>
