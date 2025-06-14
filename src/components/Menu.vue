@@ -195,6 +195,9 @@
                 发送角色
                 <em><font-awesome-icon icon="theater-masks"/></em>
               </li>
+              <li v-if="!session.isSpectator" @click="distributeTypeAsk">
+                发送角色类型
+              </li>
               <li v-if="!session.isSpectator" @click="distributeBluffsAsk">
                 发送伪装身份
                 <em><font-awesome-icon icon="hat-wizard"/></em>
@@ -246,7 +249,6 @@
               <small>
                 选择全角色合集范围
               </small>
-              <em>[B]</em>
             </li>
             <li
               @click="toggleModal('roles')"
@@ -423,6 +425,7 @@ export default {
       distributing: false,
       distributingBluffs: false,
       distributingGrimoire: false,
+      distributingTypes: false,
       isSendingBluff: true,
       selectingEditions: false,
       pendingEditions: {
@@ -514,8 +517,8 @@ export default {
     distributeAsk() {
       this.distributingBluffs = false;
       this.distributingGrimoire = false;
-      if (this.distributing) this.distributing = false;
-      else this.distributing = true;
+      this.distributingTypes = false;
+      this.distributing = !this.distributing;
     },
     distributeRoles(confirm) {
       this.distributing = false;
@@ -537,11 +540,31 @@ export default {
         2000
       );
     },
+    distributeTypeAsk() {
+      this.distributing = false;
+      this.distributingBluffs = false;
+      this.distributingGrimoire = false;
+      this.distributingTypes = !this.distributingTypes;
+      if (confirm("确定要发送角色类型给玩家？")) {
+        this.distributeTypes();
+      }
+    },
+    distributeTypes() {
+      this.distributingTypes = false;
+      if (this.session.isSpectator) return;
+      this.$store.commit("session/distributeTypes", true);
+      setTimeout(
+        (() => {
+          this.$store.commit("session/distributeTypes", false);
+        }).bind(this),
+        2000
+      );
+    },
     distributeBluffsAsk() {
       this.distributing = false;
       this.distributingGrimoire = false;
-      if (this.distributingBluffs) this.distributingBluffs = false;
-      else this.distributingBluffs = true;
+      this.distributingTypes = false;
+      this.distributingBluffs = !this.distributingBluffs;
     },
     distributeBluffs(role = "") {
       if (!role) {
@@ -577,8 +600,8 @@ export default {
     distributeGrimoireAsk(){
       this.distributing = false;
       this.distributingBluffs = false;
-      if (this.distributingGrimoire) this.distributingGrimoire = false;
-      else this.distributingGrimoire = true;
+      this.distributingTypes = false;
+      this.distributingGrimoire = !this.distributingGrimoire
     },
     distributeGrimoire(role = ""){
 

@@ -1137,6 +1137,26 @@ class LiveSession {
   }
 
   /**
+   * Distribute player types to all seated players in a direct message.
+   * This will be split server side so that each player only receives their own (sub)message.
+   */
+  distributeTypes() {
+    if (this._isSpectator) return;
+    const message = {};
+    this._store.state.players.players.forEach((player, index) => {
+      if (player.id && player.role) {
+        message[player.id] = [
+          "player",
+          { index, property: "role", value: player.role.team === "traveler" ? player.role.id : player.role.team + 's' } //角色类型图标均有s后缀
+        ];
+      }
+    });
+    if (Object.keys(message).length) {
+      this._send("direct", message);
+    }
+  }
+
+  /**
    * Distribute bluffs to demon, lunatic, minion players.
    * This will be split server side so that each player only receives their own (sub)message.
    * @param param is the role/team to be sent to
@@ -1778,6 +1798,11 @@ export default store => {
       case "session/distributeRoles":
         if (payload) {
           session.distributeRoles();
+        }
+        break;
+      case "session/distributeTypes":
+        if (payload) {
+          session.distributeTypes();
         }
         break;
       case "session/distributeBluffs":

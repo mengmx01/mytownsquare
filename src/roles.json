@@ -1527,6 +1527,17 @@
     "edition": "exp"
   },
   {
+    "id": "townsfolks",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "镇民",
+    "team": "townsfolk",
+    "ability": "这是一个镇民。",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
     "id": "snitch",
     "firstNightReminder": "在首个夜晚，唤醒一名爪牙。对他展示“这些角色不在场”信息标记，然后对他展示三个不在场的善良角色标记。让这名爪牙重新入睡。重复此流程，直到所有爪牙都得知了三个不在场角色。",
     "reminders": [],
@@ -1662,6 +1673,17 @@
     "firstNight": 0,
     "otherNight": 0,
     "edition": "exp"
+  },
+  {
+    "id": "outsiders",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "外来者",
+    "team": "outsider",
+    "ability": "这是一个外来者。",
+    "firstNight": 0,
+    "otherNight": 0
   },
   {
     "id": "widow",
@@ -1848,6 +1870,17 @@
     "edition": "exp"
   },
   {
+    "id": "minions",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "爪牙",
+    "team": "minion",
+    "ability": "这是一个爪牙。",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
     "id": "legion",
     "otherNightReminder": "除了首个夜晚以外的每个夜晚，你可以决定让一名玩家死亡。",
     "reminders": ["即将被处决", "死亡"],
@@ -1982,6 +2015,17 @@
     "edition": "exp"
   },
   {
+    "id": "demons",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "恶魔",
+    "team": "demon",
+    "ability": "这是一个恶魔。",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
     "id": "gangster",
     "reminders": [],
     "remindersGlobal": [],
@@ -2001,6 +2045,18 @@
     "name": "侏儒",
     "team": "traveler",
     "ability": "当你加入游戏时，所有玩家会得知一名与你阵营相同的玩家。每当他被提名时，你可以杀死提名者。",
+    "firstNight": 0,
+    "otherNight": 0,
+    "edition": "exp"
+  },
+  {
+    "id": "travelers",
+    "reminders": [],
+    "remindersGlobal": [],
+    "setup": false,
+    "name": "旅行者",
+    "team": "traveler",
+    "ability": "这是一个旅行者。",
     "firstNight": 0,
     "otherNight": 0,
     "edition": "exp"

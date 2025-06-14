@@ -200,6 +200,17 @@
     "ability": "每局游戏限一次，说书人可能会犯一个“错误”，但会将其纠正，并公开承认自己曾处理有误。"
   },
   {
+    "id": "fableds",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": ["完美"],
+    "setup": false,
+    "name": "传奇角色",
+    "team": "fabled",
+    "ability": "这是一个传奇角色。"
+  },
+  {
     "id": "duck",
     "firstNight": 0,
     "firstNightReminder": "",

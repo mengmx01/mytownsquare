@@ -110,7 +110,7 @@
         icon="chair"
         v-if="player.id && session.sessionId"
         class="seat"
-        :class="{ highlight: session.isRolesDistributed }"
+        :class="{ highlight: session.isRolesDistributed || session.isTypesDistributed }"
       />
 
       <!-- Ghost vote icon -->

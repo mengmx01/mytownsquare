@@ -39,6 +39,7 @@ const state = () => ({
   markedPlayer: -1,
   isVoteHistoryAllowed: true,
   isRolesDistributed: false,
+  isTypesDistributed: false,
   isBluffsDistributed: false,
   isGrimoireDistributed: false,
   isUseOldOrder: false,
@@ -87,6 +88,7 @@ const mutations = {
   setUseOldOrder: set("isUseOldOrder"),
   claimSeat: set("claimedSeat"),
   distributeRoles: set("isRolesDistributed"),
+  distributeTypes: set("isTypesDistributed"),
   distributeBluffs(state, {val}){
     state.isBluffsDistributed = val;
   },
