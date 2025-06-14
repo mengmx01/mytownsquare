@@ -54,6 +54,34 @@ class LiveSession {
         );
       } else {
         this._store.commit("session/setSessionId", "");
+        this._store.commit("session/setSpectator", false);
+        this._store.commit("session/setIsHostAllowed", null);
+        this._store.commit("session/setIsJoinAllowed", null);
+        // clear seats and return to intro
+        if (this._store.state.session.nomination) {
+          this._store.commit("session/nomination");
+        }
+        // this._store.commit("players/clear", true);
+
+        // clear customBootlegger
+        if (this._store.state.session.bootlegger) {
+          this._store.commit("session/setBootlegger", "");
+        }
+
+        // reset secret vote
+        if (this._store.state.session.isSecretVote) {
+          this._store.commit("session/setSecretVote", false);
+        }
+        // reset using older night order
+        if (this._store.state.session.isSecretVote) {
+          this._store.commit("session/setUseOldOrder", false);
+        }
+
+        // reset fabled
+        this._store.commit("players/setFabled", { fabled: [], emptyFabled: true});
+
+        // close chat box
+        this._store.commit("session/setChatOpen", false);
         if (err.reason) alert(err.reason);
       }
     };

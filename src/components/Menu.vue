@@ -648,7 +648,11 @@ export default {
         if (this.session.nomination) {
           this.$store.commit("session/nomination");
         }
-        this.$store.commit("players/clear");
+        if (this.session.sessionId) {
+          this.$store.commit("players/clear");
+        } else {
+          this.$store.commit("players/clear", true)
+        }
       }
     },
     clearRoles() {
