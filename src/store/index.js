@@ -277,6 +277,7 @@ export default new Vuex.Store({
     },
     setSelectedEditions(state, selectedEditions){
       state.selectedEditions = {...selectedEditions};
+      if (state.edition.id === "all") this.commit("setEdition", state.edition);
     },
     setStates(state, states){
       state.states = states;

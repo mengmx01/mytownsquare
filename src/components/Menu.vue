@@ -245,7 +245,7 @@
               选择剧本
               <em>[E]</em>
             </li>
-            <li v-if="!session.isSpectator" @click="selectEditionsAsk()">
+            <li @click="selectEditionsAsk()">
               <small>
                 选择全角色合集范围
               </small>
@@ -348,7 +348,7 @@
     </div>
     <div v-if="selectingEditions" class="dialog">
       <span>
-        <b>请选择全角色合集的剧本范围（目前只对说书人生效，请公开通知玩家）</b>
+        <b>请选择全角色合集的剧本范围（该功能仅对自己生效{{ !session.isSpectator ? "，请说书人公开通知玩家" : "" }}）</b>
       </span>
       <br>
       <span>
