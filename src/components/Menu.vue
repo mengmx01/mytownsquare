@@ -1,6 +1,6 @@
 <template>
   <div id="controls">
-    <span v-if="session.sessionId & session.isSpectator">
+    <span v-if="!!session.sessionId & session.isSpectator">
       <font-awesome-icon icon="microphone" v-if="microphoneSetting === 'free' && listeningFrame"
       @click="stopListening(microphoneSetting)"
       />
@@ -677,14 +677,7 @@ export default {
     leaveSession() {
       if (confirm("确定要离开/解散该房间吗？")) {
         // vacate seat upon leaving the room
-        const playerIndex = this.session.claimedSeat;
-        if (playerIndex >= 0){
-          if (this.session.playerId === this.players[playerIndex].id) {
-            this.$store.commit("session/claimSeat", -1);
-          } else {
-            this.$store.commit("session/claimSeat", playerIndex);
-          }
-        }
+        this.$store.commit("session/claimSeat", -1);
 
         this.$store.commit("session/setSpectator", false);
         this.$store.commit("session/setSessionId", "");

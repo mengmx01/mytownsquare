@@ -582,7 +582,7 @@ class LiveSession {
         isLightweight
       });
     } else {
-      const { session, grimoire } = this._store.state;
+      const { session, grimoire, states, teamsNames } = this._store.state;
       const { fabled } = this._store.state.players;
       this.sendEdition(playerId);
       this._sendDirect(playerId, "gs", {
@@ -597,6 +597,8 @@ class LiveSession {
         isVoteInProgress: session.isVoteInProgress,
         markedPlayer: session.markedPlayer,
         fabled,
+        states,
+        teamsNames,
         ...(session.nomination ? { votes: session.votes } : {})
       });
     }
@@ -622,7 +624,9 @@ class LiveSession {
       lockedVote,
       isVoteInProgress,
       markedPlayer,
-      fabled
+      fabled,
+      states,
+      teamsNames
     } = data;
     const players = this._store.state.players.players;
     // adjust number of players
@@ -686,6 +690,8 @@ class LiveSession {
       });
       this._store.commit("session/setMarkedPlayer", {val: markedPlayer, force: false});
       this._store.commit("players/setFabled", {fabled});
+      this._store.commit("setStates", states);
+      this._store.commit("setTeamsNames", teamsNames);
     }
   }
 
